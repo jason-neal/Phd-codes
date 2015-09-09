@@ -160,142 +160,169 @@ def func(x, *params):
 #HD30501-1_DRACS_Blaze_Corrected_spectra_chip-1.txt
 #Telluric_spectra_CRIRES_Chip-1.txt
 
-path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
-
+#path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
+path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
 
 for chip in range(4):
     coords = []
+    #coordsa = []
+    #coordsb = []
     UnCalibdata = IOmodule.read_2col(path + "HD30501-1_DRACS_Blaze_Corrected_spectra_chip-" + str(chip + 1) + ".txt")
     Calibdata = IOmodule.read_2col(path + "Telluric_spectra_CRIRES_Chip-" + str(chip + 1) + ".txt")
 
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-    ax2 = ax1.twiny()
-    ax1.plot(Calibdata[0], Calibdata[1])
-    ax1.set_ylabel('Transmittance')
-    ax1.set_xlabel('Wavelength (nm)')
-    ax1.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
-    ax2.plot(UnCalibdata[0],UnCalibdata[1],'r')
-    ax2.set_xlabel('Pixel vals')
-    ax2.set_ylabel('Normalized ADU')
-    ax2.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
-# automatically update ylim of ax2 when ylim of ax1 changes.
-    #ax_f.callbacks.connect("ylim_changed", convert_ax_c_to_celsius)
-    #ax_f.plot(np.linspace(-40, 120, 100))
-    #ax_f.set_xlim(0, 100)
+    Goodfit = False # for good line fits
+    while not Goodfit:
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111)
+        ax2 = ax1.twiny()
+        ax1.plot(Calibdata[0], Calibdata[1])
+        ax1.set_ylabel('Transmittance')
+        ax1.set_xlabel('Wavelength (nm)')
+        ax1.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
+        ax2.plot(UnCalibdata[0],UnCalibdata[1],'r')
+        ax2.set_xlabel('Pixel vals')
+        ax2.set_ylabel('Normalized ADU')
+        ax2.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
+        cid = fig.canvas.mpl_connect('button_press_event', onclick)
+        print("Left click on the maximum of each telluric line peak (Blue) that you want to fit from left to right. \nThen right click to close and perform fit")
+        plt.show()
+        print(coords)
+        coords_pxl = coords
+        coords =[]
 
-    #ax_f.set_title('Two scales: Fahrenheit and Celsius')
-    #ax_f.set_ylabel('Fahrenheit')
-    #ax_c.set_ylabel('Celsius')
-    cid = fig.canvas.mpl_connect('button_press_event', onclick)
+        xpos =[]
+        ypos = []
+        for tup in coords_pxl:
+            xpos.append(tup[0])
+            ypos.append(1-tup[1])
+
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111)
+        ax2 = ax1.twiny()
+        ax2.plot(Calibdata[0], Calibdata[1])
+        ax2.set_ylabel('Transmittance')
+        ax2.set_xlabel('Wavelength (nm)')
+        ax2.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
+        ax1.plot(UnCalibdata[0],UnCalibdata[1],'r')
+        ax1.plot(xpos,np.ones_like(ypos)-ypos,"+k")
+        ax1.set_xlabel('Pixel vals')
+        ax1.set_ylabel('Normalized ADU')
+        ax1.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
+        cid = fig.canvas.mpl_connect('button_press_event', onclick)
+        print("Left click on the maximum of each spectral line peak (Red) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit")
+        plt.show()
+        print(coords)
+        coords_wl = coords
+
+        # Calculate the ratios to determine where to try fit gausians
+        cal_xpos =[]
+        cal_ypos = []
+        #for tup in coords_pxl:
+          #  xpos.append(tup[0])
+           # ypos.append(1-tup[1])
+        for tup in coords_wl:
+            cal_xpos.append(tup[0])
+            cal_ypos.append(1-tup[1])
+     
+        #ratio = (xpos - np.min(UnCalibdata)) / (np.max(UnCalibdata) - np.min(UnCalibdata))
+        print("xpositions", xpos)
+        print("y positions", ypos)
+        print("cal_x wl positions", cal_xpos)
+        print("cal y pos", cal_ypos)
+
+        #cal_xpos = ratio * (np.max(Calibdata[0])-np.min(Calibdata[0])) + np.min(Calibdata[0])
+        print("calibration xpos cal_xpos", cal_xpos)
+        """ # cal_xpos and xpos are the xpostions to try fit
+        # ypos are the amplitudes
+        # sig = 5?
+        """
+    
+        init_params_uncalib = []
+        init_params_calib = []
+        for i in range(len(ypos)):
+            init_params_uncalib += [xpos[i], ypos[i], 2]        # center , amplitude, std
+            init_params_calib += [cal_xpos[i], cal_ypos[i], 0.1]    # center , amplitude, std
+
+        # print("params_uncalib1", params_uncalib1)
+        # print("params_calib1", params_calib1)
+
+        #params_uncalib = ypos + list(xpos) + list(5*np.ones_like(ypos)) 
+        #params_calib = ypos + list(cal_xpos) + list(5*np.ones_like(ypos))
+        
+        #print("params_uncalib", params_uncalib)
+       
+        #Spec_init = sum_of_gaussians()
+        #Cal_init = sum_of_gaussians()
+
+        #make_mix(len(ypos))
+        #scipy.optimize.curve_fit(f, xdata, ydata, p0=None)
+        #leastsq_uncalib, covar = opt.curve_fit(make_mix(len(ypos)),UnCalibdata[0],UnCalibdata[1],params_uncalib)
+        #leastsq_calib, covar = opt.curve_fit(make_mix(len(ypos)),Calibdata[0],Calibdata[1],params_calib)
+        
+        fit_params_uncalib = []
+        fit_params_calib = []
+
+        for jj in range(0,len(init_params_uncalib),3):
+            print("jj", jj)
+            print("type jj",type(jj))
+            
+            print(type([jj, jj + 1, jj + 2]))
+            print("[jj, jj + 1, jj + 2]",[jj,jj+3])
+            this_params_uncalib = init_params_uncalib[jj:jj+3]
+            print("this_params_uncalib", this_params_uncalib)
+            this_params_calib = init_params_calib[jj:jj+3]
+            print("this_params_calib", this_params_calib)
+            this_fit_uncalib, covar = opt.curve_fit(func, UnCalibdata[0], UnCalibdata[1], this_params_uncalib)
+            this_fit_calib, covar_cal = opt.curve_fit(func, Calibdata[0], Calibdata[1], this_params_calib)
+            # save parameters
+            for par in range(3):
+                fit_params_uncalib.append(this_fit_uncalib[par])
+                fit_params_calib.append(this_fit_calib[par])
+            #leastsq_uncalib, covar = opt.curve_fit(func,UnCalibdata[0],UnCalibdata[1], params_uncalib)
+            #leastsq_calib, covar_cal = opt.curve_fit(func,Calibdata[0],Calibdata[1], params_calib)
+
+        print("fit params individual", fit_params_uncalib, fit_params_calib) #, "covar", covar)
+
+        print("np array length",len(np.array([1,2,3,4])))
+        Fitted_uncalib = func(UnCalibdata[0], *fit_params_uncalib)
+        Fitted_calib = func(Calibdata[0], *fit_params_calib)
+        
+        fig2 = plt.figure()
+        plt.plot(UnCalibdata[0],UnCalibdata[1],'r', label="uncalib")
+        plt.plot(UnCalibdata[0],Fitted_uncalib,'k.-', label="fitted uncalib")
+        plt.legend()
+
+        fig3 = plt.figure()
+        plt.plot(Calibdata[0],Calibdata[1],'b', label="Calib")
+        plt.plot(Calibdata[0],Fitted_calib,'k.-', label="fitted calib")
+        plt.legend(loc="best")
+        print("init params_uncalib", init_params_uncalib)
+        print("fit params uncalib", fit_params_uncalib)
+        print("init params_calib", init_params_calib)
+        print("fit params calib", fit_params_calib)
+        plt.show()
+
+        Reply = raw_input(" Is this a good fit, y/n?")
+        if Reply.lower() == "y":
+            Goodfit = True
+        #Goodfit = input(" Is this a good fit")  # python 3
+    # after good fit
+
+    #### pixel map creation
+
+    # plot positions verse wavelength
+    fig4 = plt.figure()
+
+    pixel_pos = fit_params_uncalib[0:-1:3]
+    wl_pos = fit_params_calib[0:-1:3]
+    plt.plot(pixel_pos,wl_pos,"rx", markersize=5)
+    plt.ylabel("Wavelength")
+    plt.xlabel("Pixel position")
+
+    plt.plot([min(pixel_pos), max(pixel_pos)],[min(wl_pos), max(wl_pos)], "k")
+    # need to fit a linear fit to this from star to end values
     plt.show()
+    # create wavelenght map
 
-    print(coords)
-
-
-    # Calculate the ratios to determine where to try fit gausians
-
-    xpos =[]
-    ypos = []
-    for tup in coords:
-        xpos.append(tup[0])
-        ypos.append(1-tup[1])
-
-    #coords_x = coords[0]
-    #coords_y = coords[1]
-    ratio = (xpos - np.min(UnCalibdata)) / (np.max(UnCalibdata) - np.min(UnCalibdata))
-    print("xpositions", xpos)
-    print("y positions", ypos)
-    print("x ratio", ratio)
-
-    cal_xpos = ratio * (np.max(Calibdata[0])-np.min(Calibdata[0])) + np.min(Calibdata[0])
-    print("calibration xpos cal_xpos", cal_xpos)
-    """ # cal_xpos and xpos are the xpostions to try fit
-    # ypos are the amplitudes
-    # sig = 5?
-    """
-    #params = []
-    #params.append(ypos)
-    #print(params) 
-    #params.append(list(cal_xpos))
-    #print(params) 
-    #params.append(list(np.ones_like(ypos)))
-    #print(params) 
-    params_uncalib = []
-    params_calib = []
-    for i in range(len(ypos)):
-        params_uncalib += [xpos[i], ypos[i], 5] # center , amplitude, std
-        params_calib += [cal_xpos[i], ypos[i], 5]    # center , amplitude, std
-
-    # print("params_uncalib1", params_uncalib1)
-    # print("params_calib1", params_calib1)
-
-
-    #params_uncalib = ypos + list(xpos) + list(5*np.ones_like(ypos)) 
-    #params_calib = ypos + list(cal_xpos) + list(5*np.ones_like(ypos))
-    
-    #print("params_uncalib", params_uncalib)
-   
-    #Spec_init = sum_of_gaussians()
-    #Cal_init = sum_of_gaussians()
-
-
-    #make_mix(len(ypos))
-    #scipy.optimize.curve_fit(f, xdata, ydata, p0=None)
-    #leastsq_uncalib, covar = opt.curve_fit(make_mix(len(ypos)),UnCalibdata[0],UnCalibdata[1],params_uncalib)
-    #leastsq_calib, covar = opt.curve_fit(make_mix(len(ypos)),Calibdata[0],Calibdata[1],params_calib)
-    
-    
-    leastsq_uncalib, covar = opt.curve_fit(func,UnCalibdata[0],UnCalibdata[1], params_uncalib)
-    leastsq_calib, covar_cal = opt.curve_fit(func,Calibdata[0],Calibdata[1], params_calib)
-
-
-    print("fit params uncalibrated", leastsq_uncalib) #, "covar", covar)
-    print("fit params calibrated", leastsq_calib)#, "covar", covar_cal)
-    print( "array into list", list(leastsq_uncalib))
-    print("input params", params_uncalib)
-    print("type input params", type(params_uncalib))
-    print(" fit params", leastsq_uncalib)
-    print("type fit params", type(leastsq_uncalib))
-
-
-    print("first value ", leastsq_uncalib[0])
-
-    print("np array length",len(np.array([1,2,3,4])))
-    Fitted_uncalib = func(UnCalibdata[0], *leastsq_uncalib)
-    Fitted_calib = func(Calibdata[0], *leastsq_calib)
-    
-    fig2 = plt.figure()
-    plt.plot(UnCalibdata[0],UnCalibdata[1],'r', label="uncalib")
-    plt.plot(UnCalibdata[0],Fitted_uncalib,'k.-', label="fitted")
-
-    fig3 = plt.figure()
-    plt.plot(Calibdata[0],Calibdata[1],'b', label="Calib")
-    plt.plot(Calibdata[0],Fitted_calib,'k.-', label="fitted")
-
-
-    plt.legend()
-    plt.show()
-
-
-    #Fitoutput = mix2(UnCalibdata[0],len(ypos),leastsq)
-
-    #Fit_uncalib = mix2(UnCalibdata[0],len(ypos),leastsq_uncalib)
-    #Fit_calib = mix2(Calibdata[0],len(ypos),leastsq_calib)
-
-    #fitter = fitting.LevMarLSQFitter()
-        #sol_spec = fitter(Spec_init(amplitudes=ypos, means=xpos, sigmas=np.ones_like(xpos)), UnCalibdata[0], UnCalibdata[1])
-    #sol_Cal = fitter(Cal_init(amplitudes=ypos, means=cal_xpos, sigmas=np.ones_like(cal_xpos)), Calibdata[0], Calibdata[1])
-    #g_int = sum_of_gaussians( amplitudes=ypos, means=xpos, sigmas=np.ones_like(xpos))
-
-
-            #plt.plot(Calibdata[0], Fit_calib, label='fit calib')
-    
-    #plt.plot(Calibdata[0], mix2(Calibdata[0],len(ypos),params_calib), label='guess')
-    
-    #ax2.plot(x, y, label='data')
-    #plt.plot(UnCalibdata[0], Fit_uncalib, label='fit uncalib')
-    #plt.legend()
-   # plt.show()
 
 
