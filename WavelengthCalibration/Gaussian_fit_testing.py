@@ -39,7 +39,7 @@ def func(x, *params):
     y = np.ones_like(x)
     #print("func params", params)
     #print("func params", len(params))
-    for i in range(0, len(params), 3):
+    for i in range(0, len(params), param_nums):
         #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
         ctr = params[i]
         #print("ctr",ctr)
@@ -48,7 +48,32 @@ def func(x, *params):
         wid = params[i+2]
         #vert = params[i+3]
         #print("wid",wid)
+       # print("ctr", ctr, " type ", type(ctr))
+        #print("amp", amp, " type ", type(amp))
+        #print("wid", wid, " type ", type(wid))
+       # print(" type y", type(y))
+       # print(" type amp*np.exp", type(amp * np.exp( -0.5 * ((x - ctr)/wid)**2)))
+       # print(" type np.exp", type(np.exp( -0.5 * ((x - ctr)/wid)**2)))
         y = y - amp * np.exp( -0.5 * ((x - ctr)/wid)**2)
+    return y
+
+def func4(x, *params):
+    # includes vertical shift
+    y = np.ones_like(x)
+    #print("func params", params)
+    #print("func params", len(params))
+    global param_nums
+    for i in range(0, len(params), param_nums):
+        #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
+        ctr = params[i]
+        amp = abs(params[i+1]) #always positive so peaks are always downward
+        wid = params[i+2]
+        if param_nums == 4: # doesn't work well 
+            vert = params[i+3]
+            mask = (x > (ctr - 1.5*wid)) * (x < (ctr + 1.5*wid))
+            y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2) + vert * mask
+        else:
+            y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2) 
     return y
 
 """ http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python
@@ -89,8 +114,10 @@ def func(x, *params):
 
 #path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
 path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
-path = "C:/Users/Jason/Documents/Phd/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
-#C:\Users\Jason\Documents\PhD\Phd-codes\WavelengthCalibration\testfiles
+#path = "C:/Users/Jason/Documents/Phd/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
+global param_nums
+param_nums = 3  # 4 does not work as well
+
 for chip in range(4):
    
     #coordsa = []
@@ -108,7 +135,7 @@ for chip in range(4):
         ax1.set_ylabel('Transmittance')
         ax1.set_xlabel('Wavelength (nm)')
         ax1.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
-        ax2.plot(UnCalibdata[0],UnCalibdata[1],'r')
+        ax2.plot(UnCalibdata[0],UnCalibdata[1],'r')   #-0.03*np.ones_like(UnCalibdata[1])
         ax2.set_xlabel('Pixel vals')
         ax2.set_ylabel('Normalized ADU')
         ax2.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
@@ -117,7 +144,7 @@ for chip in range(4):
         plt.show()
         print("coords found for first plot", coords)
         coords_pxl = coords
-        xpos =[]
+        xpos = []
         ypos = []
         for tup in coords_pxl:
             xpos.append(tup[0])
@@ -147,13 +174,9 @@ for chip in range(4):
             if len(coords_wl) == len(coords_pxl):
                 break  # continue on outside while loop
             
-
         # Calculate the ratios to determine where to try fit gausians
-        cal_xpos =[]
+        cal_xpos = []
         cal_ypos = []
-        #for tup in coords_pxl:
-          #  xpos.append(tup[0])
-           # ypos.append(1-tup[1])
         for tup in coords_wl:
             cal_xpos.append(tup[0])
             cal_ypos.append(1-tup[1])
@@ -174,43 +197,39 @@ for chip in range(4):
         init_params_uncalib = []
         init_params_calib = []
         for i in range(len(ypos)):
-            init_params_uncalib += [xpos[i], ypos[i], 2]        # center , amplitude, std
+            if param_nums == 3:
+                init_params_uncalib += [xpos[i], ypos[i], 1.2]        # center , amplitude, std 
+            elif param_nums == 4:
+                init_params_uncalib += [xpos[i], ypos[i], 1.2, 0.01]        # center , amplitude, std (vertshift)
         for i in range(len(cal_ypos)):
-            init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04]    # center , amplitude, std
-
-        # print("params_uncalib1", params_uncalib1)
-        # print("params_calib1", params_calib1)
-
-        #params_uncalib = ypos + list(xpos) + list(5*np.ones_like(ypos)) 
-        #params_calib = ypos + list(cal_xpos) + list(5*np.ones_like(ypos))
-        
-        #print("params_uncalib", params_uncalib)
+            if param_nums == 3:
+                init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04]    # center , amplitude, std  
+            elif param_nums == 4:
+                init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04, 0.004]    # center , amplitude, std (vertshift)
        
-        #Spec_init = sum_of_gaussians()
-        #Cal_init = sum_of_gaussians()
+        print("init_params_calib", init_params_calib)
+        print("init_params_uncalib", init_params_uncalib)
 
-        #make_mix(len(ypos))
-        #scipy.optimize.curve_fit(f, xdata, ydata, p0=None)
         #leastsq_uncalib, covar = opt.curve_fit(make_mix(len(ypos)),UnCalibdata[0],UnCalibdata[1],params_uncalib)
         #leastsq_calib, covar = opt.curve_fit(make_mix(len(ypos)),Calibdata[0],Calibdata[1],params_calib)
         
         fit_params_uncalib = []
         fit_params_calib = []
 
-        for jj in range(0,len(init_params_uncalib),3):
+        for jj in range(0,len(init_params_uncalib),param_nums):
             print("jj", jj)
             print("type jj",type(jj))
             
             print(type([jj, jj + 1, jj + 2]))
-            print("[jj, jj + 1, jj + 2]",[jj,jj+3])
-            this_params_uncalib = init_params_uncalib[jj:jj+3]
+            print("[jj, jj + 1, jj + 2]",[jj,jj+param_nums])
+            this_params_uncalib = init_params_uncalib[jj:jj+param_nums]
             print("this_params_uncalib", this_params_uncalib)
-            this_params_calib = init_params_calib[jj:jj+3]
+            this_params_calib = init_params_calib[jj:jj+param_nums]
             print("this_params_calib", this_params_calib)
             this_fit_uncalib, covar = opt.curve_fit(func, UnCalibdata[0], UnCalibdata[1], this_params_uncalib)
             this_fit_calib, covar_cal = opt.curve_fit(func, Calibdata[0], Calibdata[1], this_params_calib)
             # save parameters
-            for par in range(3):
+            for par in range(param_nums):
                 fit_params_uncalib.append(this_fit_uncalib[par])
                 fit_params_calib.append(this_fit_calib[par])
             #leastsq_uncalib, covar = opt.curve_fit(func,UnCalibdata[0],UnCalibdata[1], params_uncalib)
@@ -228,16 +247,16 @@ for chip in range(4):
 
         plt.figure()
         plt.subplot(211)
-        plt.plot(UnCalibdata[0],UnCalibdata[1],'r', label="uncalib")
-        plt.plot(UnCalibdata[0],Guess_uncalib,'go-', label="guess uncalib")
-        plt.plot(UnCalibdata[0],Fitted_uncalib,'k.-', label="fitted uncalib")
+        plt.plot(UnCalibdata[0],UnCalibdata[1], 'r', label="uncalib")
+        plt.plot(UnCalibdata[0],Guess_uncalib, 'go-', label="guess uncalib")
+        plt.plot(UnCalibdata[0],Fitted_uncalib, 'k.-', label="fitted uncalib")
         plt.title("Spectral line fits")
         plt.legend()
 
         plt.subplot(212)
-        plt.plot(Calibdata[0],Calibdata[1],'b', label="Calib")
-        plt.plot(Calibdata[0],Guess_calib,'go-', label="guess calib")
-        plt.plot(Calibdata[0],Fitted_calib,'k.-', label="fitted calib")
+        plt.plot(Calibdata[0],Calibdata[1], 'b', label="Calib")
+        plt.plot(Calibdata[0],Guess_calib, 'go-', label="guess calib")
+        plt.plot(Calibdata[0],Fitted_calib, 'k.-', label="fitted calib")
         plt.title("Telluric line fits")
         plt.legend(loc="best")
         print("init params_uncalib", init_params_uncalib)
@@ -246,8 +265,14 @@ for chip in range(4):
         print("fit params calib", fit_params_calib)
         plt.show()
 
-        #Reply = raw_input(" Is this a good fit, y/n?")
-        Reply = input(" Is this a good fit, y/n?")  #python 3.4
+        try:
+            Reply = raw_input(" Is this a good fit, y/n?")
+        except:
+            pass
+        try:
+            Reply = input(" Is this a good fit, y/n?")  #python 3.4
+        except:
+            pass
         if Reply == "y":
             print("Good fit found")
             break
@@ -259,9 +284,9 @@ for chip in range(4):
     # plot positions verse wavelength
     fig4 = plt.figure()
 
-    pixel_pos = fit_params_uncalib[0:-1:3]
-    wl_pos = fit_params_calib[0:-1:3]
-    plt.plot(pixel_pos,wl_pos,"rx", markersize=5, linewidth=4)
+    pixel_pos = fit_params_uncalib[0:-1:param_nums]
+    wl_pos = fit_params_calib[0:-1:param_nums]
+    plt.plot(pixel_pos,wl_pos,"rx", markersize=10, linewidth=7)
     plt.ylabel("Wavelength")
     plt.xlabel("Pixel position")
 
@@ -288,11 +313,43 @@ for chip in range(4):
 
     lin_pointvals = np.polyval(linfit, pixel_pos)
     quad_pointvals = np.polyval(quadfit, pixel_pos) 
-    #plot differences in points from the fits
 
-    plt.plot(pixel_pos,lin_pointvals-wl_pos,"or",label="linfit")
-    plt.plot(pixel_pos,quad_pointvals-wl_pos,"ok",label="quad fit")
-    plt.plot([pixel_pos[0],pixel_pos[-1]], [0,0], 'b--')
-    plt.title("differences between points and fits")
+    #plot differences in points from the fits
+    diff_lin = lin_pointvals-wl_pos
+    diff_quad = quad_pointvals-wl_pos
+    std_diff_lin = np.std(diff_lin)
+    std_diff_quad = np.std(diff_quad)
+    fit_diffs = linvals-quadvals
+
+    plt.plot(pixel_pos, diff_lin, "or", label="linfit")
+    plt.plot(pixel_pos, diff_quad, "sk", label="quad fit")
+    plt.plot([pixel_pos[0], pixel_pos[-1]], [0,0], 'b--')
+    plt.plot([1,1024],fit_diffs[[0,-1]],  "*g",label="end fit differences")
+    plt.title("Differences between points and the fits")
+    plt.text(400,0, "Std diff linear fit = "+str(std_diff_lin))
+    plt.text(400,-.01, "Std diff quad fit = "+str(std_diff_quad))
+
     plt.legend()
     plt.show()
+
+   
+    # Perform calibration on the spectrum
+    Calibrated_lin = np.polyval(linfit, UnCalibdata[0])
+    Calibrated_quad = np.polyval(quadfit, UnCalibdata[0])
+    # plot calibrated wavelength with telluric spectrum to see how they align now
+
+    fig = plt.figure()
+    fig.add_subplot(111)
+    #ax2 = ax1.twiny()
+    plt.plot(Calibdata[0], Calibdata[1], label="Telluric")
+    #plt.set_ylabel('Transmittance')
+    plt.xlabel('Wavelength (nm)')
+    plt.xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
+    plt.plot(Calibrated_lin,UnCalibdata[1], 'r', label="Lin Caibrated Spectrum")
+    plt.plot(Calibrated_quad,UnCalibdata[1], 'g', label="Quad Caibrated Spectrum")
+    plt.ylabel('Normalized ADU')
+    plt.title("Testing Calibrated spectrum")
+    plt.legend()
+    plt.show()
+
+    CalibratedSpectra = [Calibrated_lin, UnCalibdata[1]] ## Justa test for now
