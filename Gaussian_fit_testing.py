@@ -109,6 +109,10 @@ def func4(x, *params):
 #plt.show()
 """
 
+def Get_DRACS(filepath):
+    pass
+
+
 #HD30501-1_DRACS_Blaze_Corrected_spectra_chip-1.txt
 #Telluric_spectra_CRIRES_Chip-1.txt
 
@@ -286,7 +290,7 @@ for chip in range(4):
 
     pixel_pos = fit_params_uncalib[0:-1:param_nums]
     wl_pos = fit_params_calib[0:-1:param_nums]
-    plt.plot(pixel_pos,wl_pos,"rx", markersize=10, linewidth=7)
+    plt.plot(pixel_pos,wl_pos,"g*", markersize=10, linewidth=7)
     plt.ylabel("Wavelength")
     plt.xlabel("Pixel position")
 
@@ -306,8 +310,8 @@ for chip in range(4):
     quadvals = np.polyval(quadfit, range(1,1025))
 
     plt.plot(range(1,1025), linvals , label="linearfit")
-    plt.plot(range(1,1025), quadvals, label="linearfit")
-    plt.legend()
+    plt.plot(range(1,1025), quadvals, "-.r",label="quadfit")
+    plt.legend(loc="best")
     print("quad fit vals" , quadvals)
     plt.show()
 
@@ -323,13 +327,14 @@ for chip in range(4):
 
     plt.plot(pixel_pos, diff_lin, "or", label="linfit")
     plt.plot(pixel_pos, diff_quad, "sk", label="quad fit")
-    plt.plot([pixel_pos[0], pixel_pos[-1]], [0,0], 'b--')
-    plt.plot([1,1024],fit_diffs[[0,-1]],  "*g",label="end fit differences")
+    plt.plot([pixel_pos[0], 1024], [0,0], 'b--')
+    plt.plot([1,1024],fit_diffs[[0,-1]],  "*g",label="End Fitting Values")
     plt.title("Differences between points and the fits")
     plt.text(400,0, "Std diff linear fit = "+str(std_diff_lin))
     plt.text(400,-.01, "Std diff quad fit = "+str(std_diff_quad))
-
-    plt.legend()
+    plt.xlabel("Pixel Position")
+    plt.ylabel("Wavelenght Diff (nm)")
+    plt.legend(loc="best")
     plt.show()
 
    
@@ -349,7 +354,7 @@ for chip in range(4):
     plt.plot(Calibrated_quad,UnCalibdata[1], 'g', label="Quad Caibrated Spectrum")
     plt.ylabel('Normalized ADU')
     plt.title("Testing Calibrated spectrum")
-    plt.legend()
+    plt.legend(loc="best")
     plt.show()
 
     CalibratedSpectra = [Calibrated_lin, UnCalibdata[1]] ## Justa test for now
