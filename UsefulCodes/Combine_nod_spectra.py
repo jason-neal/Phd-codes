@@ -75,9 +75,10 @@ def ExportToFits(Outputfile, Combined, NodA, NodB, hdr, hdrkeys, hdrvals):
     tbhdu = fits.BinTableHDU.from_columns(cols) # binary tbale hdu
     prihdr = append_hdr(hdr, hdrkeys, hdrvals)
     prihdu = fits.PrimaryHDU(header=prihdr)
-    prihdu.verify()
+
     thdulist = fits.HDUList([prihdu, tbhdu])
-    thdulist.writeto(Outputfile)
+    print("Writing to fits file")
+    thdulist.writeto(Outputfile,output_verify="fix")   # Fixing errors to work properly
 
     return None
 
@@ -101,7 +102,7 @@ def append_hdr(hdr, keys, values ,item=0):
         assert len(keys) == len(values), 'Not the same number of keys as values' 
         for i in range(len(keys)):
             hdr[keys[i]] = values[i]
-            print repr(hdr[0:10])
+            print repr(hdr[-2:10])
     return hdr
 
 
@@ -180,17 +181,17 @@ if __name__ == '__main__':
         Norm_A = SumNods(I_norm, I_norm_hdrs, Pos="A", Norm="Divide")
         Norm_B = SumNods(I_norm, I_norm_hdrs, Pos="B", Norm="Divide")
 
-        plt.plot(dracs_All, label="dracs All")
-        plt.plot(dracs_A, label="dracs A")
-        plt.plot(dracs_B, label="dracs B")
-        plt.legend()
-        plt.show()
+#        plt.plot(dracs_All, label="dracs All")
+#        plt.plot(dracs_A, label="dracs A")
+#        plt.plot(dracs_B, label="dracs B")
+#        plt.legend()
+#        plt.show()
 
-        plt.plot(Norm_All, label="All")
-        plt.plot(Norm_A, label="A")
-        plt.plot(Norm_B, label="B")
-        plt.legend()
-        plt.show()
+#        plt.plot(Norm_All, label="All")
+#        plt.plot(Norm_A, label="A")
+#        plt.plot(Norm_B, label="B")
+#        plt.legend()
+#        plt.show()
 
         # write ouput to fits file
         testhdr = fits.Header()
@@ -200,7 +201,7 @@ if __name__ == '__main__':
         #fits.writeto(output, hdulist[item].data, hdr, clobber=True)
         outputfile = path + "test_fits_ouput.fits"
         #fits.writeto(outputfile, Norm_All, I_norm_hdrs[1])
-        ExportToFits(outputfile,Norm_All,Norm_A,Norm_B,Last_normhdr,["Test heder key","Test hdr key 2"],["Value 1", "Test Value 2"])
+        ExportToFits(outputfile,Norm_All,Norm_A,Norm_B,Last_normhdr,["",""],["", ""])
         print("Wrote to fits Succesfully")
 
         break
