@@ -75,6 +75,7 @@ def ExportToFits(Outputfile, Combined, NodA, NodB, hdr, hdrkeys, hdrvals):
     tbhdu = fits.BinTableHDU.from_columns(cols) # binary tbale hdu
     prihdr = append_hdr(hdr, hdrkeys, hdrvals)
     prihdu = fits.PrimaryHDU(header=prihdr)
+    prihdu.verify()
     thdulist = fits.HDUList([prihdu, tbhdu])
     thdulist.writeto(Outputfile)
 
@@ -133,8 +134,8 @@ if __name__ == '__main__':
 #for chip in chips:
     while True:
         chip = 1
-        org_vals = get_filenames(path, "*.ms.fits", "*_" + str(chip + 1) + "*")
-        norm_vals = get_filenames(path, "*.ms.norm.fits", "*_" + str(chip + 1) + "*")
+        org_vals = get_filenames(path, "CRIRE*.ms.fits", "*_" + str(chip + 1) + "*")
+        norm_vals = get_filenames(path, "CRIRE*.ms.norm.fits", "*_" + str(chip + 1) + "*")
 
         print(org_vals)
         I_dracs = []
@@ -146,33 +147,50 @@ if __name__ == '__main__':
                 ThisFile = path + name
                 I_dracs.append(fits.getdata(ThisFile,0))
                 I_dracs_hdrs.append(fits.getheader(ThisFile,0))
-                
+        
+        dracs_All = SumNods(I_dracs, I_dracs_hdrs, Pos="All", Norm="Divide")
+        dracs_A = SumNods(I_dracs, I_dracs_hdrs, Pos="A", Norm="Divide")
+        dracs_B = SumNods(I_dracs, I_dracs_hdrs, Pos="B", Norm="Divide")
                 #print(type(fits.getdata(ThisFile,0)))
         #load Dracs files
         ## Speed testing  open verse getdata/getheader
+        # for name in norm_vals:    
+        #         #print("name", name)
+        #         ThisFile = path + name
+        #         I_norm.append(fits.getdata(ThisFile))
+        #         I_norm_hdrs.append(fits.getheader(ThisFile))
+        #         #print(type(I_norm))
+
+        print(norm_vals)
         for name in norm_vals:    
                 #print("name", name)
                 ThisFile = path + name
-                I_norm.append(fits.getdata(ThisFile,0))
-                I_norm_hdrs.append(fits.getheader(ThisFile,0))
-                #print(type(I_norm))
-        for name in norm_vals:    
-                #print("name", name)
-                ThisFile = path + name
+                #print ("This file = ")
                 ThisNorm = fits.open(ThisFile)
                 Last_normhdr = ThisNorm[0].header
                 I_norm_hdrs.append(Last_normhdr)
                 I_norm.append(ThisNorm[0].data)
                 ThisNorm.close()
 
-
         #print("Inorm",I_norm)
+
+        #Last_normhdr.verify()
 
         Norm_All = SumNods(I_norm, I_norm_hdrs, Pos="All", Norm="Divide")
         Norm_A = SumNods(I_norm, I_norm_hdrs, Pos="A", Norm="Divide")
         Norm_B = SumNods(I_norm, I_norm_hdrs, Pos="B", Norm="Divide")
 
+        plt.plot(dracs_All, label="dracs All")
+        plt.plot(dracs_A, label="dracs A")
+        plt.plot(dracs_B, label="dracs B")
+        plt.legend()
+        plt.show()
 
+        plt.plot(Norm_All, label="All")
+        plt.plot(Norm_A, label="A")
+        plt.plot(Norm_B, label="B")
+        plt.legend()
+        plt.show()
 
         # write ouput to fits file
         testhdr = fits.Header()
