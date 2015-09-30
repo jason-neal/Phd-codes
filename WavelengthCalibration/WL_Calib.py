@@ -13,6 +13,9 @@ import numpy as np
 import scipy as sp 
 from Get_filenames import get_filenames
 import matplotlib.pyplot as plt
+
+import Obtain_Telluric
+
 coords = []
 # Simple mouse click function to store coordinates
 def onclick(event):
@@ -101,7 +104,7 @@ def main():
     #observes = ["HD30501-1","HD30501-2","HD30501-3"]
     #for obs in observes:
     obs = "HD30501-1"
-    path = '/home/jneal/data/BrownDwarfs-PedrosCode/' + obs + '/'
+    path = '/home/jneal/Phd/data/BrownDwarfs-PedrosCode/' + obs + '/'
 
 	#for chip in range(4):
     chip = 0 
@@ -147,12 +150,21 @@ def main():
     print("end wl", wl1)
     #plt.show()
 
-    # get the calibration file
+    ####### Get the calibration file
 
-    Tapas_path = "/home/jneal/data/Tapas/"
+    #Get observation times of observations:
+    print( "Observation date",DracsHdr["DATE-OBS"])
+    ObsDate = DracsHdr["DATE-OBS"]
+    ## aOpen average file time for observation
+    #ObsTime = "*"
+    Tell_Name = Obtain_Telluric.Get_TelluricName(ObsDate[0:11],ObsTime[12:20])
+    print("77777777777777777777777777777777777777777")
+    print("Telluric name found", Tell_Name)
+    print("77777777777777777777777777777777777777777")
+    
+    Tapas_path = "/home/jneal/Phd/data/Tapas/"
 
     filelist = get_filenames(Tapas_path, "*.ipac")
-
     file = filelist[0]
     import IOmodule
 #   #loaddata = open(Tapas_path + file)

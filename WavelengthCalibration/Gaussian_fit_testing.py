@@ -3,65 +3,45 @@
 
 from __future__ import division
 from astropy.io import fits
-
+import Obtain_Telluric
 import IOmodule
 import numpy as np
 import scipy as sp 
 from Get_filenames import get_filenames
 import matplotlib.pyplot as plt
 
-#from astropy.modeling import models, fitting
-#from astropy.modeling import SummedCompositeModel
-#from astropy.modeling.models import Gaussian1D
-#from astropy.modeling.models import custom_model
 
 import scipy.optimize as opt
 
 def onclick(event):
     global ix, iy, coords
     # Disconnect after right click
-    if event.button == 3:
-        #print("that was a right mouse click")
+    if event.button == 3:   # Right mouse click
         fig.canvas.mpl_disconnect(cid)
         plt.close(1)
         return
     ix, iy = event.xdata, event.ydata
-    #print("event button", event.button)
-    # print 'x = %d, y = %d'%(
-    #     ix, iy)
-    # assign global variable to access outside of function
-    #global coords
     coords.append((ix, iy))
     print("Click position", [ix, iy])
     return
 
 def func(x, *params):
+""" Function to generate the multiple gaussian profiles. 
+    Adapted from
+    http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python """
     y = np.ones_like(x)
-    #print("func params", params)
-    #print("func params", len(params))
     for i in range(0, len(params), param_nums):
         #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
         ctr = params[i]
-        #print("ctr",ctr)
         amp = abs(params[i+1]) #always positive so peaks are always downward
-        #print("amp",amp)
         wid = params[i+2]
-        #vert = params[i+3]
-        #print("wid",wid)
-       # print("ctr", ctr, " type ", type(ctr))
-        #print("amp", amp, " type ", type(amp))
-        #print("wid", wid, " type ", type(wid))
-       # print(" type y", type(y))
-       # print(" type amp*np.exp", type(amp * np.exp( -0.5 * ((x - ctr)/wid)**2)))
-       # print(" type np.exp", type(np.exp( -0.5 * ((x - ctr)/wid)**2)))
         y = y - amp * np.exp( -0.5 * ((x - ctr)/wid)**2)
     return y
+
 
 def func4(x, *params):
     # includes vertical shift
     y = np.ones_like(x)
-    #print("func params", params)
-    #print("func params", len(params))
     global param_nums
     for i in range(0, len(params), param_nums):
         #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
@@ -76,41 +56,16 @@ def func4(x, *params):
             y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2) 
     return y
 
-""" http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python
-#from scipy.optimize import curve_fit
-#import numpy as np
-#import matplotlib.pyplot as plt
-#
-#data = np.loadtxt('data.txt', delimiter=',')
-#x, y = data
-#
-#plt.plot(x,y)
-#plt.show()
-#
-#def func(x, *params):
-#    y = np.zeros_like(x)
-#    for i in range(0, len(params), 3):
-#        ctr = params[i]
-#        amp = params[i+1]
-#        wid = params[i+2]
-#        y = y + amp * np.exp( -((x - ctr)/wid)**2)
-#    return y
-#
-#guess = [0, 60000, 80, 1000, 60000, 80]
-#for i in range(12):
-#    guess += [60+80*i, 46000, 25]   
-#
-#popt, pcov = curve_fit(func, x, y, p0=guess)
-#print popt
-#fit = func(x, *popt)
-#
-#plt.plot(x, y)
-#plt.plot(x, fit , 'r-')
-#plt.show()
-"""
 
-#HD30501-1_DRACS_Blaze_Corrected_spectra_chip-1.txt
-#Telluric_spectra_CRIRES_Chip-1.txt
+def Get_DRACS(filepath, chip):
+    """Filepath needs to point object"""
+    filename = get_filenames(filepath, "CRIRE*.norm.comb.fits", "*_" + str(chip+1) + ".*")
+    print("Filename =", filepath + filename[0])
+    print("length filename",len(filename))
+    assert len(filename) is 1   # Check only one filename found
+    hdr = fits.getheader(filepath + filename[0])
+    data = fits.getdata(filepath + filename[0])
+    return hdr, data
 
 #path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
 path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
@@ -118,12 +73,32 @@ path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Upd
 global param_nums
 param_nums = 3  # 4 does not work as well
 
+Dracspath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
+obj = "HD30501-1"
+objpath = Dracspath + obj + "/"
+
 for chip in range(4):
    
-    #coordsa = []
-    #coordsb = []
-    UnCalibdata = IOmodule.read_2col(path + "HD30501-1_DRACS_Blaze_Corrected_spectra_chip-" + str(chip + 1) + ".txt")
+    hdr, DracsUncalibdata = Get_DRACS(objpath,chip)
+    print("Dracs hdr",hdr)
+    print("Dracs data ",DracsUncalibdata)
+     UnCalibdata_comb = DracsUncalibdata["Combined"]
+    UnCalibdata_noda = DracsUncalibdata["Nod A"]
+    UnCalibdata_nodb = DracsUncalibdata["Nod B"]
+    
+    UnCalibdata = [range(1024), UnCalibdata_comb]
+
+    # Need to get proper telluric lines from the folders for each observation 
+
+    # Orignal way I tested this
+    #UnCalibdata = IOmodule.read_2col(path + "HD30501-1_DRACS_Blaze_Corrected_spectra_chip-" + str(chip + 1) + ".txt")
     Calibdata = IOmodule.read_2col(path + "Telluric_spectra_CRIRES_Chip-" + str(chip + 1) + ".txt")
+
+    #plt.plot(UnCalibdata)
+    #plt.plot(Calibdata[1],"g")
+    #plt.title("Test of new combined nods fits")
+    #plt.show()
+
 
     Goodfit = False # for good line fits
     while True:
@@ -131,11 +106,13 @@ for chip in range(4):
         fig = plt.figure()
         ax1 = fig.add_subplot(111)
         ax2 = ax1.twiny()
-        ax1.plot(Calibdata[0], Calibdata[1])
+        ax1.plot(Calibdata[0], Calibdata[1],label="Calib")
+        ax1.plot(Calibdata[0], np.ones_like(Calibdata[1])) # horizontal line
         ax1.set_ylabel('Transmittance')
         ax1.set_xlabel('Wavelength (nm)')
         ax1.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
-        ax2.plot(UnCalibdata[0],UnCalibdata[1],'r')   #-0.03*np.ones_like(UnCalibdata[1])
+
+        ax2.plot(UnCalibdata[0],UnCalibdata[1],'r',label="UnCalib")   #-0.03*np.ones_like(UnCalibdata[1])
         ax2.set_xlabel('Pixel vals')
         ax2.set_ylabel('Normalized ADU')
         ax2.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
@@ -165,7 +142,7 @@ for chip in range(4):
             ax1.set_ylabel('Normalized ADU')
             ax1.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
             cid = fig.canvas.mpl_connect('button_press_event', onclick)
-            print("Left click on the maximum of each spectral line peak (Red) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit")
+            print("Left click on the maximum of each Telluric line peak (Blue) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit")
             plt.show()
             print("coords found for second plot", coords)
             coords_wl = coords
@@ -286,7 +263,7 @@ for chip in range(4):
 
     pixel_pos = fit_params_uncalib[0:-1:param_nums]
     wl_pos = fit_params_calib[0:-1:param_nums]
-    plt.plot(pixel_pos,wl_pos,"rx", markersize=10, linewidth=7)
+    plt.plot(pixel_pos,wl_pos,"g*", markersize=10, linewidth=7)
     plt.ylabel("Wavelength")
     plt.xlabel("Pixel position")
 
@@ -306,8 +283,8 @@ for chip in range(4):
     quadvals = np.polyval(quadfit, range(1,1025))
 
     plt.plot(range(1,1025), linvals , label="linearfit")
-    plt.plot(range(1,1025), quadvals, label="linearfit")
-    plt.legend()
+    plt.plot(range(1,1025), quadvals, "-.r",label="quadfit")
+    plt.legend(loc="best")
     print("quad fit vals" , quadvals)
     plt.show()
 
@@ -323,13 +300,14 @@ for chip in range(4):
 
     plt.plot(pixel_pos, diff_lin, "or", label="linfit")
     plt.plot(pixel_pos, diff_quad, "sk", label="quad fit")
-    plt.plot([pixel_pos[0], pixel_pos[-1]], [0,0], 'b--')
-    plt.plot([1,1024],fit_diffs[[0,-1]],  "*g",label="end fit differences")
+    plt.plot([pixel_pos[0], 1024], [0,0], 'b--')
+    plt.plot([1,1024],fit_diffs[[0,-1]],  "*g",label="End Fitting Values")
     plt.title("Differences between points and the fits")
     plt.text(400,0, "Std diff linear fit = "+str(std_diff_lin))
     plt.text(400,-.01, "Std diff quad fit = "+str(std_diff_quad))
-
-    plt.legend()
+    plt.xlabel("Pixel Position")
+    plt.ylabel("Wavelenght Diff (nm)")
+    plt.legend(loc="best")
     plt.show()
 
    
@@ -349,7 +327,7 @@ for chip in range(4):
     plt.plot(Calibrated_quad,UnCalibdata[1], 'g', label="Quad Caibrated Spectrum")
     plt.ylabel('Normalized ADU')
     plt.title("Testing Calibrated spectrum")
-    plt.legend()
+    plt.legend(loc="best")
     plt.show()
 
     CalibratedSpectra = [Calibrated_lin, UnCalibdata[1]] ## Justa test for now
