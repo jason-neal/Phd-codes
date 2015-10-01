@@ -10,58 +10,37 @@ import scipy as sp
 from Get_filenames import get_filenames
 import matplotlib.pyplot as plt
 
-#from astropy.modeling import models, fitting
-#from astropy.modeling import SummedCompositeModel
-#from astropy.modeling.models import Gaussian1D
-#from astropy.modeling.models import custom_model
 
 import scipy.optimize as opt
 
 def onclick(event):
     global ix, iy, coords
     # Disconnect after right click
-    if event.button == 3:
-        #print("that was a right mouse click")
+    if event.button == 3:   # Right mouse click
         fig.canvas.mpl_disconnect(cid)
         plt.close(1)
         return
     ix, iy = event.xdata, event.ydata
-    #print("event button", event.button)
-    # print 'x = %d, y = %d'%(
-    #     ix, iy)
-    # assign global variable to access outside of function
-    #global coords
     coords.append((ix, iy))
     print("Click position", [ix, iy])
     return
 
 def func(x, *params):
+#""" Function to generate the multiple gaussian profiles. 
+#    Adapted from http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python """
     y = np.ones_like(x)
-    #print("func params", params)
-    #print("func params", len(params))
     for i in range(0, len(params), param_nums):
         #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
         ctr = params[i]
-        #print("ctr",ctr)
         amp = abs(params[i+1]) #always positive so peaks are always downward
-        #print("amp",amp)
         wid = params[i+2]
-        #vert = params[i+3]
-        #print("wid",wid)
-       # print("ctr", ctr, " type ", type(ctr))
-        #print("amp", amp, " type ", type(amp))
-        #print("wid", wid, " type ", type(wid))
-       # print(" type y", type(y))
-       # print(" type amp*np.exp", type(amp * np.exp( -0.5 * ((x - ctr)/wid)**2)))
-       # print(" type np.exp", type(np.exp( -0.5 * ((x - ctr)/wid)**2)))
         y = y - amp * np.exp( -0.5 * ((x - ctr)/wid)**2)
     return y
+
 
 def func4(x, *params):
     # includes vertical shift
     y = np.ones_like(x)
-    #print("func params", params)
-    #print("func params", len(params))
     global param_nums
     for i in range(0, len(params), param_nums):
         #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
@@ -76,45 +55,24 @@ def func4(x, *params):
             y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2) 
     return y
 
-""" http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python
-#from scipy.optimize import curve_fit
-#import numpy as np
-#import matplotlib.pyplot as plt
-#
-#data = np.loadtxt('data.txt', delimiter=',')
-#x, y = data
-#
-#plt.plot(x,y)
-#plt.show()
-#
-#def func(x, *params):
-#    y = np.zeros_like(x)
-#    for i in range(0, len(params), 3):
-#        ctr = params[i]
-#        amp = params[i+1]
-#        wid = params[i+2]
-#        y = y + amp * np.exp( -((x - ctr)/wid)**2)
-#    return y
-#
-#guess = [0, 60000, 80, 1000, 60000, 80]
-#for i in range(12):
-#    guess += [60+80*i, 46000, 25]   
-#
-#popt, pcov = curve_fit(func, x, y, p0=guess)
-#print popt
-#fit = func(x, *popt)
-#
-#plt.plot(x, y)
-#plt.plot(x, fit , 'r-')
-#plt.show()
-"""
 
-def Get_DRACS(filepath):
-    pass
+def Get_DRACS(filepath, chip):
+    """Filepath needs to point object"""
+    filename = get_filenames(filepath, "CRIRE*.norm.comb.fits", "*_" + str(chip+1) + ".*")
+    print("Filename =", filepath + filename[0])
+    print("length filename",len(filename))
+    assert len(filename) is 1   # Check only one filename found
+    hdr = fits.getheader(filepath + filename[0])
+    data = fits.getdata(filepath + filename[0])
+    return hdr, data
 
+def RV_Calc(Lambda, deltalambda):
+    """ Calcualte the Radial velocity associated to an error in wavelength calibrations"""
+    c = 299792458 # Speed of Light in m/s
+    assert len(Lambda) == len(deltalambda)
+    Verror =  [err/wl * c for err, wl in zip(deltalambda,Lambda)]
+    return Verror
 
-#HD30501-1_DRACS_Blaze_Corrected_spectra_chip-1.txt
-#Telluric_spectra_CRIRES_Chip-1.txt
 
 #path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
 path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
@@ -122,12 +80,32 @@ path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Upd
 global param_nums
 param_nums = 3  # 4 does not work as well
 
+Dracspath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
+obj = "HD30501-1"
+objpath = Dracspath + obj + "/"
+
 for chip in range(4):
    
-    #coordsa = []
-    #coordsb = []
-    UnCalibdata = IOmodule.read_2col(path + "HD30501-1_DRACS_Blaze_Corrected_spectra_chip-" + str(chip + 1) + ".txt")
+    hdr, DracsUncalibdata = Get_DRACS(objpath,chip)
+    print("Dracs hdr",hdr)
+    print("Dracs data ",DracsUncalibdata)
+    UnCalibdata_comb = DracsUncalibdata["Combined"]
+    UnCalibdata_noda = DracsUncalibdata["Nod A"]
+    UnCalibdata_nodb = DracsUncalibdata["Nod B"]
+    
+    UnCalibdata = [range(1024), UnCalibdata_comb]
+
+    # Need to get proper telluric lines from the folders for each observation 
+
+    # Orignal way I tested this
+    #UnCalibdata = IOmodule.read_2col(path + "HD30501-1_DRACS_Blaze_Corrected_spectra_chip-" + str(chip + 1) + ".txt")
     Calibdata = IOmodule.read_2col(path + "Telluric_spectra_CRIRES_Chip-" + str(chip + 1) + ".txt")
+
+    #plt.plot(UnCalibdata)
+    #plt.plot(Calibdata[1],"g")
+    #plt.title("Test of new combined nods fits")
+    #plt.show()
+
 
     Goodfit = False # for good line fits
     while True:
@@ -135,11 +113,13 @@ for chip in range(4):
         fig = plt.figure()
         ax1 = fig.add_subplot(111)
         ax2 = ax1.twiny()
-        ax1.plot(Calibdata[0], Calibdata[1])
+        ax1.plot(Calibdata[0], Calibdata[1],label="Calib")
+        ax1.plot(Calibdata[0], np.ones_like(Calibdata[1])) # horizontal line
         ax1.set_ylabel('Transmittance')
         ax1.set_xlabel('Wavelength (nm)')
         ax1.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
-        ax2.plot(UnCalibdata[0],UnCalibdata[1],'r')   #-0.03*np.ones_like(UnCalibdata[1])
+
+        ax2.plot(UnCalibdata[0],UnCalibdata[1],'r',label="UnCalib")   #-0.03*np.ones_like(UnCalibdata[1])
         ax2.set_xlabel('Pixel vals')
         ax2.set_ylabel('Normalized ADU')
         ax2.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
@@ -169,7 +149,7 @@ for chip in range(4):
             ax1.set_ylabel('Normalized ADU')
             ax1.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
             cid = fig.canvas.mpl_connect('button_press_event', onclick)
-            print("Left click on the maximum of each spectral line peak (Red) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit")
+            print("Left click on the maximum of each Telluric line peak (Blue) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit")
             plt.show()
             print("coords found for second plot", coords)
             coords_wl = coords
@@ -273,10 +253,10 @@ for chip in range(4):
             Reply = raw_input(" Is this a good fit, y/n?")
         except:
             pass
-        try:
-            Reply = input(" Is this a good fit, y/n?")  #python 3.4
-        except:
-            pass
+        #try:
+        #    Reply = input(" Is this a good fit, y/n?")  #python 3.4
+        #except:
+        #    pass
         if Reply == "y":
             print("Good fit found")
             break
@@ -337,7 +317,20 @@ for chip in range(4):
     plt.legend(loc="best")
     plt.show()
 
-   
+    ## Velocity error of fits
+    Verrors_lin = RV_Calc(wl_pos, diff_lin)
+    Verrors_quad= RV_Calc(wl_pos, diff_quad)
+    Verrors_ends = RV_Calc(linvals[[0,-1]], fit_diffs[[0,-1]])
+    plt.plot(pixel_pos, Verrors_lin,"*",label="linearfit")
+    plt.plot(pixel_pos, Verrors_quad,"*",label="quadfit")
+    plt.plot([1,1024], Verrors_ends,"*",label="Ends of fits")
+    plt.ylabel("Velocity (m/s)")
+    plt.xlabel("Wavelength (nm)")
+    plt.title("Velocity errors due to fits")
+    plt.legend()
+    plt.show()
+
+
     # Perform calibration on the spectrum
     Calibrated_lin = np.polyval(linfit, UnCalibdata[0])
     Calibrated_quad = np.polyval(quadfit, UnCalibdata[0])
