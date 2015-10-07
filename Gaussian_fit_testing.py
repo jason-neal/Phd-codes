@@ -56,6 +56,7 @@ def func4(x, *params):
     return y
 
 
+
 def Get_DRACS(filepath, chip):
     """Filepath needs to point object"""
     filename = get_filenames(filepath, "CRIRE*.norm.comb.fits", "*_" + str(chip+1) + ".*")
@@ -72,6 +73,57 @@ def RV_Calc(Lambda, deltalambda):
     assert len(Lambda) == len(deltalambda)
     Verror =  [err/wl * c for err, wl in zip(deltalambda,Lambda)]
     return Verror
+
+
+
+def FittingLines(WLA,SpecA,CoordsA,WLB,SpecB,CoordsB):
+   # plot 5% of spectra either side of each spectra
+    BestCoordsA, BestCoordsB
+    Len_A = len(SpecA)
+    Len_B = len(SpecB)
+    assert len(CoordsA) == len(CoordsB)
+    for i in range(len(CoordsA)):
+    mapA = [WLA < CoordsA[i] + prcnt/2*Len_A and WLA > CoordsA[i] - prcnt/2*Len_A ]
+    mapB = [WLB < CoordsB[i] + prcnt/2*Len_B and WLB > CoordsB[i] - prcnt/2*Len_B ]
+
+    SectA = SpecA[mapA]
+    SectB = SpecB[mapB]
+
+    # make double axes to overlay
+    plt.plot(WLA[mapA],SectA,label="sectA")
+    plt.plot(WLB[mapB],SectB,label="sectB")
+    # seek new coords of line center. would usually be just one but
+
+    # if spectral lines do a fit with spectral lines multiplied to telluric lines
+    if
+    stel= raw_input("Are there any Stellar lines to include in the fit y/N") == y   
+    if stel.lower() == "y" or stel.lower()== "yes" # Are there any spectral lines you want to add?
+        # Select the stellar lines for the spectral fit
+        # 
+	# perform the stellar line fitting version
+        pass
+    else:
+	#perform the fit 
+
+    # ask if line fits were good.
+    # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
+    # no - individually ask if want want each line included and append if yes
+    # probably plot each individually to identify 
+
+
+    return BestCoordsA, BestCoordsB
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
@@ -321,9 +373,9 @@ for chip in range(4):
     Verrors_lin = RV_Calc(wl_pos, diff_lin)
     Verrors_quad= RV_Calc(wl_pos, diff_quad)
     Verrors_ends = RV_Calc(linvals[[0,-1]], fit_diffs[[0,-1]])
-    plt.plot(pixel_pos, Verrors_lin,"*",label="linearfit")
-    plt.plot(pixel_pos, Verrors_quad,"*",label="quadfit")
-    plt.plot([1,1024], Verrors_ends,"*",label="Ends of fits")
+    plt.plot(wl_pos, Verrors_lin,"*",label="linearfit")
+    plt.plot(wl_pos, Verrors_quad,"s",label="quadfit")
+    plt.plot([1,1024], Verrors_ends,"<",label="Ends of fits")
     plt.ylabel("Velocity (m/s)")
     plt.xlabel("Wavelength (nm)")
     plt.title("Velocity errors due to fits")
