@@ -74,15 +74,22 @@ def GetCoords(WLA, SpecA,WLB, SpecB, title="Comparing Spectra", PointsA=False, P
         print("Coordinate selected =", coords)
         #ans = raw_input("Are these the corrdinate values you want to use to fit these peaks? y/N?")
         #if ans.lower() == "y":   # Good coordinates to use
-        return coords
+
+        # Add sigma coord for fitting
+        sigma =np.abs(np.mean(WL[1:]-WL[:-1])) 
+        newcoords = []
+        for coord in coords:
+            newcoord = coord + (sigma,)
+            newcoords.append(newcoord)    # list or coordinate tuple
+        return newcoords
 
 def plotFit(WL,Spec,params, init_params=False):
     plt.plot(WL,Spec,label="spectra")
     if init_params:
         GuessFit = func(WL,init_params)
-        plt.plot(WL,GuessFit,label="Clicked lines")
+        plt.plot(WL,*GuessFit,label="Clicked lines")
     ReturnFit = func(WL,params)
-    plt.plot(WL,ReturnFit,label="Fitted Lines")
+    plt.plot(WL,*ReturnFit,label="Fitted Lines")
     plt.legend(loc=0)
     plt.show()
     return None
@@ -117,19 +124,26 @@ percent is the percentage of spectra to use """
 def func(x, *params):
 #""" Function to generate the multiple gaussian profiles. 
 #    Adapted from http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python """
+   """params are now list of tuples so need to change to accomodate that """
     y = np.ones_like(x)
     for i in range(0, len(params), param_nums):
         #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
         ctr = params[i]
         amp = abs(params[i+1]) #always positive so peaks are always downward
         wid = params[i+2]
+    #for coord in params:
+	#ctr = params[0]
+        #amp = abs(params[1])
+        #wid = params[2]
         y = y - amp * np.exp( -0.5 * ((x - ctr)/wid)**2)
     return y
 
 def func_withstellar(x, *params):
 #""" Function to generate the multiple gaussian profiles with stellar gausian. 
 #    Adapted from http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python """
-    y = np.ones_like(x)
+   
+"""for stellar case have params as a lsit of two list, one for the telluric lines and one for the stellar lines. """
+ y = np.ones_like(x)
     for i in range(0, len(params), param_nums):
         #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
         ctr = params[i]
@@ -145,13 +159,14 @@ def FitGausians(WL, Spec, Coords, stel=False):
     print("Coords", Coords)
     init_params = []
     # calculate Sigma of gasuian based on delta of WL
-    deltaWL = np.mean(WL[1:]-WL[:-1])
-    print("deltaWL", deltaWL)
-    sig = 2 * deltaWL
-    print("Sig", sig)
-    for i in range(len(Coords)):
+    #deltaWL = np.mean(WL[1:]-WL[:-1])
+    #print("deltaWL", deltaWL)
+    #sig = 2 * deltaWL
+    #print("Sig", sig)
+    #for i in range(len(Coords)):
     #for i in range(0, len(Coords), 2):
-         init_params += [Coords[i][0], Coords[i][1] ,sig]
+        # init_params += [Coords[i][0], Coords[i][1] ,sig]
+    init_params = Coords
     print("Params before fit", init_params)
     params, covar = opt.curve_fit(func, WL, Spec, init_params)
     #this_fit_uncalib, covar = opt.curve_fit(func, UnCalibdata[0], UnCalibdata[1], this_params_uncalib)
