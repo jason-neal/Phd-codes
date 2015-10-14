@@ -41,17 +41,18 @@ def GetCoords(WLA, SpecA,WLB, SpecB, title="Comparing Spectra", PointsA=False, P
         fig.set_size_inches(25, 15, forward=False)
         ax1 = fig.add_subplot(111)
         ax2 = ax1.twiny()
-        ax1.plot(WLA, SpecA, "k",label="Ref Spec")
-        ax1.plot(WLA, np.ones_like(SpecA),"b-.")
-        ax1.set_ylabel("Normalized Flux/Intensity")
-        ax1.set_xlabel("Wavelength/pixels")
-        ax1.set_xlim(np.min(WLA),np.max(WLA))
-        ax1.legend()  ### ISSUES with legend
-        ax2.plot(WLB,SpecB,"r", label="Coordinate spec")
-        ax2.set_xlabel("SpecB")
-        ax2.set_xlim(np.min(WLB),np.max(WLB))
-        ax2.set_title(title)
-        ax2.legend()
+        ax1.plot(WLB,SpecB,"k",linewidth=3,label="Ref Spec" )
+        ax1.set_xlabel("SpecB")
+        ax1.set_xlim(np.min(WLB),np.max(WLB))
+        ax1.set_title(title)
+        ax1.legend()
+        ax2.plot(WLA, SpecA, "r",linewidth=5,label="Coordinate spec")
+        ax2.plot(WLA, np.ones_like(SpecA),"b-.")
+        ax2.set_ylabel("Normalized Flux/Intensity")
+        ax2.set_xlabel("Wavelength/pixels")
+        ax2.set_xlim(np.min(WLA),np.max(WLA))
+        ax2.legend()  ### ISSUES with legend
+        
         if PointsA:
             print("PointsA",PointsA)
             xpoints = []
@@ -59,13 +60,14 @@ def GetCoords(WLA, SpecA,WLB, SpecB, title="Comparing Spectra", PointsA=False, P
             for point in PointsA:
                 xpoints.append(point[0])
                 ypoints.append(point[1])
-            ax1.plot(xpoints, ypoints, "g<", label="Selected A points")
+            ax2.plot(xpoints, ypoints, "g<", label="Selected A points")
         if PointsB:
-            #ax2.plot(PointsB,"cd",label="Selected B points")
+            xpoints = []
+            ypoints = [] #ax2.plot(PointsB,"cd",label="Selected B points")
             for point in PointsB:
                 xpoints.append(point[0])
                 ypoints.append(point[1])
-            ax2.plot(xpoints, ypoints, "cd", label="Selected B points")
+            ax1.plot(xpoints, ypoints, "cd", label="Selected B points")
             
         cid = fig.canvas.mpl_connect('button_press_event', onclick)
         plt.show()
@@ -73,6 +75,17 @@ def GetCoords(WLA, SpecA,WLB, SpecB, title="Comparing Spectra", PointsA=False, P
         #ans = raw_input("Are these the corrdinate values you want to use to fit these peaks? y/N?")
         #if ans.lower() == "y":   # Good coordinates to use
         return coords
+
+def plotFit(WL,Spec,params, init_params=False):
+    plt.plot(WL,Spec,label="spectra")
+    if init_params:
+        GuessFit = func(WL,init_params)
+        plt.plot(WL,GuessFit,label="Clicked lines")
+    ReturnFit = func(WL,params)
+    plt.plot(WL,ReturnFit,label="Fitted Lines")
+    plt.legend(loc=0)
+    plt.show()
+    return None
 
 def GetRoughCoords(WLA, SpecA,WLB,SpecB):
     """ Get rough coordinate values to use for """
@@ -142,7 +155,8 @@ def FitGausians(WL, Spec, Coords, stel=False):
     print("Params before fit", init_params)
     params, covar = opt.curve_fit(func, WL, Spec, init_params)
     #this_fit_uncalib, covar = opt.curve_fit(func, UnCalibdata[0], UnCalibdata[1], this_params_uncalib)
-    print("Params after fit",params)        
+    print("Params after fit",params)      
+    plotFit(WL, Spec, params, init_params=init_params)  
     return params
 
 def FittingLines(WLA,SpecA,AxCoords,WLB,SpecB,BxCoords):
@@ -217,8 +231,8 @@ def FittingLines(WLA,SpecA,AxCoords,WLB,SpecB,BxCoords):
       #   #print("sectA",SectA,"SectB",SectB)
 
     # Get more accurate coordinates with zoomed in sections
-        Bcoords = GetCoords(WLA_sec, SectA, WLB_sec, SectB, title="Observations")  # new fucntion for plotting and getting coords
-        Acoords = GetCoords(WLB_sec, SectB, WLA_sec, SectA, title="TelluricLines", PointsB=Bcoords)
+        Acoords = GetCoords(WLA_sec, SectA, WLB_sec, SectB, title="Observations")  # new fucntion for plotting and getting coords
+        Bcoords = GetCoords(WLB_sec, SectB, WLA_sec, SectA, title="TelluricLines", PointsA=Acoords)
         #plt.plot(WLA_sec,SectA,label="sectA")
         #plt.plot(WLB_sec,SectB,label="sectB")
 
@@ -228,8 +242,10 @@ def FittingLines(WLA,SpecA,AxCoords,WLB,SpecB,BxCoords):
 
     # If spectral lines do a fit with spectral lines multiplied to telluric lines
     
-        stel= raw_input("Are there any Stellar lines to include in the fit y/N")   
-        if stel.lower() == "y" or stel.lower()== "yes" : # Are there any spectral lines you want to add?
+        #stel= raw_input("Are there any Stellar lines to include in the fit y/N")   
+        stel = False   # for now
+        if stel:
+        #if stel.lower() == "y" or stel.lower()== "yes" : # Are there any spectral lines you want to add?
             # Select the stellar lines for the spectral fit
             Stellarlines = GetCoords(WLA, SpecA, WLB, SpecB, title="Select Spectral Lines", PointsA=Acoords, PointsB=Bcoords)
         # perform the stellar line fitting version
@@ -237,7 +253,8 @@ def FittingLines(WLA,SpecA,AxCoords,WLB,SpecB,BxCoords):
         else:
         #perform the normal fit 
             ParamsA = FitGausians(WLA, SpecA, Acoords)
-        ParamsB = FitGausians(WLB, SpecB, Acoords)
+        
+        ParamsB = FitGausians(WLB, SpecB, Bcoords)
         # Plot Fitting values 
         print ("FitParamsA", ParamsA)
         print ("FitParamsB", ParamsB)
@@ -284,7 +301,7 @@ if __name__=="__main__":
 
     CoordsA = Test_pxl_pos  # first one for now
     CoordsB = Test_wl_pos
-    Goodcoords = FittingLines(UnCalibdata[0],UnCalibdata[1],CoordsA,Calibdata[0],Calibdata[1],CoordsB)
+    Goodcoords = FittingLines(UnCalibdata[0], UnCalibdata[1], CoordsA, Calibdata[0], Calibdata[1], CoordsB)
     print(" Good coords val = ", Goodcoords)
 
 
