@@ -66,15 +66,15 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         #testcoords = fig.ginput(n=0, timeout=0, show_clicks=True, 
         #    mouse_add=1, mouse_pop=2, mouse_stop=3) # better way to do it
         #print("Test coords with function", testcoords)
-        fig = plt.figure(figsize=(25, 15))
+        fig = plt.figure(figsize=(15, 15))
         fig.suptitle(title)
-        fig.set_size_inches(25, 15, forward=False)
+        #fig.set_size_inches(25, 15, forward=False)
         ax1 = fig.add_subplot(111)
         ax2 = ax1.twiny()
         ax1.plot(wl_b, spec_b, "k--", linewidth=3, label="Ref Spec")
         ax1.set_xlabel("spec_b")
         ax1.set_xlim(np.min(wl_b), np.max(wl_b))
-        ax2.plot(wl_a, spec_a, "m", linewidth=5, label="Spectra to Click")
+        ax2.plot(wl_a, spec_a, "b", linewidth=4, label="Spectra to Click")
         ax2.plot(wl_a, np.ones_like(spec_a), "b-.")
         ax2.set_ylabel("Normalized Flux/Intensity")
         ax2.set_xlabel("Wavelength/pixels")
@@ -91,7 +91,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
             for coord in points_a:
                 xpoints.append(coord[0])
                 ypoints.append(coord[1])
-            ax2.plot(xpoints, ypoints, "g<", label="Selected A points")    
+            ax2.plot(xpoints, ypoints, "g<", label="Selected A points", markersize=10)    
         if points_b is not None:
             #xpoints = points_b[0::3]
             #ypoints = np.ones_like(points_b[1::3]) - points_b[1::3]
@@ -100,7 +100,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
             for coord in points_b:
                 xpoints.append(coord[0])
                 ypoints.append(coord[1])
-            ax1.plot(xpoints, ypoints, "cd", label="Selected B points")    
+            ax1.plot(xpoints, ypoints, "md", label="Selected B points",markersize=10)    
         
         coords = fig.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1,
            mouse_pop=2, mouse_stop=3) # better way to do it
@@ -194,7 +194,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
             a_coords = get_coordinates(wl_a_sec, sect_a, wl_b_sec, sect_b,
                 title="Select Spectra Lines")  # Returns list of (x,y)
             b_coords = get_coordinates(wl_b_sec, sect_b, wl_a_sec, sect_a,
-                title="Select Telluric Lines", points_a=a_coords)
+                title="Select Telluric Lines", points_b=a_coords)
             print("Returned a_coords", a_coords)
             print("Returned b_coords", b_coords)
         
@@ -207,32 +207,31 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
             #plot_fit(wl_b_sec, sect_b, b_coords, title="Telluric Guesses")
 
         # If spectral lines do a fit with spectral lines multiplied to telluric lines
-            print("Fitting a_coords", "!") 
+            #print("Fitting a_coords", "!") 
             stel = raw_input("Are there any Stellar lines to include in the fit y/N") 
-            print("Output from stel", stel)
-            #stel = None   # for now
-            #if stel is not None:
             if stel in ["y", "Yes", "YES" "yes"]: # Are there 
                 print(" Doing Stellar fit now")
             #any spectral lines you want to add?
                 # Select the stellar lines for the spectral fit
-                stellarlines = get_coordinates(wl_a_sec, sect_a, wl_b_sec, sect_b, 
+                stellar_lines = get_coordinates(wl_a_sec, sect_a, wl_b_sec, sect_b, 
                     title="Select Spectral Lines", points_a=a_coords, 
                     points_b=b_coords)
-                stellar_params = coords2gaussian_params(stellarlines , delta_a)
+                num_stellar = len(stellar_lines)
+                stellar_params = coords2gaussian_params(stellar_lines, delta_a)
             # perform the stellar line fitting version
                 fit_params_a = do_fit(wl_a_sec, sect_a, init_params_a, stel=stellar_params)
             else:
-            #perform the normal fit 
-                print("Init params for A to fit gausians", init_params_a)
+            # Perform the normal fit 
+                #print("Init params for A to fit gausians", init_params_a)
+                num_stellar = 0
                 fit_params_a = do_fit(wl_a_sec, sect_a, init_params_a)
             
-            print("Fitting B coords", "!")
-            print("Init params for B to fit gausians", init_params_b)
+            #print("Fitting B coords", "!")
+            #print("Init params for B to fit gausians", init_params_b)
             fit_params_b = do_fit(wl_b_sec, sect_b, init_params_b)
             # Plot Fitting values 
-            print ("FitParamsA", fit_params_a)
-            print ("FitParamsB", fit_params_b)
+            #print ("FitParamsA", fit_params_a)
+            #print ("FitParamsB", fit_params_b)
             print ("Using plot_both_fits ", " to plot fit results")
             plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, paramsA=fit_params_a,
                 paramsB=fit_params_b, init_params_a=None, init_params_b=None, 
@@ -243,15 +242,34 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
                 break   # exit while true loop
             elif goodfit in ["skip", "s"]:
                 pass   # skip this fit and try another  
+        
+        #Seperate back out the stellar lines
+        fit_line_params, fit_stell_params = split_telluric_stellar(fit_params_a,
+            num_stellar)
+        fitted_coords_a = params2coords(fit_line_params)   # Spectra
+        fitted_coords_b = params2coords(fit_params_b)      # Tellruic spectrum
+        #Add a large Marker to each peak and then label by number underneath
+        plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=True,
+            title="Pick Results to use", fitcoords_a=fitted_coords_a,
+            best_a=best_a_coords, fitcoords_b=fitted_coords_b,
+            best_b=best_b_coords)
+        
+        for i in range(0,len(fitted_coords_a)):
+            coord_a = fitted_coords_a[i]
+            coord_b = fitted_coords_b[i]
+            include = raw_input("Use Peak #" + str(i+1) +" corresponding to" + str([coord_a, coord_b]) + " y/N?")
+            if include.lower() == "y" or include.lower() == "yes":
+                best_a_coords.append(CoordsA[i]) # tempry filler for return
+                best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
 
         # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
         # no - individually ask if want want each line included and append if yes
         # probably plot each individually to identify 
-        include = raw_input(" Use Coordinate point" + str([CoordsA[i], CoordsB[i]]) + " y/N?")
-        if include.lower() == "y" or include.lower() == "yes":
-            best_a_coords.append(CoordsA[i]) # tempry filler for return
-            best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
-
+        #include = raw_input(" Use Coordinate point" + str([CoordsA[i], CoordsB[i]]) + " y/N?")
+        #if include.lower() == "y" or include.lower() == "yes":
+         #   best_a_coords.append(CoordsA[i]) # tempry filler for return
+        #    best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
+         
     return best_a_coords, best_b_coords,
 
 
@@ -271,14 +289,14 @@ def func(x, *params):
     """
     y = np.ones_like(x)
     #print("*params inside function", type(params),len(params), params)
-    for i in range(0, len(params), param_nums):
+    for i in range(0, len(params), 3):
         ctr = params[i]
         amp = np.abs(params[i+1]) # always positive so peaks always down
         wid = params[i+2]
         y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2)
     return y
 
-def func_with_stellar(x, num_stellar, *params):
+def func_with_stellar(x, num_stell, *params):
     """ Function to generate the multiple gaussian profiles with 
     stellar gausian. Adapted from 
     http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python 
@@ -291,28 +309,15 @@ def func_with_stellar(x, num_stellar, *params):
     y_line = np.ones_like(x)
     y_stel = np.ones_like(x)
     #num_stel = params[0]                     # number of stellar lines given
-    params = params[0]
-    first_stel = -3*num_stellar  # index of first stellar line (from end)
-    print("num stellar", num_stellar, "first stel", -3*num_stellar)
-    print("params length", len(params))
-    print("params legnth minus stellar line values" , len(params)-3*num_stellar )
-    print("first_stel in func", first_stel)
-    line_params = params[:first_stel]
-    print("line_params in func", line_params)
-    stellar_params = params[first_stel:]
-    print("stellar_params in func", stellar_params)
-    # need to assert that lenght is multiple of 3
-    print("len linelist", len(line_params), "len stellar line params", 
-        len(stellar_params), "params length", len(params))
-    assert len(line_params)%3 is 0, "Line list is not correct length"
-    assert len(stellar_params)%3 is 0, "Stellar line list not correct length"
+    par = params[0]
+    line_params, stellar_params = split_telluric_stellar(par, num_stell)
 
-    for i in range(0, len(line_params), param_nums):
+    for i in range(0, len(line_params), 3):
         ctr = line_params[i]
         amp = abs(line_params[i+1])   # always positive so peaks are downward
         wid = line_params[i+2]
         y_line = y_line - amp*np.exp(-0.5*((x-ctr)/wid)**2)  #Add teluric lines
-    for i in range(0, len(stellar_params), param_nums):
+    for i in range(0, len(stellar_params), 3):
         stel_ctr = stellar_params[i]
         stel_amp = abs(stellar_params[i+1])  #always positive so peaks are down
         stel_wid = stellar_params[i+2]
@@ -332,7 +337,7 @@ def func_for_plotting(x, params):
     y = np.ones_like(x)
     #print("*params inside plotting func function", type(params), 
     #    len(params), params)
-    for i in range(0, len(params), param_nums):
+    for i in range(0, len(params), 3):
         ctr = params[i]
         amp = np.abs(params[i+1])  # always positive so peaks are always down
         wid = params[i+2]
@@ -348,6 +353,25 @@ def func_for_plotting(x, params):
 #                        # i.e. type conversions, slicing             #
 #                                                                     #
 #######################################################################
+def split_telluric_stellar(params, num_stellar):
+    """ Split up the array of lines into the telluric and stellar parts 
+    input np.array(teluric lines, stellar lines)
+    num_stellar is the number of stellar lines at the end
+    output telluric lines, stellar lines
+    """
+    first_stel = -3*num_stellar  # index of first stellar line (from end)
+    line_params = params[:first_stel]
+    stellar_params = params[first_stel:]
+    #print("line_params in func", line_params)
+    #print("stellar_params in func", stellar_params)
+    #print("len linelist", len(line_params), "len stellar line params", 
+    #    len(stellar_params), "params length", len(params))
+    assert len(line_params)%3 is 0, "Line list is not correct length"
+    assert len(stellar_params)%3 is 0, "Stellar line list not correct length"
+    return line_params, stellar_params,
+
+
+
 def coords2gaussian_params(coords, delta):
     """ Convert list of coordinate tuples (x,y) into a numpy gaussian 
     paramater array for the fitting routines. Delta is the mean step 
@@ -424,38 +448,61 @@ def plot_fit(wl, Spec, params, init_params=None, title=None):
     return None
 
 def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
-    init_params_a=None, paramsB=None, init_params_b=None, title=None):
+    init_params_a=None, paramsB=None, init_params_b=None, title=None, 
+    fitcoords_a=None, fitcoords_b=None, best_a=None, best_b=None):
+    """ Plotting both together, many kwargs for different parts of code"""
     fig = plt.figure(figsize=(10, 10))
     #fig.set_size_inches(25, 15, forward=False)
     ax1 = fig.add_subplot(111)
     ax2 = ax1.twiny()
-    ax1.plot(wl_b, spec_b, "k--", label="Spectra")
+    ax1.plot(wl_b, spec_b, "k--", label="Spectra", linewidth=2)
     ax1.set_xlim(np.min(wl_a), np.max(wl_a))
-    ax2.plot(wl_a, spec_a, "g*-", label="Spectrum 2")
+    ax2.plot(wl_a, spec_a, "g*-", label="Spectrum 2", linewidth=2)
     ax2.set_xlim(np.min(wl_a), np.max(wl_a))
     if init_params_b is not None:
         guessfit_b = func_for_plotting(wl_b, init_params_b)
-        ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit")
+        ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit", linewidth=2)
     if init_params_a is not None:
         guessfit_a = func_for_plotting(wl_a, init_params_a)
-        ax2.plot(wl_a, guessfit_a, "g.", label="Guess Fit") 
+        ax2.plot(wl_a, guessfit_a, "g.", label="Guess Fit", linewidth=2) 
     if paramsB is not None:      
         returnfit_b = func_for_plotting(wl_b, paramsB)
-        ax1.plot(wl_b, returnfit_b, "r-.", label="Fit")
+        ax1.plot(wl_b, returnfit_b, "r-.", label="Fit", linewidth=2)
     if paramsA is not None:
         returnfit_a = func_for_plotting(wl_a, paramsA)
-        ax2.plot(wl_a, returnfit_a, "m-.", label="Fit")
+        ax2.plot(wl_a, returnfit_a, "m-.", label="Fit", linewidth=2)
     ax1.set_xlabel("Cordinate 1")
     ax2.set_xlabel("Cordinate 2")
     fig.suptitle(title)
     plt.legend(loc=0)
-    
+    fita = fitcoords_a is not None
+    fitb = fitcoords_b is not None
+    if fita and fitb:
+        assert len(fitcoords_a) is len(fitcoords_b), " Coords not same length"
+        for i in range(0, len(fitcoords_a)):
+            coord_a = fitcoords_a[i]
+            coord_b = fitcoords_b[i]
+            ax2.plt(coord_a[0],coord_a[1], "yo", markersize=15, label="fitted peak")
+            ax1.plt(coord_b[0],coord_b[1], "ro", markersize=15, label="fitted peak")
+            ax2.text(coord_a[0], coord_a[1]-0.025, str(i+1), fontsize=16)
+    elif fita and fitb:
+        print("Only one of the fiting coords was provided")
+    if best_a is not None:
+        """ Mark peaks that have already been added to cood fitted peaks 
+        list to prevent doubleing up """
+        for xpos in best_a:
+            ax2.plt(xpos, 1, "kox", markersize=20, label="already picked")
+    if best_b is not None:
+        """ Mark peaks that have already been added to cood fitted peaks 
+        list to prevent doubleing up """
+        for xpos in best_b:
+            ax1.plt(xpos, 1, "kox", markersize=20, label="already picked")
+
     if show_plot:
-        #plt.show()
-        plt.display()
+        #show(block=False)
+        plt.show(block=False)
+        #plt.display()
     return fig, ax1, ax2,   
-
-
 
 
 
@@ -472,10 +519,9 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
 if __name__ == "__main__":
 
     # Do the test case HD30501-1 Chip-1
-
     path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
-    global param_nums
-    param_nums = 3 
+    #global param_nums
+    #param_nums = 3 
     Dracspath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
     obj = "HD30501-1"
     objpath = Dracspath + obj + "/"
