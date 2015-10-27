@@ -263,7 +263,7 @@ if __name__=="__main__":
             for jj in range(0,len(init_params_uncalib),param_nums):
                 print("jj", jj)
                 print("type jj",type(jj))
-                
+    
                 print(type([jj, jj + 1, jj + 2]))
                 print("[jj, jj + 1, jj + 2]",[jj,jj+param_nums])
                 this_params_uncalib = init_params_uncalib[jj:jj+param_nums]

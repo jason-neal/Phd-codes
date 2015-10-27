@@ -7,7 +7,7 @@
 from __future__ import division
 #from astropy.io import fits
 #import Obtain_Telluric
-import IOmodule
+
 import copy
 import math
 import numpy as np
@@ -15,12 +15,13 @@ import numpy as np
 #from Get_filenames import get_filenames
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
+
+import IOmodule
 from Gaussian_fit_testing import Get_DRACS
+
 ## Gaussian Fitting Module
 ## Develop the advanced fitting routine that fits slices of spectra 
 ## with potentailly multiple gausians.
-
-
 
 #######################################################################
 #                                                                     #
@@ -43,6 +44,7 @@ from Gaussian_fit_testing import Get_DRACS
 def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     """ Get rough coordinate values to use advanced fitting on
     First run through of peaks in spectra
+
     """
     a_coords = get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Observed Spectra") 
     b_coords = get_coordinates(wl_b, spec_b, wl_a, spec_a, title="Telluric Lines",
@@ -55,6 +57,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
      The blue plot is the plot to click on to get peak coordinates
      the black plot is the other spectra to compare against.
      points show the peaks that were choosen to fit.
+
     """    
     while True:
         #global coords, fig  #, cid
@@ -120,6 +123,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
 def do_fit(wl, spec, init_params, stel=None):
     """ Perfrom fit using opt.curvefit and return the found parameters. 
     if there is stellar lines then stel will not be None.
+
     """
     print("Params before fit", init_params, type(init_params))
     if stel is not None:
@@ -160,7 +164,8 @@ def wavelength_mapping(pixels, wavelengths):
 
 
 def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
-    """ Returns the 
+    """ Returns the positions of matching peaks for calibration map
+
     """
     best_a_coords = []
     best_b_coords = []
@@ -286,6 +291,7 @@ def func(x, *params):
     http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python. 
     Params are now list (or numpy array) of values in order of xpos, 
     ypos, sigma of each gausian peak
+
     """
     y = np.ones_like(x)
     #print("*params inside function", type(params),len(params), params)
@@ -305,6 +311,7 @@ def func_with_stellar(x, num_stell, *params):
      list of parameters so need to seperate them out. 
     [[number of telluric lines], telluric lines, stellar lines] 
     # not any more use lambda fucntion as a fixed parameter
+
     """
     y_line = np.ones_like(x)
     y_stel = np.ones_like(x)
@@ -333,6 +340,7 @@ def func_for_plotting(x, params):
     http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python. 
     Params are now a numpy array of values in order of xpos, ypos, 
     sigma of each gausian peak
+
     """
     y = np.ones_like(x)
     #print("*params inside plotting func function", type(params), 
@@ -358,6 +366,7 @@ def split_telluric_stellar(params, num_stellar):
     input np.array(teluric lines, stellar lines)
     num_stellar is the number of stellar lines at the end
     output telluric lines, stellar lines
+
     """
     first_stel = -3*num_stellar  # index of first stellar line (from end)
     line_params = params[:first_stel]
@@ -378,6 +387,7 @@ def coords2gaussian_params(coords, delta):
     in the x(wl) coordinate of the data
     input form [(x1,y1),(x2,y2),...]
     output form np.array([x1,y1,sig1,x2,y2,sig2....])
+
     """
     if delta > 0.5:  # large steps like pixel number
         sigma = 2 * delta    # Guess standard deviation  (2 * mean wl step)
@@ -393,7 +403,10 @@ def coords2gaussian_params(coords, delta):
 
 
 def params2coords(params):
-    """ Turn numpy array of gausian fit parameters into (x,y) tuples of peak coordinates"""
+    """ Turn numpy array of gausian fit parameters into 
+    (x,y) tuples of peak coordinates
+
+    """
     coords = []
     for i in range(0, len(params), 3):
         xpos = params[i]
