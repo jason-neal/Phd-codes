@@ -1,6 +1,4 @@
 
-#
-
 """ Codes for Telluric contamination removal 
     Interpolates telluric spectra to the observed spectra.
     Divides spectra telluric spectra
@@ -48,7 +46,7 @@ def test_plot_interpolation(x1, y1, x2, y2, methodname=None):
     plt.show(block=False)
 
 
-def TelluricCorrect(wl_obs, spec_obs, wl_tell, spec_tell):
+def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell):
     """Code to contain other functions in this file
 
      1. Interpolate spectra to same wavelengths with match_WLs()
@@ -86,7 +84,7 @@ if __name__ == "__main__":
     print(x2)
     #print(y1)
     #print(y2)
-    y1_cor = TelluricCorrect(x1, y1, x2, y2)
+    y1_cor = telluric_correct(x1, y1, x2, y2)
     print(x1)
     print(y1)
     print(y1_cor)  
