@@ -19,6 +19,14 @@ def get_telluric_name(date, time):
     match = get_filenames(tapas_path, str1 , str2)
     return match 
 
+def get_telluric_from_obs(obs_name):
+       """ Load average time list for name then load from there"""
+       # Load ObsAverageTimes.txt
+       avg_obs_time = "2012-04-07T00:20:00"
+       date = avg_obs_time[0:11]
+       time = avg_obs_time[12:20]
+       match = get_telluric_name(date, time)
+       return match 
 
 def list_telluric(path):
     match = get_filenames(path, "tapas_*")
@@ -27,9 +35,9 @@ def list_telluric(path):
 
 def load_telluric(tapas_path, filename):
     ext = filename[-4:] 
-    file = tapas_path + filename
+    file_ = tapas_path + filename
     if ext == "ipac":
-        with open(file) as f:
+        with open(file_) as f:
             col1 = []
             col2 = []
             for line in f:
@@ -44,7 +52,7 @@ def load_telluric(tapas_path, filename):
                     col2.append(val2)
         tell = np.array([col1,col2], dtype="float64")
     elif ext == "fits":
-        i_tell = (fits.getdata(file,0))
+        i_tell = (fits.getdata(file_,0))
         col1 = i_tell["wavelength"]
         col2 = i_tell["transmittance"]
         #print("i_tell", i_tell)
@@ -65,6 +73,11 @@ def plot_telluric(data, name, labels=True, show=False):
         plt.ylabel("Transmittance")
     if show:
         plt.show()
+    pass
+
+def do_all_telluric():
+    """ module to find file, load file and be ready to pass data onwards"""
+    
     pass
 
 if __name__== "__main__" :
@@ -95,3 +108,5 @@ if __name__== "__main__" :
         data = load_telluric(tapas_path, filename)
         plot_telluric(data, filename)
     plt.show()
+
+    do_all_telluric()
