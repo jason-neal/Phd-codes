@@ -486,7 +486,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     ax1 = fig2.add_subplot(111)
     ax2 = ax1.twiny()
     ax1.plot(wl_b, spec_b, "k--", label="Spectra", linewidth=2)
-    ax1.set_xlim(np.min(wl_a), np.max(wl_a))
+    ax1.set_xlim(np.min(wl_b), np.max(wl_b))
     #if init_params_b is not None:
     #    guessfit_b = func_for_plotting(wl_b, init_params_b)
     #    ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit", linewidth=2)
