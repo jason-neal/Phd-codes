@@ -71,6 +71,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         #print("Test coords with function", testcoords)
         fig = plt.figure(figsize=(15, 15))
         fig.suptitle(title)
+        plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95) # remove edge space
         #fig.set_size_inches(25, 15, forward=False)
         ax1 = fig.add_subplot(111)
         ax2 = ax1.twiny()
@@ -241,16 +242,20 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
             #print ("FitParamsA", fit_params_a)
             #print ("FitParamsB", fit_params_b)
             print ("Using plot_both_fits ", " to plot fit results")
-            plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, paramsA=fit_params_a,
+            fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, paramsA=fit_params_a,
                 paramsB=fit_params_b, init_params_a=None, init_params_b=None, 
                 title="Displaying Fits with Originals", show_plot=True) # need to show without stoping
             
-            goodfit = raw_input(" Was this a good fit? y/N?")
+            goodfit = raw_input(" Was this a good fit? y/N/s (skip)?")
             if goodfit in ["yes", "y", "Y", "Yes", "YES"]:
+                plt.close(fig)
                 break   # exit while true loop
             elif goodfit in ["skip", "s"]:
-                pass   # skip this fit and try another  
-        
+                plt.close(fig)
+                pass   # skip this fit and try another 
+            else:
+                print("Registered this as not a good fit. Trying again.") 
+                plt.close(fig)
         #Seperate back out the stellar lines
         if num_stellar is not 0:
             fit_line_params, fit_stell_params = split_telluric_stellar(fit_params_a,
@@ -266,7 +271,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
         fitted_coords_b = params2coords(fit_params_b)      # Tellruic spectrum
         #Add a large Marker to each peak and then label by number underneath
 
-        plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, show_plot=True,
+        fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, show_plot=True,
             title="Pick Results to use", fitcoords_a=fitted_coords_a,
             best_a=best_a_coords, fitcoords_b=fitted_coords_b,
             best_b=best_b_coords)
@@ -281,8 +286,10 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
             include = raw_input("Use Peak #" + str(i+1) +" corresponding to" + 
                                 str([coord_a[0],'pxls', coord_b[0],'nm']) + " y/N?")
             if include.lower() == "y" or include.lower() == "yes":
-                best_a_coords.append(CoordsA[i]) # tempry filler for return
-                best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
+                #best_a_coords.append(CoordsA[i]) # tempry filler for return
+                #best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
+                best_a_coords.append(coord_a[0])
+                best_b_coords.append(coord_b[0])
 
         # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
         # no - individually ask if want want each line included and append if yes
@@ -293,6 +300,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
         #    best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
         print("best_a_coords", best_a_coords)
         print("best_b_coords", best_b_coords)
+        plt.close(fig)
     return best_a_coords, best_b_coords,
 
 
@@ -465,7 +473,9 @@ def slice_spectra(wl, spectrum, pos, prcnt=0.10):
 #                                                                     #
 #######################################################################
 def plot_fit(wl, Spec, params, init_params=None, title=None):
-    fig = plt.figure(figsize=(10, 10))
+    fig = plt.figure(figsize=(15, 10))
+    #http://stackoverflow.com/questions/332289/how-do-you-change-the-size-of-figures-drawn-with-matplotlib
+    plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95) # remove edge space ?
     plt.plot(wl, Spec, label="Spectrum")
     if init_params is not None:
         guessfit = func_for_plotting(wl, init_params)
@@ -475,24 +485,25 @@ def plot_fit(wl, Spec, params, init_params=None, title=None):
     plt.title(title)
     plt.legend(loc=0)
     plt.show()
-    return None
+    return fig
 
 def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     init_params_a=None, paramsB=None, init_params_b=None, title=None, 
     fitcoords_a=None, fitcoords_b=None, best_a=None, best_b=None):
     """ Plotting both together, many kwargs for different parts of code"""
-    fig2 = plt.figure(figsize=(10, 10))
+    fig2 = plt.figure(figsize=(15, 15))
     #fig.set_size_inches(25, 15, forward=False)
     ax1 = fig2.add_subplot(111)
     ax2 = ax1.twiny()
-    ax1.plot(wl_b, spec_b, "k--", label="Spectra", linewidth=2)
+    plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95) # remove edge space
+    ax1.plot(wl_b, spec_b, "k--", label="Spectra B", linewidth=4)
     ax1.set_xlim(np.min(wl_b), np.max(wl_b))
     #if init_params_b is not None:
     #    guessfit_b = func_for_plotting(wl_b, init_params_b)
     #    ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit", linewidth=2)
     if paramsB is not None:      
         returnfit_b = func_for_plotting(wl_b, paramsB)
-        ax1.plot(wl_b, returnfit_b, "r-.", label="Fit", linewidth=2)
+        ax1.plot(wl_b, returnfit_b, "r-.", label="Fit", linewidth=4)
     ax1.set_xlabel("Cordinate 1")
     
     bb1 = best_b is not None
@@ -502,16 +513,21 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         list to prevent doubleing up """
         for xpos in best_b:
             print("Xpos", xpos)
-            ax1.plot(xpos, 1, "kx", markersize=20, label="already picked")
+            ax1.plot(xpos, 1, "kx", markersize=20, label="already picked", 
+                linewidth=4)
     
-    ax2.plot(wl_a, spec_a, "g*-", label="Spectrum 2", linewidth=2)
+    ax2.plot(wl_a, spec_a, "g*-", label="Spectra A", linewidth=4)
+    # plot also on ax1 for legend
+    ax1.plot(wl_a, spec_a, "g*-", label="Spectra A", linewidth=4) # for label
     ax2.set_xlim(np.min(wl_a), np.max(wl_a))
     #if init_params_a is not None:
     #    guessfit_a = func_for_plotting(wl_a, init_params_a)
     #   ax2.plot(wl_a, guessfit_a, "g.", label="Guess Fit", linewidth=2) 
     if paramsA is not None:
         returnfit_a = func_for_plotting(wl_a, paramsA)
-        ax2.plot(wl_a, returnfit_a, "m-.", label="Fit", linewidth=2)
+        ax2.plot(wl_a, returnfit_a, "m-.", label="Fit A", linewidth=4)
+        # plot also on ax1 for legend
+        ax1.plot(wl_a, returnfit_a, "m-.", label="Fit A", linewidth=4)
     ax2.set_xlabel("Cordinate 2")
 
     fita = fitcoords_a is not None
@@ -523,20 +539,24 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         for i in range(0, len(fitcoords_a)):
             coord_a = fitcoords_a[i]
             coord_b = fitcoords_b[i]
-            ax2.plot(coord_a[0], coord_a[1], "yo", markersize=15, label="fitted peak")
-            ax1.plot(coord_b[0], coord_b[1], "ro", markersize=15, label="fitted peak")
-            ax2.text(coord_a[0], coord_a[1]-0.025, str(i+1), fontsize=16)
+            ax2.plot(coord_a[0], coord_a[1], "yo", markersize=15, label="Fitted A peak")
+            ax1.plot(coord_a[0], coord_a[1], "yo", markersize=15, label="Fitted A peak")
+            ax1.plot(coord_b[0], coord_b[1], "ro", markersize=15, label="Fitted B peak")
+            ax2.text(coord_a[0], coord_a[1]-0.025, str(i+1), fontsize=20, color='red', 
+                fontweight='bold')
+            ax1.text(coord_b[0], coord_b[1]-0.025, str(i+1), fontsize=20, color='red',
+                fontweight='bold')
     elif fita or fitb:
         print("Only one of the fitting coords was provided")
     ba1 = best_a is not None
     ba2 = best_a is not []
     if ba1 and ba2:
         """ Mark peaks that have already been added to cood fitted peaks 
-        list to prevent doubleing up """
+        list to prevent doubling up """
         for xpos in best_a:
             print("Xpos", xpos)
-            ax2.plot(xpos, 1, "kx", markersize=20, linewidth=4, label="already picked")
-
+            ax2.plot(xpos, 1, "kx", markersize=20, linewidth=5, label="Already picked line")
+    ax1.legend(loc="best")
     if show_plot:
         plt.show(block=False)
         
