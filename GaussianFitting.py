@@ -155,15 +155,6 @@ def do_fit(wl, spec, init_params, stel=None):
     #plot_fit(wl, Spec, params, init_params=init_params)  
     return params
 
-def wavelength_mapping(pixels, wavelengths):
-    """ Generate the wavelenght map
-      fit polynomial (use pedros code)
-
-    """
-    wl_map = None
-    return wl_map
-
-
 def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
     """ Returns the positions of matching peaks for calibration map
 
@@ -517,7 +508,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     if paramsB is not None:      
         returnfit_b = func_for_plotting(wl_b, paramsB)
         ax1.plot(wl_b, returnfit_b, "r-.", label="Fit", linewidth=4)
-    ax1.set_xlabel("Cordinate 1")
+    ax1.set_xlabel("1st axis")
     
     bb1 = best_b is not None
     bb2 = best_b is not []
@@ -541,7 +532,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         ax2.plot(wl_a, returnfit_a, "m-.", label="Fit A", linewidth=4)
         # plot also on ax1 for legend
         ax1.plot(wl_a, returnfit_a, "m-.", label="Fit A", linewidth=4)
-    ax2.set_xlabel("Cordinate 2")
+    ax2.set_xlabel("2nd 1st axis")
 
     fita = fitcoords_a is not None
     fitb = fitcoords_b is not None
@@ -578,9 +569,44 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
 def print_fit_instructions():
     """ Print to screen the fitting instructions
     """
-    print("/n/n Instructions: /n/n ")
+    print("\n\n Instructions: \n\n ")
 
     return None
+
+#######################################################################
+#                                                                     #
+#                        # Mapping                                  #
+#                                                                     #
+#                                                                     #
+#######################################################################
+
+def wavelength_mapping(pixels, wavelengths):
+    """ Generate the wavelenght map equation
+      fit polynomial 
+
+    """
+    #linfit = np.polyfit(pixels, wavelengths,1)
+    wl_map = np.polyfit(pixels, wavelengths,2)
+    #print("linear fit x, c", linfit)
+    print("wl_map equation x**2, x, c", wl_map)
+    
+    #linvals = np.polyval(linfit, range(1,1025))
+    quadvals = np.polyval(wl_map, range(1,1025))
+    plt.plot(pixels, wavelengths , 'ko',linewidth=4, markersize=7, label="Points")
+    plt.plot(range(1,1025), quadvals, "-.r", linewidth=3, label="quadfit")
+    plt.title("Plot fitted points and quad fit")
+    plt.show()
+    print("quad fit vals " , quadvals)
+    
+    #lin_pointvals = np.polyval(linfit, pixels)
+    #generate mapped wavelength values for the pixel positions
+    quad_pointvals = np.polyval(wl_map, pixels)
+    diff = quad_pointvals - pixels
+    std_diff = np.std(diff)
+    print("Differences in wavelength from map points to choosen points", diff)
+    print("Standard deviation of differences (wavelength mapping error value?) ", std_diff )
+    
+    return wl_map
 
 
 
@@ -621,29 +647,31 @@ if __name__ == "__main__":
 
     print_fit_instructions()
     #Comment Below line to skip this and work on next part
-    Goodcoords = adv_wavelength_fitting(UnCalibdata[0], UnCalibdata[1], 
-                                        CoordsA, Calibdata[0], Calibdata[1],
-                                        CoordsB)
+    #good_coords_a, good_coords_b = adv_wavelength_fitting(UnCalibdata[0], UnCalibdata[1], 
+    #                                    CoordsA, Calibdata[0], Calibdata[1],
+    #                                    CoordsB)
     
     
      # to continue on with the wavelength maping 
     #('Good coords val = ', ([58.751104497854982, 81.658541491501651, 189.34108796650241, 583.07310836733564, 674.44574875440139, 688.75467383238379, 715.71056015872659, 741.04649082758874, 755.65385861534787, 971.61400877925826], [2112.5013784537928, 2112.7671666575789, 2114.0161400469569, 2118.5337956108197, 2119.5747945058301, 2119.7372298600226, 2120.0462545073347, 2120.3424115686403, 2120.505718389647, 2122.9485968267259]))
-    GoodcoordsA = [58.751104497854982, 81.658541491501651, 189.34108796650241, 583.07310836733564, 674.44574875440139, 688.75467383238379, 715.71056015872659, 741.04649082758874, 755.65385861534787, 971.61400877925826]
-    GoodCoordsB = [2112.5013784537928, 2112.7671666575789, 2114.0161400469569, 2118.5337956108197, 2119.5747945058301, 2119.7372298600226, 2120.0462545073347, 2120.3424115686403, 2120.505718389647, 2122.9485968267259]
+    good_coords_a = [58.751104497854982, 81.658541491501651, 189.34108796650241, 583.07310836733564, 674.44574875440139, 688.75467383238379, 715.71056015872659, 741.04649082758874, 755.65385861534787, 971.61400877925826]
+    good_coords_b = [2112.5013784537928, 2112.7671666575789, 2114.0161400469569, 2118.5337956108197, 2119.5747945058301, 2119.7372298600226, 2120.0462545073347, 2120.3424115686403, 2120.505718389647, 2122.9485968267259]
     print("Skipping ahead to wavlenght mapping part")
-    print("Good coords vals A= ", GoodcoordsA)
-    print("Good coords vals B = ", GoodcoordsA)
-    wl_map = wavelength_mapping(GoodcoordsA, GoodcoordsB)
+    print("Good coords vals A= ", good_coords_a)
+    print("Good coords vals B = ", good_coords_b)
+    wl_map = wavelength_mapping(good_coords_a, good_coords_b)
     #""" Generate the wavelenght map
     #  fit polynomial (use pedros code)
 
     #"""
-    print("Returned wl_map", wl_map)
-   
-
-
-
-
+    print("Returned wl_map parameters", wl_map)
+    
+    calibrated_wl = np.polyval(wl_map, UnCalibdata[0])
+    
+    plt.plot(calibrated_wl, UnCalibdata[1], label="Calibrated spectra")
+    plt.plot(Calibdata[0], Calibdata[1], label="Telluric spectra")
+    plt.title("Calibration Output")
+    plt.show()
 
 
 
