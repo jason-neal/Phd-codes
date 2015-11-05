@@ -75,10 +75,10 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         #fig.set_size_inches(25, 15, forward=False)
         ax1 = fig.add_subplot(111)
         ax2 = ax1.twiny()
-        ax1.plot(wl_b, spec_b, "k--", linewidth=3, label="Ref Spec")
+        ax1.plot(wl_b, spec_b, "k--", wl=3, label="Ref Spec")
         ax1.set_xlabel("spec_b")
         ax1.set_xlim(np.min(wl_b), np.max(wl_b))
-        ax2.plot(wl_a, spec_a, "b", linewidth=4, label="Spectra to Click")
+        ax2.plot(wl_a, spec_a, "b", wl=4, label="Spectra to Click")
         ax2.plot(wl_a, np.ones_like(spec_a), "b-.")
         ax2.set_ylabel("Normalized Flux/Intensity")
         ax2.set_xlabel("Wavelength/pixels")
@@ -95,7 +95,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
             for coord in points_a:
                 xpoints.append(coord[0])
                 ypoints.append(coord[1])
-            ax2.plot(xpoints, ypoints, "g<", label="Selected A points", markersize=10)    
+            ax2.plot(xpoints, ypoints, "g<", label="Selected A points", ms=10)    
         if points_b is not None:
             #xpoints = points_b[0::3]
             #ypoints = np.ones_like(points_b[1::3]) - points_b[1::3]
@@ -104,7 +104,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
             for coord in points_b:
                 xpoints.append(coord[0])
                 ypoints.append(coord[1])
-            ax1.plot(xpoints, ypoints, "md", label="Selected B points",markersize=10)    
+            ax1.plot(xpoints, ypoints, "md", label="Selected B points",ms=10)    
         
         coords = fig.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1,
                             mouse_pop=2, mouse_stop=3) # better way to do it
@@ -516,14 +516,14 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     if hor is not None:
         print("hor is not NONE so should have horizontal line !!!!!!!!!!")
         ax1.plot(wl_b, hor*np.ones_like(wl_b), "k-.")
-    ax1.plot(wl_b, spec_b, "k--", label="Spectra B", linewidth=4)
+    ax1.plot(wl_b, spec_b, "k--", label="Spectra B", wl=4)
     ax1.set_xlim(np.min(wl_b), np.max(wl_b))
     #if init_params_b is not None:
     #    guessfit_b = func_for_plotting(wl_b, init_params_b)
-    #    ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit", linewidth=2)
+    #    ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit", wl=2)
     if paramsB is not None:      
         returnfit_b = func_for_plotting(wl_b, paramsB)
-        ax1.plot(wl_b, returnfit_b, "r-.", label="Fit", linewidth=4)
+        ax1.plot(wl_b, returnfit_b, "r-.", label="Fit", wl=4)
     ax1.set_xlabel("1st axis")
     
     bb1 = best_b is not None
@@ -533,21 +533,21 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         list to prevent doubleing up """
         for xpos in best_b:
             print("Xpos", xpos)
-            ax1.plot(xpos, 1, "kx", markersize=20, label="already picked", 
-                linewidth=4)
+            ax1.plot(xpos, 1, "kx", ms=20, label="already picked", 
+                wl=4)
     
-    ax2.plot(wl_a, spec_a, "g*-", label="Spectra A", linewidth=4)
+    ax2.plot(wl_a, spec_a, "g*-", label="Spectra A", wl=4)
     # plot also on ax1 for legend
-    ax1.plot(wl_a, spec_a, "g*-", label="Spectra A", linewidth=4) # for label
+    ax1.plot(wl_a, spec_a, "g*-", label="Spectra A", wl=4) # for label
     ax2.set_xlim(np.min(wl_a), np.max(wl_a))
     #if init_params_a is not None:
     #    guessfit_a = func_for_plotting(wl_a, init_params_a)
-    #   ax2.plot(wl_a, guessfit_a, "g.", label="Guess Fit", linewidth=2) 
+    #   ax2.plot(wl_a, guessfit_a, "g.", label="Guess Fit", wl=2) 
     if paramsA is not None:
         returnfit_a = func_for_plotting(wl_a, paramsA)
-        ax2.plot(wl_a, returnfit_a, "m-.", label="Fit A", linewidth=4)
+        ax2.plot(wl_a, returnfit_a, "m-.", label="Fit A", wl=4)
         # plot also on ax1 for legend
-        ax1.plot(wl_a, returnfit_a, "m-.", label="Fit A", linewidth=4)
+        ax1.plot(wl_a, returnfit_a, "m-.", label="Fit A", wl=4)
     ax2.set_xlabel("2nd axis")
 
     fita = fitcoords_a is not None
@@ -559,12 +559,12 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         for i in range(0, len(fitcoords_a)):
             coord_a = fitcoords_a[i]
             coord_b = fitcoords_b[i]
-            ax2.plot(coord_a[0], coord_a[1], "bo", markersize=15, label="Fitted A peak")
-            ax1.plot(coord_a[0], coord_a[1], "bo", markersize=15, label="Fitted A peak")
-            ax1.plot(coord_b[0], coord_b[1], "ro", markersize=15, label="Fitted B peak")
-            ax2.text(coord_a[0], coord_a[1]-0.01, " "+str(i+1), fontsize=20, color='blue', 
+            ax2.plot(coord_a[0], coord_a[1], "bo", ms=15, label="Fitted A peak")
+            ax1.plot(coord_a[0], coord_a[1], "bo", ms=15, label="Fitted A peak")
+            ax1.plot(coord_b[0], coord_b[1], "ro", ms=15, label="Fitted B peak")
+            ax2.text(coord_a[0], coord_a[1]-0.01, " "+str(i+1), fontsize=20, c='blue', 
                 fontweight='bold')
-            ax1.text(coord_b[0], coord_b[1]-0.01, " "+str(i+1), fontsize=20, color='red',
+            ax1.text(coord_b[0], coord_b[1]-0.01, " "+str(i+1), fontsize=20, c='red',
                 fontweight='bold')
     elif fita or fitb:
         print("Only one of the fitting coords was provided")
@@ -575,7 +575,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         list to prevent doubling up """
         for xpos in best_a:
             print("Xpos", xpos)
-            ax2.plot(xpos, 1, "kx", markersize=20, linewidth=5, label="Already picked line")
+            ax2.plot(xpos, 1, "kx", ms=20, wl=5, label="Already picked line")
     ax1.legend(loc="best")
     if show_plot:
         plt.show(block=False)
@@ -608,8 +608,8 @@ def wavelength_mapping(pixels, wavelengths):
     
     #linvals = np.polyval(linfit, range(1,1025))
     quadvals = np.polyval(wl_map, range(1,1025))
-    plt.plot(pixels, wavelengths , 'ko',linewidth=4, markersize=7, label="Points")
-    plt.plot(range(1,1025), quadvals, "-.r", linewidth=3, label="quadfit")
+    plt.plot(pixels, wavelengths , 'ko',wl=4, ms=7, label="Points")
+    plt.plot(range(1,1025), quadvals, "-.r", wl=3, label="quadfit")
     plt.title("Plot fitted points and quad fit")
     plt.show()
     print("quad fit vals " , quadvals)
