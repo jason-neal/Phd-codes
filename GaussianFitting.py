@@ -210,7 +210,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
                 # show figure
                 fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, show_plot=True, 
                                              title="Any Stellar lines", hor=1) 
-                stel = raw_input("Are there any Stellar lines to include in the fit y/N") 
+                stel = raw_inputer("Are there any Stellar lines to include in the fit y/N") 
                 plt.close(fig)
                 if stel in ["y", "Yes", "YES" "yes"]: # Are there 
                     #print(" Doing Stellar fit now")
@@ -237,7 +237,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
                 fit_worked = True    
             except RuntimeError:
                 print("Runtime Error: Fit could not find good parameters" )
-                cont_try = raw_input('Would you like to keep trying to fit to this section Y/n?')
+                cont_try = raw_inputer('Would you like to keep trying to fit to this section Y/n?')
                 if cont_try in ['n', 'no','N','No','NO']:
                     fit_worked = False
                     break
@@ -291,7 +291,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
                 coord_b = fitted_coords_b[i]
                # include = raw_input("Use Peak #" + str(i+1) +" corresponding to" + 
                 #                    str([coord_a[0],'pxls', coord_b[0],'nm']) + " y/N?")
-                include =str(raw_input("Use Peak # {} ".format(i+1) + "corresponding to" +
+                include =str(raw_inputer("Use Peak # {} ".format(i+1) + "corresponding to" +
                              " [a-{0:.2f}, b-{1:.2f}]? y/N?".format(coord_a[0], coord_b[0])))
                 if include.lower() == "y" or include.lower() == "yes":
                     #best_a_coords.append(CoordsA[i]) # tempry filler for return
@@ -473,7 +473,13 @@ def slice_spectra(wl, spectrum, pos, prcnt=0.10):
     spectrum_sec = spectrum[map1*map2]   
     return wl_sec, spectrum_sec 
 
-
+def raw_inputer(question):
+    """ Print raw_input question above.
+    To enable questions to appear when using Gooey
+    """
+    print(question)
+    ans = raw_input("")
+    return ans
 #######################################################################
 #                                                                     #
 #                        # Plotting Functions                         #
