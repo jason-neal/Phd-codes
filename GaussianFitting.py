@@ -207,9 +207,13 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
 
             # If spectral lines do a fit with spectral lines multiplied to telluric lines
                 #print("Fitting a_coords", "!") 
+                # show figure
+                fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, show_plot=True, 
+                                             title="Any Stellar lines", hor=1) 
                 stel = raw_input("Are there any Stellar lines to include in the fit y/N") 
+                plt.close(fig)
                 if stel in ["y", "Yes", "YES" "yes"]: # Are there 
-                    print(" Doing Stellar fit now")
+                    #print(" Doing Stellar fit now")
                 #any spectral lines you want to add?
                     # Select the stellar lines for the spectral fit
                     stellar_lines = get_coordinates(wl_a_sec, sect_a, wl_b_sec, sect_b, 
@@ -245,7 +249,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
             print ("Using plot_both_fits ", " to plot fit results")
             fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, paramsA=fit_params_a,
                                          paramsB=fit_params_b, init_params_a=None, init_params_b=None, 
-                                         title="Displaying Fits with Originals", show_plot=True) # need to show without stoping  
+                                         title="Displaying Fits with Originals", show_plot=True, hor=1) # need to show without stoping  
             goodfit = raw_input(" Was this a good fit? y/N/s (skip)?")
             if goodfit in ["yes", "y", "Y", "Yes", "YES"]:
                 plt.close(fig)
@@ -276,7 +280,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
             fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, show_plot=True,
                 title="Pick Results to use", fitcoords_a=fitted_coords_a,
                 best_a=best_a_coords, fitcoords_b=fitted_coords_b,
-                best_b=best_b_coords)
+                best_b=best_b_coords, hor=1)
             #plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=True,
             #    title="Pick Results to use", fitcoords_a=fitted_coords_a,
             #    best_a=best_a_coords, fitcoords_b=fitted_coords_b,
@@ -493,13 +497,19 @@ def plot_fit(wl, Spec, params, init_params=None, title=None):
 
 def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     init_params_a=None, paramsB=None, init_params_b=None, title=None, 
-    fitcoords_a=None, fitcoords_b=None, best_a=None, best_b=None):
+    fitcoords_a=None, fitcoords_b=None, best_a=None, best_b=None, hor=None):
     """ Plotting both together, many kwargs for different parts of code"""
+    """ hor for add horizontal line"""
     fig2 = plt.figure(figsize=(15, 15))
     #fig.set_size_inches(25, 15, forward=False)
     ax1 = fig2.add_subplot(111)
     ax2 = ax1.twiny()
+
     plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95) # remove edge space
+    # Add horizontal line at given height
+    if hor is not None:
+        print("hor is not NONE so should have horizontal line !!!!!!!!!!")
+        ax1.plot(wl_b, hor*np.ones_like(wl_b), "k-.")
     ax1.plot(wl_b, spec_b, "k--", label="Spectra B", linewidth=4)
     ax1.set_xlim(np.min(wl_b), np.max(wl_b))
     #if init_params_b is not None:
@@ -532,7 +542,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         ax2.plot(wl_a, returnfit_a, "m-.", label="Fit A", linewidth=4)
         # plot also on ax1 for legend
         ax1.plot(wl_a, returnfit_a, "m-.", label="Fit A", linewidth=4)
-    ax2.set_xlabel("2nd 1st axis")
+    ax2.set_xlabel("2nd axis")
 
     fita = fitcoords_a is not None
     fitb = fitcoords_b is not None
@@ -543,12 +553,12 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         for i in range(0, len(fitcoords_a)):
             coord_a = fitcoords_a[i]
             coord_b = fitcoords_b[i]
-            ax2.plot(coord_a[0], coord_a[1], "yo", markersize=15, label="Fitted A peak")
-            ax1.plot(coord_a[0], coord_a[1], "yo", markersize=15, label="Fitted A peak")
+            ax2.plot(coord_a[0], coord_a[1], "bo", markersize=15, label="Fitted A peak")
+            ax1.plot(coord_a[0], coord_a[1], "bo", markersize=15, label="Fitted A peak")
             ax1.plot(coord_b[0], coord_b[1], "ro", markersize=15, label="Fitted B peak")
-            ax2.text(coord_a[0], coord_a[1]-0.025, str(i+1), fontsize=20, color='red', 
+            ax2.text(coord_a[0], coord_a[1]-0.01, " "+str(i+1), fontsize=20, color='blue', 
                 fontweight='bold')
-            ax1.text(coord_b[0], coord_b[1]-0.025, str(i+1), fontsize=20, color='red',
+            ax1.text(coord_b[0], coord_b[1]-0.01, " "+str(i+1), fontsize=20, color='red',
                 fontweight='bold')
     elif fita or fitb:
         print("Only one of the fitting coords was provided")
@@ -647,16 +657,16 @@ if __name__ == "__main__":
 
     print_fit_instructions()
     #Comment Below line to skip this and work on next part
-    #good_coords_a, good_coords_b = adv_wavelength_fitting(UnCalibdata[0], UnCalibdata[1], 
-    #                                    CoordsA, Calibdata[0], Calibdata[1],
-    #                                    CoordsB)
+    good_coords_a, good_coords_b = adv_wavelength_fitting(UnCalibdata[0], UnCalibdata[1], 
+                                       CoordsA, Calibdata[0], Calibdata[1],
+                                       CoordsB)
     
     
      # to continue on with the wavelength maping 
     #('Good coords val = ', ([58.751104497854982, 81.658541491501651, 189.34108796650241, 583.07310836733564, 674.44574875440139, 688.75467383238379, 715.71056015872659, 741.04649082758874, 755.65385861534787, 971.61400877925826], [2112.5013784537928, 2112.7671666575789, 2114.0161400469569, 2118.5337956108197, 2119.5747945058301, 2119.7372298600226, 2120.0462545073347, 2120.3424115686403, 2120.505718389647, 2122.9485968267259]))
     good_coords_a = [58.751104497854982, 81.658541491501651, 189.34108796650241, 583.07310836733564, 674.44574875440139, 688.75467383238379, 715.71056015872659, 741.04649082758874, 755.65385861534787, 971.61400877925826]
     good_coords_b = [2112.5013784537928, 2112.7671666575789, 2114.0161400469569, 2118.5337956108197, 2119.5747945058301, 2119.7372298600226, 2120.0462545073347, 2120.3424115686403, 2120.505718389647, 2122.9485968267259]
-    print("Skipping ahead to wavlenght mapping part")
+    print("Skipping ahead to wavelength mapping part")
     print("Good coords vals A= ", good_coords_a)
     print("Good coords vals B = ", good_coords_b)
     wl_map = wavelength_mapping(good_coords_a, good_coords_b)
