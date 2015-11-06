@@ -48,7 +48,7 @@ def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     """
     a_coords = get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Observed Spectra") 
     b_coords = get_coordinates(wl_b, spec_b, wl_a, spec_a, title="Telluric Lines",
-                               points_a=a_coords)
+                               points_b=a_coords)
     return a_coords, b_coords, 
 
 def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra", 
@@ -75,10 +75,10 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         #fig.set_size_inches(25, 15, forward=False)
         ax1 = fig.add_subplot(111)
         ax2 = ax1.twiny()
-        ax1.plot(wl_b, spec_b, "k--", wl=3, label="Ref Spec")
+        ax1.plot(wl_b, spec_b, "k--", lw=3, label="Ref Spec")
         ax1.set_xlabel("spec_b")
         ax1.set_xlim(np.min(wl_b), np.max(wl_b))
-        ax2.plot(wl_a, spec_a, "b", wl=4, label="Spectra to Click")
+        ax2.plot(wl_a, spec_a, "b", lw=4, label="Spectra to Click")
         ax2.plot(wl_a, np.ones_like(spec_a), "b-.")
         ax2.set_ylabel("Normalized Flux/Intensity")
         ax2.set_xlabel("Wavelength/pixels")
@@ -170,6 +170,8 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
     delta_b = np.abs(np.mean(wl_b[1:] - wl_b[:-1]))
     assert len(AxCoords) is len(BxCoords), "Lenght of Coords do not match"
     for i in range(len(AxCoords)):
+        print("A coords Axcoords", AxCoords)
+        print(i," ith value in Axcoords", AxCoords[i])
         wl_a_sec, sect_a = slice_spectra(wl_a, spec_a, AxCoords[i])
         wl_b_sec, sect_b = slice_spectra(wl_b, spec_b, BxCoords[i])
         
@@ -250,7 +252,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
             fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, paramsA=fit_params_a,
                                          paramsB=fit_params_b, init_params_a=None, init_params_b=None, 
                                          title="Displaying Fits with Originals", show_plot=True, hor=1) # need to show without stoping  
-            goodfit = raw_input(" Was this a good fit? y/N/s (skip)?")
+            goodfit = raw_inputer(" Was this a good fit? y/N/s (skip)?")
             if goodfit in ["yes", "y", "Y", "Yes", "YES"]:
                 plt.close(fig)
                 break   # exit while true loop
@@ -467,6 +469,9 @@ def slice_spectra(wl, spectrum, pos, prcnt=0.10):
         Returns both the sections of wavelength and spectra extracted.
         """
     span = np.abs(wl[-1] - wl[0])
+    print("Span Size", span)
+    print("pos", pos, type(pos))
+    print("percent", prcnt, type(prcnt))
     map1 = wl > (pos - (prcnt/2)*span)
     map2 = wl < (pos + (prcnt/2)*span)
     wl_sec = wl[map1*map2]
@@ -516,14 +521,14 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     if hor is not None:
         print("hor is not NONE so should have horizontal line !!!!!!!!!!")
         ax1.plot(wl_b, hor*np.ones_like(wl_b), "k-.")
-    ax1.plot(wl_b, spec_b, "k--", label="Spectra B", wl=4)
+    ax1.plot(wl_b, spec_b, "k--", label="Spectra B", lw=4)
     ax1.set_xlim(np.min(wl_b), np.max(wl_b))
     #if init_params_b is not None:
     #    guessfit_b = func_for_plotting(wl_b, init_params_b)
-    #    ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit", wl=2)
+    #    ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit", lw=2)
     if paramsB is not None:      
         returnfit_b = func_for_plotting(wl_b, paramsB)
-        ax1.plot(wl_b, returnfit_b, "r-.", label="Fit", wl=4)
+        ax1.plot(wl_b, returnfit_b, "r-.", label="Fit", lw=4)
     ax1.set_xlabel("1st axis")
     
     bb1 = best_b is not None
@@ -534,20 +539,20 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         for xpos in best_b:
             print("Xpos", xpos)
             ax1.plot(xpos, 1, "kx", ms=20, label="already picked", 
-                wl=4)
+                lw=4)
     
-    ax2.plot(wl_a, spec_a, "g*-", label="Spectra A", wl=4)
+    ax2.plot(wl_a, spec_a, "g*-", label="Spectra A", lw=4)
     # plot also on ax1 for legend
-    ax1.plot(wl_a, spec_a, "g*-", label="Spectra A", wl=4) # for label
+    ax1.plot(wl_a, spec_a, "g*-", label="Spectra A", lw=4) # for label
     ax2.set_xlim(np.min(wl_a), np.max(wl_a))
     #if init_params_a is not None:
     #    guessfit_a = func_for_plotting(wl_a, init_params_a)
-    #   ax2.plot(wl_a, guessfit_a, "g.", label="Guess Fit", wl=2) 
+    #   ax2.plot(wl_a, guessfit_a, "g.", label="Guess Fit", lw=2) 
     if paramsA is not None:
         returnfit_a = func_for_plotting(wl_a, paramsA)
-        ax2.plot(wl_a, returnfit_a, "m-.", label="Fit A", wl=4)
+        ax2.plot(wl_a, returnfit_a, "m-.", label="Fit A", lw=4)
         # plot also on ax1 for legend
-        ax1.plot(wl_a, returnfit_a, "m-.", label="Fit A", wl=4)
+        ax1.plot(wl_a, returnfit_a, "m-.", label="Fit A", lw=4)
     ax2.set_xlabel("2nd axis")
 
     fita = fitcoords_a is not None
@@ -562,9 +567,9 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
             ax2.plot(coord_a[0], coord_a[1], "bo", ms=15, label="Fitted A peak")
             ax1.plot(coord_a[0], coord_a[1], "bo", ms=15, label="Fitted A peak")
             ax1.plot(coord_b[0], coord_b[1], "ro", ms=15, label="Fitted B peak")
-            ax2.text(coord_a[0], coord_a[1]-0.01, " "+str(i+1), fontsize=20, c='blue', 
+            ax2.text(coord_a[0], coord_a[1]-0.01, " "+str(i+1), fontsize=20, color='blue', 
                 fontweight='bold')
-            ax1.text(coord_b[0], coord_b[1]-0.01, " "+str(i+1), fontsize=20, c='red',
+            ax1.text(coord_b[0], coord_b[1]-0.01, " "+str(i+1), fontsize=20, color='red',
                 fontweight='bold')
     elif fita or fitb:
         print("Only one of the fitting coords was provided")
@@ -575,7 +580,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         list to prevent doubling up """
         for xpos in best_a:
             print("Xpos", xpos)
-            ax2.plot(xpos, 1, "kx", ms=20, wl=5, label="Already picked line")
+            ax2.plot(xpos, 1, "kx", ms=20, lw=5, label="Already picked line")
     ax1.legend(loc="best")
     if show_plot:
         plt.show(block=False)
@@ -608,8 +613,8 @@ def wavelength_mapping(pixels, wavelengths):
     
     #linvals = np.polyval(linfit, range(1,1025))
     quadvals = np.polyval(wl_map, range(1,1025))
-    plt.plot(pixels, wavelengths , 'ko',wl=4, ms=7, label="Points")
-    plt.plot(range(1,1025), quadvals, "-.r", wl=3, label="quadfit")
+    plt.plot(pixels, wavelengths , 'ko',lw=4, ms=7, label="Points")
+    plt.plot(range(1,1025), quadvals, "-.r", lw=3, label="quadfit")
     plt.title("Plot fitted points and quad fit")
     plt.show()
     print("quad fit vals " , quadvals)
