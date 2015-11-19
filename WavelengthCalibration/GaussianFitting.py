@@ -46,13 +46,18 @@ def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     First run through of peaks in spectra
 
     """
-    a_coords = get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Observed Spectra") 
+    textloc_a = (np.median(wl_a), max([min(spec_a), 0.5]))
+    text_a = "Select Spectral regions/lines for finer calibration fitting"
+    #textloc_b = (np.median(wl_b), max([min(spec_b), 0.5]))
+    text_b = "Select matching Telluric regions/lines for finer calibration fitting"
+    a_coords = get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Observed Spectra",
+                                textloc=textloc_a, text=text_a) 
     b_coords = get_coordinates(wl_b, spec_b, wl_a, spec_a, title="Telluric Lines",
-                               points_b=a_coords)
+                               points_b=a_coords, textloc=textloc_a, text=text_b)
     return a_coords, b_coords, 
 
 def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra", 
-                    points_a=None, points_b=None):
+                    points_a=None, points_b=None, textloc=False, text=False):
     """ Obtains Coordinates of clicked points on the plot of spectra.
      The blue plot is the plot to click on to get peak coordinates
      the black plot is the other spectra to compare against.
@@ -78,10 +83,10 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         ax1.plot(wl_b, spec_b, "k--", lw=3, label="Ref Spec")
         ax1.set_xlabel("spec_b")
         ax1.set_xlim(np.min(wl_b), np.max(wl_b))
-        ax2.plot(wl_a, spec_a, "b", lw=4, label="Spectra to Click")
+        ax2.plot(wl_a, spec_a, "b", lw=3, label="Spectra to Click")
         ax2.plot(wl_a, np.ones_like(spec_a), "b-.")
         ax2.set_ylabel("Normalized Flux/Intensity")
-        ax2.set_xlabel("Wavelength/pixels")
+        #ax2.set_xlabel("Wavelength/pixels")
         ax2.set_xlim(np.min(wl_a), np.max(wl_a))
         ax2.legend()        ### ISSUES with legend
         #print("get_coordinates points_A input ", points_a)
@@ -95,7 +100,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
             for coord in points_a:
                 xpoints.append(coord[0])
                 ypoints.append(coord[1])
-            ax2.plot(xpoints, ypoints, "g<", label="Selected A points", ms=10)    
+            ax2.plot(xpoints, ypoints, "g<", label="Selected A points", ms=13)    
         if points_b is not None:
             #xpoints = points_b[0::3]
             #ypoints = np.ones_like(points_b[1::3]) - points_b[1::3]
@@ -104,8 +109,16 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
             for coord in points_b:
                 xpoints.append(coord[0])
                 ypoints.append(coord[1])
-            ax1.plot(xpoints, ypoints, "md", label="Selected B points",ms=10)    
+            ax1.plot(xpoints, ypoints, "md", label="Selected B points", ms=13)    
         
+        if textloc and text:
+            """ Display text on the plot"""
+            print("text location", textloc)
+            ax1.text(textloc[0], textloc[1]-0.005, text, fontsize=20, color='red',
+                fontweight='bold', horizontalalignment='center')
+            ax2.text(textloc[0], textloc[1]-0.005, text, fontsize=20, color='red',
+                fontweight='bold', horizontalalignment='center')
+
         coords = fig.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1,
                             mouse_pop=2, mouse_stop=3) # better way to do it
         plt.close()
@@ -145,6 +158,7 @@ def do_fit(wl, spec, init_params, stel=None):
         print("appended array with stellar lines", init_params)
         params, __ = opt.curve_fit(lambda x, *params: func_with_stellar(x, 
                                     stelnum, params), wl, spec, init_params)
+         
     else:    
         params, __ = opt.curve_fit(func, wl, spec, init_params)
         #__ is junk parameter to take the covar returned by curve_fit
@@ -172,8 +186,8 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
     for i in range(len(AxCoords)):
         print("A coords Axcoords", AxCoords)
         print(i," ith value in Axcoords", AxCoords[i])
-        wl_a_sec, sect_a = slice_spectra(wl_a, spec_a, AxCoords[i])
-        wl_b_sec, sect_b = slice_spectra(wl_b, spec_b, BxCoords[i])
+        wl_a_sec, sect_a = slice_percentage(wl_a, spec_a, AxCoords[i])
+        wl_b_sec, sect_b = slice_percentage(wl_b, spec_b, BxCoords[i])
         
        #renormalize by upperquartile to give beter fit chance 
        # print("upper quatrile A", upper_quartile(sect_a))
@@ -192,10 +206,14 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
             try:  # RuntimeError of fitting
             # Get more accurate coordinates with zoomed in sections
                 a_coords = get_coordinates(wl_a_sec, sect_a, wl_b_sec, sect_b,
-                                           title="Select Spectra Lines")  #(x,y)'s
+                                           title="Select Spectra Lines",
+                                           textloc= (np.median(wl_a_sec), max(min(sect_a), 0.5)),
+                                           text="Choose lines for calibration")  #(x,y)'s
                 b_coords = get_coordinates(wl_b_sec, sect_b, wl_a_sec, sect_a,
                                            title="Select Telluric Lines", 
-                                           points_b=a_coords)
+                                           points_b=a_coords,
+                                           textloc= (np.median(wl_b_sec), max(min(sect_b), 0.5)),
+                                           text="Choose lines to calibrate with")
                 print("Returned a_coords = ", a_coords)
                 print("Returned b_coords = ", b_coords)
             
@@ -210,10 +228,11 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
             # If spectral lines do a fit with spectral lines multiplied to telluric lines
                 #print("Fitting a_coords", "!") 
                 # show figure
-                fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, show_plot=True, 
-                                             title="Any Stellar lines", hor=1) 
-                stel = raw_inputer("Are there any Stellar lines to include in the fit y/N") 
-                plt.close(fig)
+                #fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, show_plot=True, 
+                #                             title="Any Stellar lines", hor=1) 
+                #stel = raw_inputer("Are there any Stellar lines to include in the fit y/N") 
+                stel = "y"
+                #plt.close(fig)
                 if stel in ["y", "Yes", "YES" "yes"]: # Are there 
                     #print(" Doing Stellar fit now")
                 #any spectral lines you want to add?
@@ -221,7 +240,9 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
                     stellar_lines = get_coordinates(wl_a_sec, sect_a, wl_b_sec, sect_b, 
                                                     title="Select Spectral Lines", 
                                                     points_a=a_coords, 
-                                                    points_b=b_coords)
+                                                    points_b=b_coords, 
+                                                    textloc=(b_coords[0][0],b_coords[0][1]), 
+                                                    text="Click to select Stellar lines. /n Right click to close")
                     num_stellar = len(stellar_lines)
                     stellar_params = coords2gaussian_params(stellar_lines, delta_a)
                 # perform the stellar line fitting version
@@ -388,9 +409,6 @@ def func_for_plotting(x, params):
         y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2)
     return y
 
-
-
-
 #######################################################################
 #                                                                     #
 #                        # Data manipulationions                      #
@@ -463,7 +481,7 @@ def upper_quartile(nums):
         #print("upper quartile value", uq)
     return upq
 
-def slice_spectra(wl, spectrum, pos, prcnt=0.10):
+def slice_percentage(wl, spectrum, pos, prcnt=0.10):
     """ Extract a section of a spectrum around a given wavelenght position. 
         percnt is the percentage lenght of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
@@ -474,6 +492,21 @@ def slice_spectra(wl, spectrum, pos, prcnt=0.10):
     print("percent", prcnt, type(prcnt))
     map1 = wl > (pos - (prcnt/2)*span)
     map2 = wl < (pos + (prcnt/2)*span)
+    wl_sec = wl[map1*map2]
+    spectrum_sec = spectrum[map1*map2]   
+    return wl_sec, spectrum_sec 
+
+def slice_spectra(wl, spectrum, low, high):
+    """ Extract a section of a spectrum between wavelength bounds. 
+        percnt is the percentage lenght of the spectra to use.
+        Returns both the sections of wavelength and spectra extracted.
+        """
+    #span = np.abs(wl[-1] - wl[0])
+    #print("Span Size", span)
+    print("lower bound", low)
+    print("upper bound", high)
+    map1 = wl > low
+    map2 = wl < high
     wl_sec = wl[map1*map2]
     spectrum_sec = spectrum[map1*map2]   
     return wl_sec, spectrum_sec 
@@ -508,7 +541,8 @@ def plot_fit(wl, Spec, params, init_params=None, title=None):
 
 def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     init_params_a=None, paramsB=None, init_params_b=None, title=None, 
-    fitcoords_a=None, fitcoords_b=None, best_a=None, best_b=None, hor=None):
+    fitcoords_a=None, fitcoords_b=None, best_a=None, best_b=None, hor=None, 
+    textloc=False, text=False):
     """ Plotting both together, many kwargs for different parts of code"""
     """ hor for add horizontal line"""
     fig2 = plt.figure(figsize=(15, 15))
@@ -519,7 +553,6 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95) # remove edge space
     # Add horizontal line at given height
     if hor is not None:
-        print("hor is not NONE so should have horizontal line !!!!!!!!!!")
         ax1.plot(wl_b, hor*np.ones_like(wl_b), "k-.")
     ax1.plot(wl_b, spec_b, "k--", label="Spectra B", lw=4)
     ax1.set_xlim(np.min(wl_b), np.max(wl_b))
@@ -538,8 +571,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         list to prevent doubleing up """
         for xpos in best_b:
             print("Xpos", xpos)
-            ax1.plot(xpos, 1, "kx", ms=20, label="already picked", 
-                lw=4)
+            ax1.plot(xpos, 1, "kx", ms=20, label="already picked", lw=4)
     
     ax2.plot(wl_a, spec_a, "g*-", label="Spectra A", lw=4)
     # plot also on ax1 for legend
@@ -567,9 +599,9 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
             ax2.plot(coord_a[0], coord_a[1], "bo", ms=15, label="Fitted A peak")
             ax1.plot(coord_a[0], coord_a[1], "bo", ms=15, label="Fitted A peak")
             ax1.plot(coord_b[0], coord_b[1], "ro", ms=15, label="Fitted B peak")
-            ax2.text(coord_a[0], coord_a[1]-0.01, " "+str(i+1), fontsize=20, color='blue', 
+            ax2.text(coord_a[0], coord_a[1]-0.005, " "+str(i+1), fontsize=20, color='blue', 
                 fontweight='bold')
-            ax1.text(coord_b[0], coord_b[1]-0.01, " "+str(i+1), fontsize=20, color='red',
+            ax1.text(coord_b[0], coord_b[1]-0.005, " "+str(i+1), fontsize=20, color='red',
                 fontweight='bold')
     elif fita or fitb:
         print("Only one of the fitting coords was provided")
@@ -582,6 +614,15 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
             print("Xpos", xpos)
             ax2.plot(xpos, 1, "kx", ms=20, lw=5, label="Already picked line")
     ax1.legend(loc="best")
+    
+    if textloc and text:
+        """ display text on the plot"""
+        print("text location",textloc)
+        ax1.text(textloc[0], textloc[1]-0.005, text, fontsize=20, color='red',
+                fontweight='bold', horizontalalignment='center')
+        ax2.text(textloc[0], textloc[1]-0.005, text, fontsize=20, color='red',
+                fontweight='bold', horizontalalignment='center')
+
     if show_plot:
         plt.show(block=False)
         
