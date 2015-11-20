@@ -53,7 +53,7 @@ def _parser():
 def export_wavecal_2fits(filename, wavelength, spectrum, pixelpos, hdr, hdrkeys, hdrvals):
     """ Write Combined DRACS CRIRES NOD Spectra to a fits table file"""
     col1 = fits.Column(name="Wavelength", format="E", array=wavelength) # colums of data
-    col2 = fits.Column(name="Extracted DRACS", format="E", array=spectrum)
+    col2 = fits.Column(name="Extracted_DRACS", format="E", array=spectrum)
     col3 = fits.Column(name="Pixel", format="E", array=pixelpos)
     cols = fits.ColDefs([col1, col2, col3])
     tbhdu = fits.BinTableHDU.from_columns(cols) # binary tbale hdu
@@ -120,6 +120,7 @@ def main(fname, output=False, telluric=False):
 
     # telluric spectra is way to long, need to reduce it to similar size as ccd    
     tell_data = obt.load_telluric(tellpath, tellname[0])
+    # Sliced to wavelength measurement of detector
     calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
 
@@ -135,11 +136,11 @@ def main(fname, output=False, telluric=False):
     wl_map = gf.wavelength_mapping(good_a, good_b)
 
     calibrated_wl = np.polyval(wl_map, uncalib_data[0])
-    
+    plt.figure()
     plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
     plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
-    plt.title("Calibration Output")
-    plt.show()
+    plt.title("Calibrated Output")
+    plt.show(block=True)
 
 
     # Save output now

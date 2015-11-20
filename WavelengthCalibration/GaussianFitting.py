@@ -46,7 +46,7 @@ def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     First run through of peaks in spectra
 
     """
-    textloc_a = (np.median(wl_a), max([min(spec_a), 0.5]))
+    textloc_a = (np.median(wl_a), max([min(spec_a), 0.7]))
     text_a = "Select Spectral regions/lines for finer calibration fitting"
     #textloc_b = (np.median(wl_b), max([min(spec_b), 0.5]))
     text_b = "Select matching Telluric regions/lines for finer calibration fitting"
@@ -80,7 +80,8 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         #fig.set_size_inches(25, 15, forward=False)
         ax1 = fig.add_subplot(111)
         ax2 = ax1.twiny()
-        ax1.plot(wl_b, spec_b, "k--", lw=3, label="Ref Spec")
+        ax1.plot(wl_b, spec_b, "k-", lw=2, label="Ref Spec")
+        ax2.plot(wl_b, spec_b, "k-", lw=2, label="Ref Spec")
         ax1.set_xlabel("spec_b")
         ax1.set_xlim(np.min(wl_b), np.max(wl_b))
         ax2.plot(wl_a, spec_a, "b", lw=3, label="Spectra to Click")
@@ -509,7 +510,7 @@ def upper_quartile(nums):
         #print("upper quartile value", uq)
     return upq
 
-def slice_percentage(wl, spectrum, pos, prcnt=0.10):
+def slice_percentage(wl, spectrum, pos, prcnt=0.15):
     """ Extract a section of a spectrum around a given wavelenght position. 
         percnt is the percentage lenght of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
