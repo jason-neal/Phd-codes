@@ -57,7 +57,8 @@ def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     return a_coords, b_coords, 
 
 def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra", 
-                    points_a=None, points_b=None, textloc=False, text=False):
+                    points_a=None, points_b=None, textloc=False, text=False, 
+                    model=False):
     """ Obtains Coordinates of clicked points on the plot of spectra.
      The blue plot is the plot to click on to get peak coordinates
      the black plot is the other spectra to compare against.
@@ -88,7 +89,6 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         ax2.plot(wl_a, np.ones_like(spec_a), "b-.")
         ax2.set_ylabel("Normalized Flux/Intensity")
         # Setting ylimits
-        
         amin = np.min(spec_a)
         bmin = np.min(spec_b)
         amax = np.max(spec_a)
@@ -100,7 +100,9 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
             else:
                 ax1.set_ylim(0, np.max([amax, bmax]) + 0.02)
 
-        # too deep a line
+        if model:
+            ax1.plot(model[0],model[1], 'r', label="model spectrum")
+            ax2.plot(model[0],model[1], 'r', label="model spectrum")
         
         #ymax = np.min([amax, bmax, 1.05]) + 0.02 * np.min([amax-amin,bmax-bmin])
         #ymin = np.max([amin, bmin, 0.5]) - 0.05 
@@ -190,7 +192,7 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
     assert len(params) is len(init_params), "len(Params) do not match"     
     return params
 
-def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
+def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model=False):
     """ Returns the positions of matching peaks for calibration map
 
     """
@@ -203,6 +205,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
     spec_b = np.array(spec_b)  # make sure all are numpy arrays
     delta_a = np.abs(np.mean(wl_a[1:] - wl_a[:-1]))   # average wl step
     delta_b = np.abs(np.mean(wl_b[1:] - wl_b[:-1]))
+
     assert len(AxCoords) is len(BxCoords), "Lenght of Coords do not match"
     for i in range(len(AxCoords)):
         print("A coords Axcoords", AxCoords)
@@ -229,12 +232,12 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords):
                 a_coords = get_coordinates(wl_a_sec, sect_a, wl_b_sec, sect_b,
                                            title="Select Spectra Lines",
                                            textloc= (np.median(wl_a_sec), max(min(sect_a), 0.5)),
-                                           text="Choose lines for calibration")  #(x,y)'s
+                                           text="Choose lines for calibration", model=model)  #(x,y)'s
                 b_coords = get_coordinates(wl_b_sec, sect_b, wl_a_sec, sect_a,
                                            title="Select Telluric Lines", 
                                            points_b=a_coords,
                                            textloc= (np.median(wl_b_sec), max(min(sect_b), 0.5)),
-                                           text="Choose lines to calibrate with")
+                                           text="Choose lines to calibrate with", model=model)
                 print("Returned a_coords = ", a_coords)
                 print("Returned b_coords = ", b_coords)
             

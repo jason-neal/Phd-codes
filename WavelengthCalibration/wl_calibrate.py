@@ -15,6 +15,9 @@ import IOmodule
 import GaussianFitting as gf
 from Gaussian_fit_testing import Get_DRACS
 import Obtain_Telluric as obt
+#from plot_fits import get_wavelength
+
+
 
 #@Gooey(program_name='Plot fits - Easy 1D fits plotting', default_size=(610, 730))
 def _parser():
@@ -30,6 +33,8 @@ def _parser():
                         help='Ouput Filename',)
     parser.add_argument('-t', '--telluric', default=False,
                        help='Telluric line Calibrator')
+    parser.add_argument('-m', '--model', default=False,
+                       help='Stellar Model')
     #parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
     #parser.add_argument('fname',
     #                    action='store',
@@ -49,6 +54,18 @@ def _parser():
     args = parser.parse_args()
     return args
 
+def get_wavelength(hdr):
+    """Return the wavelength vector calculated from the header of a FITS
+    file.
+
+    :hdr: Header from a FITS ('CRVAL1', 'CDELT1', and 'NAXIS1' is required as
+            keywords)
+    :returns: Equidistant wavelength vector
+    " From plot_fits.py"
+    """
+    w0, dw, n = hdr['CRVAL1'], hdr['CDELT1'], hdr['NAXIS1']
+    w1 = w0 + dw * n
+    return np.linspace(w0, w1, n, endpoint=False)
 
 def export_wavecal_2fits(filename, wavelength, spectrum, pixelpos, hdr, hdrkeys, hdrvals):
     """ Write Combined DRACS CRIRES NOD Spectra to a fits table file"""
@@ -83,7 +100,7 @@ def append_hdr(hdr, keys, values ,item=0):
     return hdr
 
 
-def main(fname, output=False, telluric=False):
+def main(fname, output=False, telluric=False, model=False):
     homedir = os.getcwd()
     print("Input name", fname)
     print("Output name", output)
@@ -126,13 +143,49 @@ def main(fname, output=False, telluric=False):
 
     gf.print_fit_instructions()
 
+    if model:
+        modelpath = "/home/jneal/Phd/data/phoenixmodels/"
+        modelwave= 'WAVE_PHOENIX-ACES-AGSS-COND-2011.fits'
+        I_mod = fits.getdata(model)
+        hdr = fits.getheader(model)
+        if 'WAVE' in hdr.keys():
+            w_mod = fits.getdata(modelpath+modelwave)
+            w_mod = w_mod/10.
+        else:
+            w_mod = get_wavelength(hdr)
+        #nre = nrefrac(w_mod)  # Correction for vacuum to air (ground based)
+        #w_mod = w_mod / (1 + 1e-6 * nre)
+        
+        i = (w_mod >  wl_lower) & (w_mod < wl_upper)
+        w_mod = w_mod[i]
+        I_mod = I_mod[i]
+
+        if len(w_mod) > 0:
+            # https://phoenix.ens-lyon.fr/Grids/FORMAT
+            # I_mod = 10 ** (I_mod-8.0)
+            I_mod /= np.median(I_mod)
+            # Normalization (use first 50 points below 1.2 as continuum)
+            maxes = I_mod[(I_mod < 1.2)].argsort()[-50:][::-1]
+            I_mod /= np.median(I_mod[maxes])
+            #if ccf in ['model', 'both'] and rv1:
+            #    print('Warning: RV set for model. Calculate RV with CCF')
+            #if rv1 and ccf not in ['model', 'both']:
+            #    I_mod, w_mod = dopplerShift(wvl=w_mod, flux=I_mod, v=rv1, fill_value=0.95)
+        else:
+            print('Warning: Model spectrum not available in wavelength range.')
+            model = False
+
     rough_a, rough_b = gf.get_rough_peaks(uncalib_data[0], uncalib_data[1], calib_data[0], calib_data[1])
     rough_x_a = [coord[0] for coord in rough_a]
     rough_x_b = [coord[0] for coord in rough_b]
-    good_a, good_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+    if model:
+        good_a, good_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+                                       rough_x_a, calib_data[0], calib_data[1],
+                                       rough_x_b, model=[w_mod, I_mod])
+    else:
+        good_a, good_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b)
-
     wl_map = gf.wavelength_mapping(good_a, good_b)
 
     calibrated_wl = np.polyval(wl_map, uncalib_data[0])
