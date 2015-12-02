@@ -41,12 +41,6 @@ from Gaussian_fit_testing import Get_DRACS
     # print("Click position", [ix, iy])
 #     return
 
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> telluricremoval
 def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     """ Get rough coordinate values to use advanced fitting on
     First run through of peaks in spectra
@@ -203,8 +197,10 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
 
     """
     best_a_coords = []
+    best_a_peaks = []
     best_b_coords = []
-   
+    best_b_peaks = []
+
     wl_a = np.array(wl_a)      # make sure all are numpy arrays
     spec_a = np.array(spec_a)  # make sure all are numpy arrays
     wl_b = np.array(wl_b)      # make sure all are numpy arrays
@@ -359,6 +355,8 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                     #best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
                     best_a_coords.append(coord_a[0])
                     best_b_coords.append(coord_b[0])
+                    best_a_peaks.append(coord_a[1])
+                    best_b_peaks.append(coord_b[1])
 
             # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
             # no - individually ask if want want each line included and append if yes
@@ -370,7 +368,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             print("best_a_coords", best_a_coords)
             print("best_b_coords", best_b_coords)
             plt.close(fig)
-    return best_a_coords, best_b_coords,
+    return best_a_coords, best_a_peaks, best_b_coords, best_b_peaks
 
 
 #######################################################################
