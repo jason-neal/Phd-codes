@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 """ Codes for Telluric contamination removal 
     Interpolates telluric spectra to the observed spectra.
@@ -9,6 +10,9 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 from scipy import interpolate
+import argparse
+import GaussianFitting as gf
+import Obtain_Telluric as obt
 
 def divide_spectra(spec_a, spec_b):
     """ Assumes that the spectra have been interpolated to same wavelength step"""
@@ -69,9 +73,60 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell):
     
     return corrected_spec
 
+def _parser():
+    """Take care of all the argparse stuff.
 
+    :returns: the args
+    """
+    parser = argparse.ArgumentParser(description='Telluric Removal')
+    parser.add_argument('fname', help='Input fits file')
+    parser.add_argument('-o', '--output', default=False,
+                        help='Ouput Filename',)
+    args = parser.parse_args()
+    return args
+
+def main(fname, output=False):
+    homedir = os.getcwd()
+    data = fits.getdata(fname)
+    wl = data["Wavelength"] 
+    I = data["Extracted_DRACS"]
+    hdr = fits.getheader(fname)
+    datetime = hdr["DATE-OBS"]
+    obsdate, obstime = datetime.split("T")
+    obstime, __ = obstime.split(".")
+    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) 
+    print("tell name", tellname)
+
+    tell_data = obt.load_telluric(tellpath, tellname[0])
+
+    wl_lower = np.min(wl)
+    wl_upper = np.max(wl)
+    tell_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
+
+    # Loaded in the data
+    # Now perform the telluric removal
+
+    I_corr = telluric_correct(wl, I, tell_data[0], tell_data[1])
+
+    plt.figure()
+    plt.plot(wl, I, label="Spectra")
+    plt.plot(tell_data[0], tell_data[1], label="Telluric lines")
+
+    plt.figure()
+    plt.plot(wl, I_corr, label="Corrected Spectra")
+    plt.plot(tell_data[0], tell_data[1], label="Telluric lines")
+
+    plt.show()
 
 if __name__ == "__main__":
+    args = vars(_parser())
+    fname = args.pop('fname')
+    opts = {k: args[k] for k in args}
+
+    main(fname, **opts)
+
+
+
     """ Some test code for testing functions """
     sze = 20
     x2 = range(sze)
