@@ -41,6 +41,12 @@ from Gaussian_fit_testing import Get_DRACS
     # print("Click position", [ix, iy])
 #     return
 
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> telluricremoval
 def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     """ Get rough coordinate values to use advanced fitting on
     First run through of peaks in spectra

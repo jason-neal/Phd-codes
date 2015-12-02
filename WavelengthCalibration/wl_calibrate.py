@@ -99,53 +99,53 @@ def append_hdr(hdr, keys, values ,item=0):
             print(repr(hdr[-2:10]))
     return hdr
 
-
 def main(fname, output=False, telluric=False, model=False):
     homedir = os.getcwd()
     print("Input name", fname)
     print("Output name", output)
-
-    #tellpath = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
-    tellpath = "/home/jneal/Phd/data/Tapas/"
-    #ext = 0   # for testing
-    #hdr, data = Get_DRACS(fname, ext)  #Get DRACS only finds relevant file in the path folder
-    
+   
     data = fits.getdata(fname)
+
+    test0 = ".ms.norm.comb.fits" in fname
+    test1 = ".ms.sum.norm.fits" in fname
+    test2 = ".ms.Apos.norm.fits" in fname
+    test3 = ".ms.Bpos.norm.fits" in fname
+    if test0:
+        uncalib_combined = data["Combined"]
+        #uncalib_noda = uncalib_data["Nod A"]
+        #uncalib_nodb = uncalib_data["Nod B"]
+    elif test1 or test2 or test3:
+        uncalib_combined = data
+    else:
+        print("Unrecgonized input filename. Can take ouput from normalizeobsrsum or Combine_nod_spectra.py")
+        raise("Spectra_Error", "Unrecgonized input filename type")
 
     # get time from header to then get telluric lines
     hdr = fits.getheader(fname)
     wl_lower = hdr["HIERARCH ESO INS WLEN STRT"]
     wl_upper = hdr["HIERARCH ESO INS WLEN END"]
     datetime = hdr["DATE-OBS"]
-    print("Observation time ", datetime)
+
     obsdate, obstime = datetime.split("T")
-    
     obstime, __ = obstime.split(".")
-    print(" time ", obstime)
-    print(" date ", obsdate)
+
+    tellpath = "/home/jneal/Phd/data/Tapas/"
     tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
     print("tell name", tellname)
-    print("listing telluric files")
-    
-    uncalib_combined = data["Combined"]
-    #uncalib_noda = uncalib_data["Nod A"]
-    #uncalib_nodb = uncalib_data["Nod B"]
+
     uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
-    # get hdr information and then find coresponding Telluric spectra
-    #calib_data = IOmodule.read_2col(tellpath + "Telluric_spectra_CRIRES_Chip-" + 
-    #                                str(1) + ".txt")
 
     # telluric spectra is way to long, need to reduce it to similar size as ccd    
     tell_data = obt.load_telluric(tellpath, tellname[0])
     # Sliced to wavelength measurement of detector
     calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
-
-    gf.print_fit_instructions()
+    gf.print_fit_instructions()  # Instructions on how to calibrate
 
     if model:
         modelpath = "/home/jneal/Phd/data/phoenixmodels/"
-        modelwave= 'WAVE_PHOENIX-ACES-AGSS-COND-2011.fits'
+        modelwave = 'WAVE_PHOENIX-ACES-AGSS-COND-2011.fits'
+
         I_mod = fits.getdata(model)
         hdr = fits.getheader(model)
         if 'WAVE' in hdr.keys():
