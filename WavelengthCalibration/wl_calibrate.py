@@ -179,11 +179,11 @@ def main(fname, output=False, telluric=False, model=False):
     rough_x_a = [coord[0] for coord in rough_a]
     rough_x_b = [coord[0] for coord in rough_b]
     if model:
-        good_a, good_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+        good_a, peaks_a, good_b, peaks_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b, model=[w_mod, I_mod])
     else:
-        good_a, good_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+        good_a, peaks_a, good_b, peaks_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b)
     wl_map = gf.wavelength_mapping(good_a, good_b)
@@ -218,8 +218,7 @@ def main(fname, output=False, telluric=False, model=False):
             Output_filename = output
         else:
             Output_filename = fname.replace(".fits", ".wavecal.fits")
-        
-            
+    
 
         T_now = str(time.gmtime()[0:6])
         hdrkeys = ["Calibration", "CALIBRATION TIME", 'PIXELMAP PARAM1', \
@@ -232,6 +231,24 @@ def main(fname, output=False, telluric=False, model=False):
     else:
         print("Did not save calibration to file.")
     
+    ans = raw_input("Do you want to observe the line depths?")
+    if ans in ['yes', 'y', 'Yes', 'YES']:
+    # observe heights of fitted peaks
+        plt.figure
+        plt.plot(peaks_a, label="Specta line depths")
+        plt.plot(peaks_b, label="Telluric line depths")
+        plt.show(block=True)
+    
+    linedepthpath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
+    ans = raw_input("Do you want to export the line depths to a file?")
+    if ans in ['yes', 'y', 'Yes', 'YES']:
+        with open(linedepthpath + "Spectral_linedepths.txt","a") as f:
+            for peak in peaks_a:
+                print(peak)
+                f.write(str(peak) + "\n")
+        with open(linedepthpath + "Telluric_linedepths.txt","a") as f:
+            for peak in peaks_b:
+                f.write(str(peak) + "\n")
 
 if __name__ == '__main__':
     args = vars(_parser())
