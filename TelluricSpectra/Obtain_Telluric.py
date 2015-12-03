@@ -55,9 +55,21 @@ def load_telluric(tapas_path, filename):
                 else:
                     line.strip()
                     val1, val2 = line.split()
-                    col1.append(val1)
-                    col2.append(val2)
+                    col1.append(float(val1))
+                    col2.append(float(val2))
+        # put in order
+        print("col1[-1]", col1[-1])
+        print("col1[-1]", col1[0])
+        
+        print(col1)
+        print("col1[-1]-col1[0]", col1[-1]-col1[0])
+        if col1[-1]-col1[0] < 0:  # wl is backwards
+            col1.reverse()
+            col2.reverse()            
+            print(col1)
+
         tell = np.array([col1,col2], dtype="float64")
+
     elif ext == "fits":
         i_tell = (fits.getdata(file_,0))
         col1 = i_tell["wavelength"]
