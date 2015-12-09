@@ -57,30 +57,23 @@ def load_telluric(tapas_path, filename):
                     val1, val2 = line.split()
                     col1.append(float(val1))
                     col2.append(float(val2))
-        # put in order
-        print("col1[-1]", col1[-1])
-        print("col1[-1]", col1[0])
-        
-        print(col1)
-        print("col1[-1]-col1[0]", col1[-1]-col1[0])
-        if col1[-1]-col1[0] < 0:  # wl is backwards
-            col1.reverse()
-            col2.reverse()            
-            print(col1)
-
-        tell = np.array([col1,col2], dtype="float64")
-
+    
     elif ext == "fits":
         i_tell = (fits.getdata(file_,0))
         col1 = i_tell["wavelength"]
         col2 = i_tell["transmittance"]
-        #print("i_tell", i_tell)
-        #print("type(i_tell)", type(i_tell))
-        tell = np.array([col1,col2], dtype="float64")
+
     else:
         print(" Could not load file", filename," with extention", ext)
         return None
-    #print(tell)
+        
+        # put in ascending order
+    if col1[-1]-col1[0] < 0:  # wl is backwards
+        col1.reverse()
+        col2.reverse()            
+
+    tell = np.array([col1,col2], dtype="float64")
+
     return tell    
     
 def plot_telluric(data, name, labels=True, show=False):
