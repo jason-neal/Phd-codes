@@ -72,13 +72,13 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, kind="linear", method
      2. Divide by Telluric
      3.   ...
     """
-    interped_spec = match_wl(wl_tell, spec_tell, wl_obs, kind=kind, method=method)
+    interped_tell = match_wl(wl_tell, spec_tell, wl_obs, kind=kind, method=method)
     
-    corrected_spec = divide_spectra(spec_obs, interped_spec) # Divide by telluric spectra
+    corrected_spec = divide_spectra(spec_obs, interped_tell) # Divide by telluric spectra
 
     # other corrections?
     
-    return corrected_spec
+    return corrected_spec, interped_tell
 
 def _parser():
     """Take care of all the argparse stuff.
@@ -95,6 +95,43 @@ def _parser():
                         help='Interpolation method numpy or scipy')
     args = parser.parse_args()
     return args
+
+
+def export_correction_2fits(filename, wavelength, corrected, original, telluric, hdr, hdrkeys, hdrvals, tellhdr):
+    """ Write Telluric Corrected spectra to a fits table file"""
+    col1 = fits.Column(name="Wavelength", format="E", array=wavelength) # colums of data
+    col2 = fits.Column(name="Corrected_DRACS", format="E", array=corrected)
+    col3 = fits.Column(name="Extracted_DRACS", format="E", array=original)
+    col4 = fits.Column(name="Interpolated_Tapas", format="E", array=telluric)
+    cols = fits.ColDefs([col1, col2, col3, col4])
+    tbhdu = fits.BinTableHDU.from_columns(cols) # binary tbale hdu
+    prihdr = append_hdr(hdr, hdrkeys, hdrvals)
+    prihdu = fits.PrimaryHDU(header=prihdr)
+    thdulist = fits.HDUList([prihdu, tbhdu])
+    # telluric head to go as a second extension !!!
+
+    #print("Writing to fits file")
+    thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
+    return None
+
+# could make new module for fits handlers like this
+def append_hdr(hdr, keys, values ,item=0):
+    ''' Apend/change parameters to fits hdr, 
+    can take list or tuple as input of keywords 
+    and values to change in the header 
+    Defaults at changing the header in the 0th item 
+    unless the number the index is givien,
+    If a key is not found it adds it to the header'''
+    
+    if type(keys) == str:           # To handle single value
+        hdr[keys] = values
+    else:
+        assert len(keys) == len(values), 'Not the same number of keys as values' 
+        for i in range(len(keys)):
+            hdr[keys[i]] = values[i]
+            print(repr(hdr[-2:10]))
+    return hdr
+
 
 def main(fname, output=False, kind="linear", method="scipy"):
     homedir = os.getcwd()
@@ -125,7 +162,7 @@ def main(fname, output=False, kind="linear", method="scipy"):
     # Loaded in the data
     # Now perform the telluric removal
 
-    I_corr = telluric_correct(wl, I, tell_data[0], tell_data[1], kind=kind, method=method)
+    I_corr, Tell_interp = telluric_correct(wl, I, tell_data[0], tell_data[1], kind=kind, method=method)
 
     #print("After telluric_correct")
     plt.figure()
@@ -134,6 +171,21 @@ def main(fname, output=False, kind="linear", method="scipy"):
     plt.plot(tell_data[0], tell_data[1], label="Telluric Spectra")
     plt.legend(loc="best")
     plt.show()
+    
+
+    ### SAVING Telluric Corrected Spectra ###
+    # PROBABALY NEED TO HARDCODE IN THE HEADER LINES...
+    os.chdir(homedir)   # to make sure saving where running
+    if output:  
+            Output_filename = output
+    else:
+            Output_filename = fname.replace(".fits", ".tellcorr.fits")
+    hdrkeys = ["State"]
+    hdrvals = [("Telluric Corrected","Spectra state")]
+    tellhdr = False   ### need to correctly get this from obtain telluric
+    export_correction_2fits(Output_filename, wl, I_corr, I, Tell_interp, hdr, hdrkeys, hdrvals, tellhdr)
+
+
 
 if __name__ == "__main__":
     args = vars(_parser())
