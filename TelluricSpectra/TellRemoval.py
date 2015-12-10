@@ -65,7 +65,7 @@ def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
 #     plt.show()
 #     return None
 
-def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, kind="linear", method="scipy"):
+def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_airmass, kind="linear", method="scipy"):
     """Code to contain other functions in this file
 
      1. Interpolate spectra to same wavelengths with match_wl()
@@ -74,11 +74,26 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, kind="linear", method
     """
     interped_tell = match_wl(wl_tell, spec_tell, wl_obs, kind=kind, method=method)
     
-    corrected_spec = divide_spectra(spec_obs, interped_tell) # Divide by telluric spectra
+    """ from Makee: Atmospheric Absorption Correction
+    Assuming that the telluric spectra I have is equvilant to the star 
+    flux and steps 1-3 have been done by using the Tapas spectrum and 
+    my wavelngth calibration procedure.
+    
+    Step 4: Exponential correction to the flux level of the star
+    new_star_flux = old_star_flux**B where B is a function of the 
+    airmass. B = (object airmass)/(star airmass)
+
+    """
+    bad_correction = divide_spectra(spec_obs, interped_tell)
+
+    B = obs_airmass/tell_airmass
+    print("Airmass Ratio B =", B)
+    new_tell = interped_tell ** B
+    corrected_spec = divide_spectra(spec_obs, new_tell) # Divide by telluric spectra
 
     # other corrections?
     
-    return corrected_spec, interped_tell
+    return corrected_spec, interped_tell, bad_correction, new_tell
 
 
 
@@ -148,6 +163,7 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
     datetime = hdr["DATE-OBS"]
     airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
     airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
+    obs_airmass = (airmass_start + airmass_end)/2
     print("Starting Airmass", airmass_start, "Ending Airmass", airmass_end)
     obsdate, obstime = datetime.split("T")
     obstime, __ = obstime.split(".")
@@ -156,8 +172,8 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
     print("tell name", tellname)
 
     tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
-    airmass_tell = tell_hdr["airmass"]
-    print("Telluric Airmass ", airmass_tell)
+    tell_airmass = float(tell_hdr["airmass"])
+    print("Telluric Airmass ", tell_airmass)
     wl_lower = np.min(wl/1.0001)
     wl_upper = np.max(wl*1.0001)
     tell_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
@@ -172,13 +188,16 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
     # Loaded in the data
     # Now perform the telluric removal
 
-    I_corr, Tell_interp = telluric_correct(wl, I, tell_data[0], tell_data[1], kind=kind, method=method)
+    I_corr, Tell_interp, bad_correction, tell_Amass_corr = telluric_correct(wl, I, tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
 
     #print("After telluric_correct")
     plt.figure()
     plt.plot(wl, I, label="Observed Spectra")
+    plt.plot(wl, bad_correction, label="Bad Correction")
     plt.plot(wl, I_corr, label="Corrected Spectra")
-    plt.plot(tell_data[0], tell_data[1], label="Telluric Spectra")
+    plt.plot(wl, Tell_interp, label="Telluric Spectra")
+    plt.plot(wl, tell_Amass_corr, label="Telluric Spectra ** B")
+    plt.plot(wl, np.ones_like(wl), "--")
     plt.legend(loc="best")
     plt.show()
     
