@@ -41,25 +41,40 @@ def list_telluric(path):
     return match
 
 def load_telluric(tapas_path, filename):
+    """Returns telluric data and header
+    if just want the data then call as load_telluric()[0]
+    or data, __ = load_telluric() 
+
+    likewise just the header as hdr = load_telluric()[1]"""
     ext = filename[-4:] 
     file_ = tapas_path + filename
     if ext == "ipac":
+        tell_hdr = fits.Header()
         with open(file_) as f:
             col1 = []
             col2 = []
             for line in f:
-                firstchar = line[0]
-            #print("first char =", firstchar)
-                if line[0] == "\\" or line[0] == "|":
-                    pass #print("Match a header line")
+                #firstchar = line[0]
+                #print("first char =", firstchar)
+                if line.startswith("\\"):
+                    # Get the Tapas Header
+                    line = line[1:] # remove the leading \
+                    line = line.strip()
+                    items = line.split("=")
+
+                    tell_hdr[items[0]] = items[1] # Add to header
+
+                elif line.startswith("|"):
+                    continue    # skip pipes
                 else:
-                    line.strip()
+                    line = line.strip()
                     val1, val2 = line.split()
                     col1.append(float(val1))
                     col2.append(float(val2))
-    
+
     elif ext == "fits":
-        i_tell = (fits.getdata(file_,0))
+        i_tell = fits.getdata(file_,0)
+        tell_hdr = fits.getheader(file_,0)
         col1 = i_tell["wavelength"]
         col2 = i_tell["transmittance"]
 
@@ -72,9 +87,9 @@ def load_telluric(tapas_path, filename):
         col1.reverse()
         col2.reverse()            
 
-    tell = np.array([col1,col2], dtype="float64")
+    tell_data = np.array([col1, col2], dtype="float64")
 
-    return tell    
+    return tell_data, tell_hdr  
     
 def plot_telluric(data, name, labels=True, show=False):
     plt.plot(data[0], data[1], label=name)
