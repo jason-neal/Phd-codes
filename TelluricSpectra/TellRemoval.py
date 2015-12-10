@@ -155,8 +155,9 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
     tellname = obt.get_telluric_name(tellpath, obsdate, obstime) 
     print("tell name", tellname)
 
-    tell_data = obt.load_telluric(tellpath, tellname[0])
-
+    tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
+    airmass_tell = tell_hdr["airmass"]
+    print("Telluric Airmass ", airmass_tell)
     wl_lower = np.min(wl/1.0001)
     wl_upper = np.max(wl*1.0001)
     tell_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
