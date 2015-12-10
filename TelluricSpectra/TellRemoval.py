@@ -80,6 +80,10 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, kind="linear", method
     
     return corrected_spec, interped_tell
 
+
+
+
+
 def _parser():
     """Take care of all the argparse stuff.
 
@@ -142,6 +146,9 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
     I = data["Extracted_DRACS"]
     hdr = fits.getheader(fname)
     datetime = hdr["DATE-OBS"]
+    airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
+    airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
+    print("Starting Airmass", airmass_start, "Ending Airmass", airmass_end)
     obsdate, obstime = datetime.split("T")
     obstime, __ = obstime.split(".")
     tellpath = "/home/jneal/Phd/data/Tapas/"
