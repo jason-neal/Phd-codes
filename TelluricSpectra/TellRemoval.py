@@ -84,18 +84,71 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     airmass. B = (object airmass)/(star airmass)
 
     """
-    bad_correction = divide_spectra(spec_obs, interped_tell)
 
+    bad_correction = divide_spectra(spec_obs, interped_tell)
+    
     B = obs_airmass/tell_airmass
-    print("Airmass Ratio B =", B)
+    print("Airmass Ratio B = ", B)
+
+    bmin, bminpeaks, bslopes = B_minimization(wl_obs, spec_obs, interped_tell, B_init=False)
+    print("Minimized B value = ", bmin)
+    print("Minimized peaks B value = ", bminpeaks)
+    print("Minimized slopes B value = ", bslopes)
+
     new_tell = interped_tell ** B
     corrected_spec = divide_spectra(spec_obs, new_tell) # Divide by telluric spectra
+    new_tell_min = interped_tell ** bmin
+    corrected_min_spec = divide_spectra(spec_obs, new_tell_min) # Divide by telluric spectra
+    new_tell_minpeaks = interped_tell ** bminpeaks
+    corrected_minpeaks_spec = divide_spectra(spec_obs, new_tell_minpeaks) # Divide by telluric spectra
+    new_tell_slopes = interped_tell ** bslopes
+    corrected_slopes_spec = divide_spectra(spec_obs, new_tell_slopes) # Divide by telluric spectra
 
     # other corrections?
     
-    return corrected_spec, interped_tell, bad_correction, new_tell
+    return corrected_spec, interped_tell, bad_correction, new_tell, corrected_min_spec, new_tell_min, corrected_minpeaks_spec, new_tell_minpeaks, corrected_slopes_spec, new_tell_slopes
 
 
+def B_minimization(wl, spec_obs, spec_tell, B_init=False):
+    """
+    Find Optimal B that scales the telluric spectra to best match the
+    intesity of the observed spectra
+    """
+    blist = np.linspace(0.20, 2, 100)
+    diffs = []
+    peakdiffs = []
+    Slopediffs = []
+    peaks = spec_tell<0.98
+    obs_peaks = spec_obs[peaks]
+    tell_peaks = spec_tell[peaks]
+
+    for bb in blist:
+        diffs.append(sum(abs(spec_obs - spec_tell**bb)))
+        peakdiffs.append(sum(abs(obs_peaks - tell_peaks**bb))) 
+        tell = spec_tell**bb
+        corr = spec_obs/tell
+        len(corr[1:])
+        len(corr[:-1])
+        slopes = corr[1:]-corr[:-1]
+        Slopediffs.append(sum(abs(slopes)))
+
+    plt.figure()
+    plt.plot(blist, diffs, label="all")
+    plt.plot(blist, peakdiffs, label="<0.98")
+    plt.plot(blist, Slopediffs, label="Slopes")
+    plt.xlabel("b values")
+    plt.ylabel("Summed difference")
+    plt.title("B minimization testing")
+    plt.legend()
+    plt.show()
+
+    B = blist[diffs.index(min(diffs))]
+    Bpeaks = blist[peakdiffs.index(min(peakdiffs))]
+    Bslope =  blist[Slopediffs.index(min(Slopediffs))]
+    #print("B min =", B)
+    #print("B peaks min = ", Bpeaks)
+    #print("B slopes min = ", Bslope)
+    return B, Bpeaks, Bslope
 
 
 
@@ -188,15 +241,21 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
     # Loaded in the data
     # Now perform the telluric removal
 
-    I_corr, Tell_interp, bad_correction, tell_Amass_corr = telluric_correct(wl, I, tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
+    I_corr, Tell_interp, bad_correction, tell_Amass_corr, I_corr_min, tell_Amass_corr_min, I_corr_minpeaks, new_tell_minpeaks, I_corr_slopes, new_tell_slopes = telluric_correct(wl, I, tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
 
     #print("After telluric_correct")
     plt.figure()
-    plt.plot(wl, I, label="Observed Spectra")
-    plt.plot(wl, bad_correction, label="Bad Correction")
-    plt.plot(wl, I_corr, label="Corrected Spectra")
-    plt.plot(wl, Tell_interp, label="Telluric Spectra")
-    plt.plot(wl, tell_Amass_corr, label="Telluric Spectra ** B")
+    plt.plot(wl, I,"k", label="Observed Spectra")
+    plt.plot(wl, Tell_interp, label="Telluric")
+    plt.plot(wl, bad_correction, label="Base Correction")
+    plt.plot(wl, I_corr, label="Corrected B")
+    plt.plot(wl, tell_Amass_corr, label="Telluric ** B")
+    plt.plot(wl, I_corr_min, label="Corrected minimized B")
+    plt.plot(wl, tell_Amass_corr_min, label="Telluric minimized B")
+    plt.plot(wl, I_corr_minpeaks, label="Corrected minimized peaks B")
+    plt.plot(wl, new_tell_minpeaks, label="Telluric minimized peaks B")
+    plt.plot(wl, I_corr_slopes, label="Corrected minimized slopes B")
+    plt.plot(wl, new_tell_slopes, label="Tell minimized slopes B")
     plt.plot(wl, np.ones_like(wl), "--")
     plt.legend(loc="best")
     plt.show()
