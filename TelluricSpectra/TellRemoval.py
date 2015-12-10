@@ -87,6 +87,8 @@ def _parser():
     """
     parser = argparse.ArgumentParser(description='Telluric Removal')
     parser.add_argument('fname', help='Input fits file')
+    parser.add_argument('-x', '--export', default=False,
+                        help='Export result to fits file True/False')
     parser.add_argument('-o', '--output', default=False,
                         help='Ouput Filename')
     parser.add_argument('-k', '--kind', default="linear",
@@ -133,7 +135,7 @@ def append_hdr(hdr, keys, values ,item=0):
     return hdr
 
 
-def main(fname, output=False, kind="linear", method="scipy"):
+def main(fname, export=False, output=False, kind="linear", method="scipy"):
     homedir = os.getcwd()
     data = fits.getdata(fname)
     wl = data["Wavelength"] 
@@ -180,11 +182,15 @@ def main(fname, output=False, kind="linear", method="scipy"):
             Output_filename = output
     else:
             Output_filename = fname.replace(".fits", ".tellcorr.fits")
-    hdrkeys = ["State"]
-    hdrvals = [("Telluric Corrected","Spectra state")]
+    hdrkeys = ["Correction", "Tapas Interpolation method", "Interpolation kind", "Correction Params A, B"]
+    hdrvals = [("Tapas divion","Spectra Correction"),(method, "numpy or scipy"),(kind, "linear,slinear,quadratic,cubic"),("Blankety ", "Blank")]
     tellhdr = False   ### need to correctly get this from obtain telluric
-    export_correction_2fits(Output_filename, wl, I_corr, I, Tell_interp, hdr, hdrkeys, hdrvals, tellhdr)
-
+    
+    if export:
+        export_correction_2fits(Output_filename, wl, I_corr, I, Tell_interp, hdr, hdrkeys, hdrvals, tellhdr)
+        print("Saved coorected telluric spectra to " + str(Output_filename))
+    else:
+        print("Skipped Saving coorected telluric spectra ")
 
 
 if __name__ == "__main__":
