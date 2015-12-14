@@ -223,14 +223,20 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
     tellpath = "/home/jneal/Phd/data/Tapas/"
     tellname = obt.get_telluric_name(tellpath, obsdate, obstime) 
     print("tell name", tellname)
-
+    
     tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
     tell_airmass = float(tell_hdr["airmass"])
     print("Telluric Airmass ", tell_airmass)
     wl_lower = np.min(wl/1.0001)
     wl_upper = np.max(wl*1.0001)
     tell_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
-    #tell_data =
+    
+    # Telluric Normalization (use first 50 points below 1.2 as constant continuum)
+    I_tell = tell_data[1]
+    maxes = I_tell[(I_tell < 1.2)].argsort()[-50:][::-1]
+    tell_data = (tell_data[0], tell_data[1] / np.median(I_tell[maxes]))
+    print("Telluric normaliztion value", np.median(I_tell[maxes]))
+
     # print("After slice spectra")
     # plt.figure()
     # plt.plot(wl, I, label="Spectra")
