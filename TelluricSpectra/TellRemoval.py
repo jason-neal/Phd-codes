@@ -148,7 +148,9 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
     peak_slopediffs = []
     abs_area = []
     area = []
-
+    std = []        # minimize stdeviation
+    std_peaks = []  # minimize std around telluric lines
+    std_30kms = []  # values withing the 30kms telluric exclusion window
     peaks = spec_tell<0.98
     peakslopes = spec_tell>0.95
 
@@ -164,7 +166,7 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
         
         corr = spec_obs/(spec_tell**bb)
         peaks_corr = obs_slope_peaks / (tell_slope_peaks**bb)
-
+        
         slopes = corr[1:]-corr[:-1]
         Slopediffs.append(sum(abs(slopes)))
 
@@ -176,6 +178,9 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
         h = ((corr[1:]+corr[:-1]) / 2.0 ) - 1
         abs_area.append(sum(np.abs(h*d_wl)))
         #area.append(sum(h*d_wl))
+        
+        std.append(np.std(corr))
+        std_peaks.append(np.std(peaks_corr))
 
 
     plt.figure()
@@ -184,6 +189,8 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
     plt.plot(blist, Slopediffs/max(Slopediffs), label="Slopes")
     plt.plot(blist, peak_slopediffs/max(peak_slopediffs), label="Peak Slopes")
     plt.plot(blist, abs_area/max(abs_area), label="absolute area")
+    plt.plot(blist, std/max(std), label="Peak Slopes")
+    plt.plot(blist, std_peaks/max(std_peaks), label="absolute area")
     #absa = list(np.abs(area))
     #plt.plot(blist, area/area[absa.index(max(absa))], label="area")
     plt.xlabel("b values")
@@ -198,12 +205,13 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
     Bpeak_slope =  blist[peak_slopediffs.index(min(peak_slopediffs))]
     B_abs_area = blist[abs_area.index(min(abs_area))]
     #B_area = blist[area.index(min(area))]
-    
+    B_std = blist[std.index(min(std))]
+    B_std_peaks = blist[std_peaks.index(min(std_peaks))]
 
-    Bvals = (B, Bpeaks, Bslope, Bpeak_slope, B_abs_area )
-    Blabels = ("Min Diff", "Min Diff of peaks < 0.98", \
-                "Min Total Slope", "Min Slope < 0.98", \
-                "Min Absolute Area from 1")
+    Bvals = (B, Bpeaks, Bslope, Bpeak_slope, B_abs_area, B_std, B_std_peaks )
+    Blabels = ("Min Diff", "Min Diff of peaks ", \
+                "Min Total Slope", "Min Slope in peaks", \
+                "Min Absolute Area from 1", "Min std","min peaks std")
     #B_area , "Min Area from 1"
     return Bvals, Blabels
 
