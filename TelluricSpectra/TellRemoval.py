@@ -141,37 +141,41 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
     Find Optimal B that scales the telluric spectra to best match the
     intesity of the observed spectra
     """
-    blist = np.linspace(0.10, 2.5, 500)
-    diffs = []
-    peakdiffs = []
-    Slopediffs = []
-    peak_slopediffs = []
+    blist = np.linspace(0.10, 1.5, 500)
+    subtracts = []
+    divisions = []
+    peak_subtracts = []
+    peak_divisions = []
+ # Slopediffs = []
+   # peak_slopediffs = []
     abs_area = []
-    area = []
+   # area = []
     std = []        # minimize stdeviation
     std_peaks = []  # minimize std around telluric lines
     std_30kms = []  # values withing the 30kms telluric exclusion window
     peaks = spec_tell<0.98
-    peakslopes = spec_tell>0.95
+   # peakslopes = spec_tell>0.95
 
     obs_peaks = spec_obs[peaks]
     tell_peaks = spec_tell[peaks]
 
-    obs_slope_peaks = spec_obs[peaks]
-    tell_slope_peaks = spec_tell[peaks]
+   # obs_slope_peaks = spec_obs[peaks]
+   # tell_slope_peaks = spec_tell[peaks]
 
     for bb in blist:
-        diffs.append(sum(abs(spec_obs - spec_tell**bb)))
-        peakdiffs.append(sum(abs(obs_peaks - tell_peaks**bb))) 
+        subtracts.append(sum(abs(spec_obs - spec_tell**bb)))
+        peak_subtracts.append(sum(abs(obs_peaks - tell_peaks**bb))) 
+        divisions.append(sum(abs(np.ones_like(spec_obs)-(spec_obs / (spec_tell**bb))))) 
+        peak_divisions.append(sum(abs(np.ones_like(obs_peaks)-(obs_peaks/(tell_peaks**bb)))))
         
-        corr = spec_obs/(spec_tell**bb)
-        peaks_corr = obs_slope_peaks / (tell_slope_peaks**bb)
+        corr = spec_obs / (spec_tell**bb)
+        peaks_corr = obs_peaks / (tell_peaks**bb)
         
-        slopes = corr[1:]-corr[:-1]
-        Slopediffs.append(sum(abs(slopes)))
+      #  slopes = corr[1:]-corr[:-1]
+      #  Slopediffs.append(sum(abs(slopes)))
 
-        peak_slopes = peaks_corr[1:]-peaks_corr[:-1]
-        peak_slopediffs.append(sum(abs(peak_slopes)))
+      #  peak_slopes = peaks_corr[1:]-peaks_corr[:-1]
+      #  peak_slopediffs.append(sum(abs(peak_slopes)))
 
         # Area around 1
         d_wl = wl[1:]-wl[:-1]
@@ -182,15 +186,14 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
         std.append(np.std(corr))
         std_peaks.append(np.std(peaks_corr))
 
-
     plt.figure()
-    plt.plot(blist, diffs/max(diffs), label="Difference")
-    plt.plot(blist, peakdiffs/max(peakdiffs), label="peaks diff <0.98")
-    plt.plot(blist, Slopediffs/max(Slopediffs), label="Slopes")
-    plt.plot(blist, peak_slopediffs/max(peak_slopediffs), label="Peak Slopes")
+    plt.plot(blist, subtracts/max(subtracts), label="Subtractions")
+    plt.plot(blist, peak_subtracts/max(peak_subtracts), label="peaks subtractions <0.98")
+    plt.plot(blist, divisions/max(divisions), label="Divisions")
+    plt.plot(blist, peak_divisions/max(peak_divisions), label="Peak Divisions")
     plt.plot(blist, abs_area/max(abs_area), label="absolute area")
-    plt.plot(blist, std/max(std), label="Peak Slopes")
-    plt.plot(blist, std_peaks/max(std_peaks), label="absolute area")
+    plt.plot(blist, std/max(std), label="std")
+    plt.plot(blist, std_peaks/max(std_peaks), label="Peak std")
     #absa = list(np.abs(area))
     #plt.plot(blist, area/area[absa.index(max(absa))], label="area")
     plt.xlabel("b values")
@@ -199,19 +202,19 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
     plt.legend()
     plt.show()
 
-    B = blist[diffs.index(min(diffs))]
-    Bpeaks = blist[peakdiffs.index(min(peakdiffs))]
-    Bslope =  blist[Slopediffs.index(min(Slopediffs))]
-    Bpeak_slope =  blist[peak_slopediffs.index(min(peak_slopediffs))]
+    #B = blist[diffs.index(min(diffs))]
+    B_subtracts = blist[subtracts.index(min(subtracts))]
+    B_peak_subtracts = blist[peak_subtracts.index(min(peak_subtracts))]
+    B_divisions = blist[divisions.index(min(divisions))]
+    B_peak_divisions = blist[peak_divisions.index(min(peak_divisions))]
     B_abs_area = blist[abs_area.index(min(abs_area))]
     #B_area = blist[area.index(min(area))]
     B_std = blist[std.index(min(std))]
     B_std_peaks = blist[std_peaks.index(min(std_peaks))]
 
-    Bvals = (B, Bpeaks, Bslope, Bpeak_slope, B_abs_area, B_std, B_std_peaks )
-    Blabels = ("Min Diff", "Min Diff of peaks ", \
-                "Min Total Slope", "Min Slope in peaks", \
-                "Min Absolute Area from 1", "Min std","min peaks std")
+    Bvals = (B_subtracts, B_peak_subtracts, B_divisions, B_peak_divisions, B_abs_area, B_std, B_std_peaks)
+    Blabels = ("Min Subtraction", "Min Peak Subtraction", "Min Division", "Min Peak Division", \
+               "Min Absolute Area from 1", "Min std", "min peaks std")
     #B_area , "Min Area from 1"
     return Bvals, Blabels
 
