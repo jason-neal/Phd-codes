@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from astropy.io import fits
-from gooey import Gooey, GooeyParser
+#from gooey import Gooey, GooeyParser
 import IOmodule
 import GaussianFitting as gf
 from Gaussian_fit_testing import Get_DRACS
@@ -105,20 +105,27 @@ def main(fname, output=False, telluric=False, model=False):
     print("Output name", output)
    
     data = fits.getdata(fname)
-
+    # normalized before sumation with python
     test0 = ".ms.norm.comb.fits" in fname
+    # normalized after sumation
     test1 = ".ms.sum.norm.fits" in fname
     test2 = ".ms.Apos.norm.fits" in fname
     test3 = ".ms.Bpos.norm.fits" in fname
+    # normalized before sumation with iraf
+    test4 = ".ms.norm.sum.fits" in fname
+    test5 = ".ms.norm.Apos.fits" in fname
+    test6 = ".ms.norm.Bpos.fits" in fname
     if test0:
         uncalib_combined = data["Combined"]
         #uncalib_noda = uncalib_data["Nod A"]
         #uncalib_nodb = uncalib_data["Nod B"]
-    elif test1 or test2 or test3:
+    elif test1 or test2 or test3 or test4 or test5 or test6:
         uncalib_combined = data
     else:
-        print("Unrecgonized input filename. Can take ouput from normalizeobsrsum or Combine_nod_spectra.py")
+        print("Unrecgonized input filename. Can take ouput from sumnormnodcycle8jn.cl, normalizeobsrsum.cl or Combine_nod_spectra.py")
         raise("Spectra_Error", "Unrecgonized input filename type")
+    
+    uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
 
     # get time from header to then get telluric lines
     hdr = fits.getheader(fname)
@@ -129,15 +136,16 @@ def main(fname, output=False, telluric=False, model=False):
     obsdate, obstime = datetime.split("T")
     obstime, __ = obstime.split(".")
 
+
     tellpath = "/home/jneal/Phd/data/Tapas/"
     tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
-    print("tell name", tellname)
-
-    uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
-
-    # telluric spectra is way to long, need to reduce it to similar size as ccd    
-    tell_data = obt.load_telluric(tellpath, tellname[0])
+    print("Telluric Name", tellname)
+ 
+    # Telluric spectra is way to long, need to reduce it to similar size as ccd    
+    tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
     # Sliced to wavelength measurement of detector
+    print(tell_data[1])
+    #print(tell_data[0])
     calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
     gf.print_fit_instructions()  # Instructions on how to calibrate
