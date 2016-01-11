@@ -136,4 +136,4 @@ if __name__== "__main__" :
         plot_telluric(data, filename)
     plt.show()
 
-    do_all_telluric()
+    #do_all_telluric()
