@@ -236,6 +236,7 @@ def main(fname, output=False, telluric=False, model=False):
                    (wl_map[1], "Linear term"), (wl_map[2], "Constant term")]
                 ###### ADD OTHER parameter need to store above - estimated errors of fitting?
         export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], uncalib_data[0], hdr, hdrkeys, hdrvals)
+        print("Succesfully saved calibration to file -".format(Output_filename))
     else:
         print("Did not save calibration to file.")
     
