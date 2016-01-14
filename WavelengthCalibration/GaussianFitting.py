@@ -393,6 +393,7 @@ def func(x, *params):
         amp = np.abs(params[i+1]) # always positive so peaks always down
         wid = params[i+2]
         y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2)
+    y[y < 0] = 0
     return y
 
 def func_with_stellar(x, num_stell, *params):
@@ -425,6 +426,7 @@ def func_with_stellar(x, num_stell, *params):
         y_stel = y_stel - stel_amp*np.exp(-0.5*((x-stel_ctr)/stel_wid)**2)
 
     y_combined = y_line*y_stel   # multiplication of stellar and telluric lines
+    y_combined[y_combined < 0] = 0   # limit minimum value to zero
     return y_combined
 
 def func_for_plotting(x, params):
@@ -443,6 +445,7 @@ def func_for_plotting(x, params):
         amp = np.abs(params[i+1])  # always positive so peaks are always down
         wid = params[i+2]
         y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2)
+    y[y < 0] = 0
     return y
 
 #######################################################################
