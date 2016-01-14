@@ -84,9 +84,8 @@ def load_telluric(tapas_path, filename):
         
         # put in ascending order
     if col1[-1]-col1[0] < 0:  # wl is backwards
-        col1.reverse()
-        col2.reverse()            
-
+            col1 = col1[::-1]
+            col2 = col2[::-1]                
     tell_data = np.array([col1, col2], dtype="float64")
 
     return tell_data, tell_hdr  
