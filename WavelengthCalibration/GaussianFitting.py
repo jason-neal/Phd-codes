@@ -85,7 +85,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         ax2.plot(wl_b, spec_b, "k-", lw=2, label="Ref Spec")
         ax1.set_xlabel("spec_b")
         ax1.set_xlim(np.min(wl_b), np.max(wl_b))
-        ax2.plot(wl_a, spec_a, "b", lw=3, label="Spectra to Click")
+        ax2.plot(wl_a, spec_a, "b", lw=2, label="Spectra to Click")
         ax2.plot(wl_a, np.ones_like(spec_a), "b-.")
         ax2.set_ylabel("Normalized Flux/Intensity")
         # Setting ylimits
@@ -593,14 +593,14 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     # Add horizontal line at given height
     if hor is not None:
         ax1.plot(wl_b, hor*np.ones_like(wl_b), "k-.")
-    ax1.plot(wl_b, spec_b, "k--", label="Spectra B", lw=4)
+    ax1.plot(wl_b, spec_b, "k", label="Spectra B", lw=2)
     ax1.set_xlim(np.min(wl_b), np.max(wl_b))
     #if init_params_b is not None:
     #    guessfit_b = func_for_plotting(wl_b, init_params_b)
     #    ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit", lw=2)
     if paramsB is not None:      
         returnfit_b = func_for_plotting(wl_b, paramsB)
-        ax1.plot(wl_b, returnfit_b, "r-.", label="Fit", lw=4)
+        ax1.plot(wl_b, returnfit_b, "r-", label="Fit", lw=2)
     ax1.set_xlabel("1st axis")
     
     bb1 = best_b is not None
@@ -612,18 +612,18 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
             print("Xpos", xpos)
             ax1.plot(xpos, 1, "kx", ms=20, label="already picked", lw=4)
     
-    ax2.plot(wl_a, spec_a, "g*-", label="Spectra A", lw=4)
+    ax2.plot(wl_a, spec_a, "g-", label="Spectra A", lw=2)
     # plot also on ax1 for legend
-    ax1.plot(wl_a, spec_a, "g*-", label="Spectra A", lw=4) # for label
+    ax1.plot(wl_a, spec_a, "g-", label="Spectra A", lw=2) # for label
     ax2.set_xlim(np.min(wl_a), np.max(wl_a))
     #if init_params_a is not None:
     #    guessfit_a = func_for_plotting(wl_a, init_params_a)
     #   ax2.plot(wl_a, guessfit_a, "g.", label="Guess Fit", lw=2) 
     if paramsA is not None:
         returnfit_a = func_for_plotting(wl_a, paramsA)
-        ax2.plot(wl_a, returnfit_a, "m-.", label="Fit A", lw=4)
+        ax2.plot(wl_a, returnfit_a, "m-", label="Fit A", lw=2)
         # plot also on ax1 for legend
-        ax1.plot(wl_a, returnfit_a, "m-.", label="Fit A", lw=4)
+        ax1.plot(wl_a, returnfit_a, "m-", label="Fit A", lw=2)
     ax2.set_xlabel("2nd axis")
 
     fita = fitcoords_a is not None
@@ -666,6 +666,28 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         plt.show(block=False)
         
     return fig2, ax1, ax2,   
+
+
+def overlay_fitting(wl_a,  spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
+    init_params_a=None, paramsB=None, init_params_b=None):
+    """Function to plot both spectra and their fitted peaks on separate
+    subplots to better see if the fits are good
+     """
+    fitted_a = func_for_plotting(wl_a, paramsA)
+    fitted_b = func_for_plotting(wl_b, paramsB)
+    fig, ax1, ax2 = plt.subplot(nrows=2, ncols=1)
+
+    ax1.plt(wl_a, spec_a, label="spectra", wl=2)
+    ax1.plt(wl_a, fitted_a, label="fit", wl=2) 
+    ax1.set_title("CRIRES spectra fit")
+
+    ax2.plt(wl_b, spec_b, label="Spectra", wl=2)
+    ax2.plt(wl_b, fited_b, label="fit", wl=2)
+    ax2.set_title("Telluric spectra fit")
+
+    return None
+
+
 
 def print_fit_instructions():
     """ Print to screen the fitting instructions
