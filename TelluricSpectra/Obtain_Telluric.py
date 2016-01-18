@@ -73,8 +73,8 @@ def load_telluric(tapas_path, filename):
                     col2.append(float(val2))
 
     elif ext == "fits":
-        i_tell = fits.getdata(file_,0)
-        tell_hdr = fits.getheader(file_,0)
+        i_tell = fits.getdata(file_, 1)
+        tell_hdr = fits.getheader(file_, 1)
         col1 = i_tell["wavelength"]
         col2 = i_tell["transmittance"]
 
