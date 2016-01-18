@@ -15,6 +15,7 @@ import IOmodule
 import GaussianFitting as gf
 from Gaussian_fit_testing import Get_DRACS
 import Obtain_Telluric as obt
+from TellRemoval import airmass_scaling
 #from plot_fits import get_wavelength
 
 
@@ -105,13 +106,11 @@ def main(fname, output=False, telluric=False, model=False):
     print("Output name", output)
    
     data = fits.getdata(fname)
-    # normalized before sumation with python
+
     test0 = ".ms.norm.comb.fits" in fname
-    # normalized after sumation
     test1 = ".ms.sum.norm.fits" in fname
     test2 = ".ms.Apos.norm.fits" in fname
     test3 = ".ms.Bpos.norm.fits" in fname
-    # normalized before sumation with iraf
     test4 = ".ms.norm.sum.fits" in fname
     test5 = ".ms.norm.Apos.fits" in fname
     test6 = ".ms.norm.Bpos.fits" in fname
@@ -127,26 +126,37 @@ def main(fname, output=False, telluric=False, model=False):
     
     uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
 
-    # get time from header to then get telluric lines
+    # Get time from header to then get telluric lines
     hdr = fits.getheader(fname)
     wl_lower = hdr["HIERARCH ESO INS WLEN STRT"]
     wl_upper = hdr["HIERARCH ESO INS WLEN END"]
     datetime = hdr["DATE-OBS"]
-
+    
     obsdate, obstime = datetime.split("T")
     obstime, __ = obstime.split(".")
-
 
     tellpath = "/home/jneal/Phd/data/Tapas/"
     tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
     print("Telluric Name", tellname)
- 
+    
     # Telluric spectra is way to long, need to reduce it to similar size as ccd    
     tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
+    
+    # Scale telluric lines to airmass
+    start_airmass = hdr["HIERARCH ESO TEL AIRM START"]
+    end_airmass = hdr["HIERARCH ESO TEL AIRM END"]
+    obs_airmass = (start_airmass + end_airmass) / 2
+    
+    #print(tell_header)
+    tell_airmass = float(tell_header["airmass"])
+    #print(obs_airmass, type(obs_airmass))
+    #print(tell_airmass, type(tell_airmass))
+    tell_data[1] = airmass_scaling(tell_data[1], tell_airmass, obs_airmass)
+    
     # Sliced to wavelength measurement of detector
-    print(tell_data[1])
-    #print(tell_data[0])
     calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
+
+
 
     gf.print_fit_instructions()  # Instructions on how to calibrate
 
