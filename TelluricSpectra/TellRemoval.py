@@ -64,6 +64,11 @@ def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
 #     plt.ylabel("Norm Intensity")
 #     plt.show()
 #     return None
+def airmass_scaling(spectra, spec_airmass, obs_airmass):
+    """Scale the Telluric spectra to match the airmass of the observation"""
+    B = obs_airmass/spec_airmass
+    new_spec = spectra ** B
+    return new_spec 
 
 def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_airmass, kind="linear", method="scipy"):
     """Code to contain other functions in this file
