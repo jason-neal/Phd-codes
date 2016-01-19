@@ -88,6 +88,10 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         ax2.plot(wl_a, spec_a, "b", lw=2, label="Spectra to Click")
         ax2.plot(wl_a, np.ones_like(spec_a), "b-.")
         ax2.set_ylabel("Normalized Flux/Intensity")
+        # Stopping scientific notation offset in wavelength
+        ax1.get_xaxis().get_major_formatter().set_useOffset(False)
+        ax2.get_xaxis().get_major_formatter().set_useOffset(False)
+      
         # Setting ylimits
         amin = np.min(spec_a)
         bmin = np.min(spec_b)
@@ -305,9 +309,13 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             
             
             print ("Using plot_both_fits ", " to plot fit results")
-            fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, paramsA=fit_params_a,
-                                         paramsB=fit_params_b, init_params_a=None, init_params_b=None, 
-                                         title="Displaying Fits with Originals", show_plot=True, hor=1) # need to show without stoping  
+            fig, __, __ = overlay_fitting(wl_a_sec,  sect_a, wl_b_sec, sect_b, show_plot=True, paramsA=fit_params_a,
+            paramsB=fit_params_b, hor=1)
+  
+            #fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, paramsA=fit_params_a,
+            #                             paramsB=fit_params_b, init_params_a=None, init_params_b=None, 
+            #                             title="Displaying Fits with Originals", show_plot=True, hor=1) # need to show without stoping  
+            
             goodfit = raw_inputer(" Was this a good fit? y/N/s (skip)?")
             if goodfit in ["yes", "y", "Y", "Yes", "YES"]:
                 plt.close(fig)
@@ -575,6 +583,9 @@ def plot_fit(wl, Spec, params, init_params=None, title=None):
     plt.plot(wl, returnfit, label="Fitted Lines")
     plt.title(title)
     plt.legend(loc=0)
+    # Stopping scientific notation offset in wavelength
+    plt.get_xaxis().get_major_formatter().set_useOffset(False)
+      
     plt.show()
     return fig
 
@@ -584,11 +595,15 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     textloc=False, text=False):
     """ Plotting both together, many kwargs for different parts of code"""
     """ hor for add horizontal line"""
-    fig2 = plt.figure(figsize=(15, 15))
+    fig2 = plt.figure(figsize=(12, 12))
     #fig.set_size_inches(25, 15, forward=False)
     ax1 = fig2.add_subplot(111)
     ax2 = ax1.twiny()
-
+    
+    # Stopping scientific notation offset in wavelength
+    ax1.get_xaxis().get_major_formatter().set_useOffset(False)
+    ax2.get_xaxis().get_major_formatter().set_useOffset(False)
+      
     plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95) # remove edge space
     # Add horizontal line at given height
     if hor is not None:
@@ -669,23 +684,37 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
 
 
 def overlay_fitting(wl_a,  spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
-    init_params_a=None, paramsB=None, init_params_b=None):
+    init_params_a=None, paramsB=None, init_params_b=None, hor=None):
     """Function to plot both spectra and their fitted peaks on separate
     subplots to better see if the fits are good
      """
     fitted_a = func_for_plotting(wl_a, paramsA)
     fitted_b = func_for_plotting(wl_b, paramsB)
-    fig, ax1, ax2 = plt.subplot(nrows=2, ncols=1)
 
-    ax1.plt(wl_a, spec_a, label="spectra", wl=2)
-    ax1.plt(wl_a, fitted_a, label="fit", wl=2) 
-    ax1.set_title("CRIRES spectra fit")
+    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1,figsize=(12, 8))
+    
+    if hor is not None:
+        ax1.plot(wl_a, hor*np.ones_like(wl_a), "k-.")
+        ax2.plot(wl_b, hor*np.ones_like(wl_b), "k-.")
+    
+    ax1.plot(wl_a, spec_a, label="Spectra", lw=2)
+    ax1.plot(wl_a, fitted_a, label="Fit", lw=2) 
+    ax1.set_title("CRIRES NIR Spectra")
+    ax1.set_xlabel("Pixel Number")
+    ax1.legend(loc="best")
 
-    ax2.plt(wl_b, spec_b, label="Spectra", wl=2)
-    ax2.plt(wl_b, fited_b, label="fit", wl=2)
-    ax2.set_title("Telluric spectra fit")
+    ax2.plot(wl_b, spec_b, label="Spectra", lw=2)
+    ax2.plot(wl_b, fitted_b, label="Fit", lw=2)
+    ax2.set_title("TAPAS Telluric Spectra")
+    ax2.set_xlabel("Wavelength (nm)")
+    ax2.get_xaxis().get_major_formatter().set_useOffset(False)
+    #ax2.get_xaxis().get_major_formatter().set_scientific(False)
+    ax2.legend(loc="best")
+    
+    if show_plot:
+        plt.show(block=False)
 
-    return None
+    return fig, ax1, ax2
 
 
 
