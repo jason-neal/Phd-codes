@@ -207,10 +207,16 @@ def main(fname, output=False, telluric=False, model=False):
     wl_map = gf.wavelength_mapping(good_a, good_b)
 
     calibrated_wl = np.polyval(wl_map, uncalib_data[0])
-    plt.figure()
+    
+    fig = plt.figure()
     plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
     plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
-    plt.title("Calibrated Output")
+    plt.title("Wavelength Calibrated Output")
+    # Stopping scientific notation offset in wavelength
+    ax = plt.gca()
+    ax.get_xaxis().get_major_formatter().set_useOffset(False)
+    plt.xlabel("Wavelength (nm)")  
+    plt.ylabel("Normalized Intensity")  
     plt.show(block=True)
 
 
