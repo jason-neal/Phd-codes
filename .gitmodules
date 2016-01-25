@@ -1,0 +1,3 @@
+[submodule "WavelengthCalibration/XCorr-WaveCal"]
+	path = WavelengthCalibration/XCorr-WaveCal
+	url = git@github.com:jason-neal/XCorr-WaveCal.git
