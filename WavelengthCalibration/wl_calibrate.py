@@ -16,6 +16,7 @@ import GaussianFitting as gf
 from Gaussian_fit_testing import Get_DRACS
 import Obtain_Telluric as obt
 from TellRemoval import airmass_scaling
+import XCorrWaveCalScript as XCorrWaveCal
 #from plot_fits import get_wavelength
 
 
@@ -224,15 +225,22 @@ def main(fname, output=False, telluric=False, model=False):
     #Do you want to fine turn this calibration?
     ans = raw_input("Do you want to finetune the calibtration?")
     if ans in ['yes', 'y', 'Yes', 'YES']:
-            print("Are not able to fine tune at this time.")
-            #gf.get_rough_peaks()
-            #adv_wavelength_fitting()
-            # This will leave 2 conversion equations that prob should refit
- # numpy.polyval(p, x)[source]
- #    Evaluate a polynomial at specific values.
- #    If p is of length N, this function returns the value:
- #        p[0]*x**(N-1) + p[1]*x**(N-2) + ... + p[N-2]*x + p[N-1]
- #    If x is a sequence, then p(x) is returned for each element of x. If x is another polynomial then the composite polynomial p(x(t)) is returned.
+        print("Finetune with XCORR WAVECAL using this result as the guess wavelength")
+    #
+        Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((data_wl, data), (t_wl, t_data))
+        fig = plt.figure()
+        plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
+        plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
+        plt.plot(Finetuned_wl, uncalib_data[1], label="Finetuned Wl spectra")
+        plt.title("Wavelength Calibrated Output with Finetuneing")
+        # Stopping scientific notation offset in wavelength
+        ax = plt.gca()
+        ax.get_xaxis().get_major_formatter().set_useOffset(False)
+        plt.xlabel("Wavelength (nm)")
+        plt.ylabel("Normalized Intensity")
+        plt.show(block=True)
+ 
+    # This to possible tune,  sample_num, ratio, increment        
 
     #Do you want to save this output?
     ans = raw_input("Do you want to save this calibration?")
