@@ -223,10 +223,10 @@ def main(fname, output=False, telluric=False, model=False):
 
     # Save output now
     #Do you want to fine turn this calibration?
-    ans = raw_input("Do you want to finetune the calibtration?")
+    ans = raw_input("Do you want to finetune the calibtration?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
-        print("Finetune with XCORR WAVECAL using this result as the guess wavelength")
-    #
+        print("\n\nFinetune with XCORR WAVECAL using this result as the guess wavelength\n")
+    # 
         Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((calibrated_wl, uncalib_data[1]), (calib_data[0], calib_data[1]))
         fig = plt.figure()
         plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
@@ -244,7 +244,7 @@ def main(fname, output=False, telluric=False, model=False):
     else:
         print("Did not fine tune calibration with Xcorr")
     #Do you want to save this output?
-    ans = raw_input("Do you want to save this calibration?")
+    ans = raw_input("Do you want to save this calibration?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         os.chdir(homedir)   # to make sure saving where running
         if output:  
@@ -265,7 +265,7 @@ def main(fname, output=False, telluric=False, model=False):
     else:
         print("Did not save calibration to file.")
     
-    ans = raw_input("Do you want to observe the line depths?")
+    ans = raw_input("Do you want to observe the line depths?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
     # observe heights of fitted peaks
         plt.figure
@@ -274,7 +274,7 @@ def main(fname, output=False, telluric=False, model=False):
         plt.show(block=True)
     
     linedepthpath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
-    ans = raw_input("Do you want to export the line depths to a file?")
+    ans = raw_input("Do you want to export the line depths to a file?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         with open(linedepthpath + "Spectral_linedepths.txt","a") as f:
             for peak in peaks_a:
