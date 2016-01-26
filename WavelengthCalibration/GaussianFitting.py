@@ -747,7 +747,7 @@ def wavelength_mapping(pixels, wavelengths):
     plt.plot(pixels, wavelengths , 'ko',lw=4, ms=7, label="Points")
     plt.plot(range(1,1025), quadvals, "-.r", lw=3, label="quadfit")
     plt.title("Plot fitted points and quad fit")
-    plt.show()
+    plt.show(block=False)
     print("quad fit vals " , quadvals)
     
     #lin_pointvals = np.polyval(linfit, pixels)
