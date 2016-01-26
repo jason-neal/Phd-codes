@@ -227,7 +227,7 @@ def main(fname, output=False, telluric=False, model=False):
     if ans in ['yes', 'y', 'Yes', 'YES']:
         print("Finetune with XCORR WAVECAL using this result as the guess wavelength")
     #
-        Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((data_wl, data), (t_wl, t_data))
+        Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((calibrated_wl, uncalib_data[1]), (calib_data[0], calib_data[1]))
         fig = plt.figure()
         plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
         plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
@@ -241,7 +241,8 @@ def main(fname, output=False, telluric=False, model=False):
         plt.show(block=True)
  
     # This to possible tune,  sample_num, ratio, increment        
-
+    else:
+        print("Did not fine tune calibration with Xcorr")
     #Do you want to save this output?
     ans = raw_input("Do you want to save this calibration?")
     if ans in ['yes', 'y', 'Yes', 'YES']:
