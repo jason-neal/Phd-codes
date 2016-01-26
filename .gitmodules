@@ -1,3 +1,5 @@
 [submodule "WavelengthCalibration/XCorr-WaveCal"]
 	path = WavelengthCalibration/XCorr-WaveCal
 	url = git@github.com:jason-neal/XCorr-WaveCal.git
+[submodule "WavewlengthCalibration/XCorr-WaveCal"]
+	branch = master
