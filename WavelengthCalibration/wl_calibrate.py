@@ -218,7 +218,7 @@ def main(fname, output=False, telluric=False, model=False):
     ax.get_xaxis().get_major_formatter().set_useOffset(False)
     plt.xlabel("Wavelength (nm)")  
     plt.ylabel("Normalized Intensity")  
-    plt.show(block=True)
+    plt.show(block=False)
 
 
     # Save output now
@@ -227,7 +227,7 @@ def main(fname, output=False, telluric=False, model=False):
     if ans in ['yes', 'y', 'Yes', 'YES']:
         print("\n\nFinetune with XCORR WAVECAL using this result as the guess wavelength\n")
     # 
-        Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((calibrated_wl, uncalib_data[1]), (calib_data[0], calib_data[1]))
+        Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((calibrated_wl, uncalib_data[1]), (tell_data[0], tell_data[1]), increment=0.1)
         fig = plt.figure()
         plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
         plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
@@ -238,6 +238,7 @@ def main(fname, output=False, telluric=False, model=False):
         ax.get_xaxis().get_major_formatter().set_useOffset(False)
         plt.xlabel("Wavelength (nm)")
         plt.ylabel("Normalized Intensity")
+        plt.legend()
         plt.show(block=True)
  
     # This to possible tune,  sample_num, ratio, increment        
