@@ -87,4 +87,111 @@ for name in R10_filenames:
    
 plt.legend()
 plt.title("R=100000 Convolution Effect")
+#plt.show()
+
+
+
+#####  Tapas at R 50000
+
+path = "/home/jneal/Phd/data/tapas-testing/"
+
+tapas1_filenames = ["tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-10.ipac", \
+            "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-5.ipac", \
+            "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-15.ipac"]
+plt.figure()
+for name in tapas1_filenames:
+    data, hdr = obt.load_telluric(path, name)
+      
+    res = float(hdr["resPower"])
+    sampRati = hdr["sampRati"]
+    airmass = hdr["airmass"]
+    plt.plot(data[0], data[1], label="R =" + str(int(res)) + ", sampling =" + sampRati + " airmass=" + str(airmass))
+   
+    #plt.plot(wl, Tr, label=res+" "+conv+" "+fwhm)
+plt.legend()
+plt.title("Tapas R=50000 sampling Effect")
+#plt.show()
+
+
+
+
+tapas2_filenames = ["tapas_test2_1.ipac", \
+            "tapas_test2_2.ipac", \
+            "tapas_test2_3.ipac", \
+            "tapas_test2_4.ipac"]
+plt.figure()
+for name in tapas2_filenames:
+    data, hdr2 = obt.load_telluric(path, name)
+    for key, val in hdr2.iteritems():
+        print("Key", key, "Value", val)
+    
+    try:
+        res = hdr2["RESPOWER"]
+        res = float(res)
+        sampRati = hdr2["sampRati"]
+        airmass = hdr2["airmass"]
+    except:
+        print("No RESPOWER for", name)
+        res = 0
+        sampRati = 0
+        airmass = hdr2["airmass"]
+   
+    plt.plot(data[0], data[1], label="R =" + str(int(res)) + ", sampling =" + str(sampRati) + " airmass=" + str(airmass))
+    #plt.plot(wl, Tr, label=res+" "+conv+" "+fwhm)
+plt.legend()
+plt.title("Tapas Instrument Effect")
+#plt.show()
+
+
+
+
+# Effect of 1 hour time increments on tapas spectra 
+#(to see the effect of the 1hr timing difference given by tapas)
+plt.figure()
+tapas3_filenames = ["tapas_test3_1_timing_0.ipac", \
+            "tapas_test3_1_timing_0.ipac", \
+            "tapas_test3_1_timing_0.ipac", \
+            "tapas_test3_1_timing_0.ipac", \
+            "tapas_test3_1_timing_0.ipac", \
+            "tapas_test3_1_timing_0.ipac"]
+
+for name in tapas3_filenames:
+    data, hdr = obt.load_telluric(path, name)
+    #wl, Tr = np.loadtxt(path+name, unpack=True)
+   
+    res = float(hdr["resPower"])
+    sampRati = hdr["sampRati"]
+    airmass = hdr["airmass"]
+   
+   
+    plt.plot(data[0], data[1], label="R =" + str(int(res)) + ", sampling =" + str(sampRati) + " airmass=" + str(airmass))
+    #plt.plot(wl, Tr, label=res+" "+conv+" "+fwhm)
+plt.legend()
+plt.title("Tapas Timing Effects")
+plt.show()
+
+
+
+
+
+# Effect BEERV COrrection increments on tapas spectra 
+#(to see the effect of the 1hr timing difference given by tapas)
+
+
+tapas4_filenames = ["tapas_test3_timing_0_no_berv_corr.ipac", \
+            "tapas_test3_1_timing_0.ipac"]
+
+for name in tapas4_filenames:
+    data, hdr = obt.load_telluric(path, name)
+    #wl, Tr = np.loadtxt(path+name, unpack=True)
+   
+    res = float(hdr["resPower"])
+    sampRati = hdr["sampRati"]
+    airmass = hdr["airmass"]
+   
+   
+    plt.plot(data[0], data[1], label="R =" + str(int(res)) + ", sampling =" + str(sampRati))
+    #plt.plot(wl, Tr, label=res+" "+conv+" "+fwhm)
+plt.legend()
+plt.title("Tapas BERV Effects")
 plt.show()
