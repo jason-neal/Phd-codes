@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
 """ Codes for Telluric contamination removal 
     Interpolates telluric spectra to the observed spectra.
@@ -145,16 +145,17 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
     """
     Find Optimal B that scales the telluric spectra to best match the
     intesity of the observed spectra
+    
     """
     blist = np.linspace(0.10, 1.5, 500)
     subtracts = []
     divisions = []
     peak_subtracts = []
     peak_divisions = []
- # Slopediffs = []
-   # peak_slopediffs = []
+    # Slopediffs = []
+    # peak_slopediffs = []
     abs_area = []
-   # area = []
+    # area = []
     std = []        # minimize stdeviation
     std_peaks = []  # minimize std around telluric lines
     std_30kms = []  # values withing the 30kms telluric exclusion window
@@ -176,11 +177,11 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
         corr = spec_obs / (spec_tell**bb)
         peaks_corr = obs_peaks / (tell_peaks**bb)
         
-      #  slopes = corr[1:]-corr[:-1]
-      #  Slopediffs.append(sum(abs(slopes)))
+    #  slopes = corr[1:]-corr[:-1]
+    #  Slopediffs.append(sum(abs(slopes)))
 
-      #  peak_slopes = peaks_corr[1:]-peaks_corr[:-1]
-      #  peak_slopediffs.append(sum(abs(peak_slopes)))
+    #  peak_slopes = peaks_corr[1:]-peaks_corr[:-1]
+    #  peak_slopediffs.append(sum(abs(peak_slopes)))
 
         # Area around 1
         d_wl = wl[1:]-wl[:-1]

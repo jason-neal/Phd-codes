@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
 ## Module that has a function that can obtain the telluric spectra relevant to the observations we have

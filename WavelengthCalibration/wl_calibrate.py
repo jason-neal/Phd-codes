@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """ Script to run wavelength calibration on input fits file"""
 from __future__ import division, print_function
@@ -223,7 +223,7 @@ def main(fname, output=False, telluric=False, model=False):
 
     # Save output now
     #Do you want to fine turn this calibration?
-    ans = raw_input("Do you want to finetune the calibtration?\n")
+    ans = input("Do you want to finetune the calibtration?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         print("\n\nFinetune with XCORR WAVECAL using this result as the guess wavelength\n")
     # 
@@ -245,7 +245,7 @@ def main(fname, output=False, telluric=False, model=False):
     else:
         print("Did not fine tune calibration with Xcorr")
     #Do you want to save this output?
-    ans = raw_input("Do you want to save this calibration?\n")
+    ans = input("Do you want to save this calibration?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         os.chdir(homedir)   # to make sure saving where running
         if output:  
@@ -266,7 +266,7 @@ def main(fname, output=False, telluric=False, model=False):
     else:
         print("Did not save calibration to file.")
     
-    ans = raw_input("Do you want to observe the line depths?\n")
+    ans = input("Do you want to observe the line depths?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
     # observe heights of fitted peaks
         plt.figure
@@ -275,7 +275,7 @@ def main(fname, output=False, telluric=False, model=False):
         plt.show(block=True)
     
     linedepthpath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
-    ans = raw_input("Do you want to export the line depths to a file?\n")
+    ans = input("Do you want to export the line depths to a file?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         with open(linedepthpath + "Spectral_linedepths.txt","a") as f:
             for peak in peaks_a:

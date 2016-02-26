@@ -1,7 +1,10 @@
-#!/usr/bin/env python
-""" Module docstring
-"""
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
+
+"""Fitting the Centroid positions of telluric lines with gausians 
+to obtain a wavelenght calibration from pixel to wavelength.
+
+"""
 
 ## GaussainFitting.py
 from __future__ import division
@@ -50,13 +53,13 @@ def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     text_a = "Select Spectral regions/lines for finer calibration fitting"
     #textloc_b = (np.median(wl_b), max([min(spec_b), 0.5]))
     text_b = "Select matching Telluric regions/lines for finer calibration fitting"
-    a_coords = get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Observed Spectra",
+    a_coords = get_coords(wl_a, spec_a, wl_b, spec_b, title="Observed Spectra",
                                 textloc=textloc_a, text=text_a) 
-    b_coords = get_coordinates(wl_b, spec_b, wl_a, spec_a, title="Telluric Lines",
+    b_coords = get_coords(wl_b, spec_b, wl_a, spec_a, title="Telluric Lines",
                                points_b=a_coords, textloc=textloc_a, text=text_b)
     return a_coords, b_coords, 
 
-def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra", 
+def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra", 
                     points_a=None, points_b=None, textloc=False, text=False, 
                     model=False):
     """ Obtains Coordinates of clicked points on the plot of spectra.
@@ -115,8 +118,8 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         #ax2.set_xlabel("Wavelength/pixels")
         ax2.set_xlim(np.min(wl_a), np.max(wl_a))
         ax2.legend()        ### ISSUES with legend
-        #print("get_coordinates points_A input ", points_a)
-        #print("get_coordinates points_B input ", points_b)
+        #print("get_coords points_A input ", points_a)
+        #print("get_coords points_B input ", points_b)
         if points_a is not None:
             #print("points_a", points_a)
             #xpoints = points_a[0::3]
@@ -150,7 +153,7 @@ def get_coordinates(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         plt.close()
         #cid = fig.canvas.mpl_connect('button_press_event', onclick)      
         #plt.show()
-        #ans = raw_input("Are these the corrdinate values you want to use to fit these peaks? y/N?")
+        #ans = input("Are these the corrdinate values you want to use to fit these peaks? y/N?")
         #if ans.lower() == "y":   # Good coordinates to use
         return coords
 
@@ -235,11 +238,11 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
         while True:   # Was this a good fit
             try:  # RuntimeError of fitting
             # Get more accurate coordinates with zoomed in sections
-                a_coords = get_coordinates(wl_a_sec, sect_a, wl_b_sec, sect_b,
+                a_coords = get_coords(wl_a_sec, sect_a, wl_b_sec, sect_b,
                                            title="Select Spectra Lines",
                                            textloc= (np.median(wl_a_sec), max(min(sect_a), 0.5)),
                                            text="Choose lines for calibration", model=model)  #(x,y)'s
-                b_coords = get_coordinates(wl_b_sec, sect_b, wl_a_sec, sect_a,
+                b_coords = get_coords(wl_b_sec, sect_b, wl_a_sec, sect_a,
                                            title="Select Telluric Lines", 
                                            points_b=a_coords,
                                            textloc= (np.median(wl_b_sec), max(min(sect_b), 0.5)),
@@ -260,12 +263,12 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                 # show figure
                 #fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, show_plot=True, 
                 #                             title="Any Stellar lines", hor=1) 
-                #stel = raw_inputer("Are there any Stellar lines to include in the fit y/N") 
+                #stel = inputer("Are there any Stellar lines to include in the fit y/N") 
                 stel = "y"
                 #plt.close(fig)
                 if stel in ["y", "Yes", "YES" "yes"]:
                     # Select the stellar lines for the spectral fit
-                    stellar_lines = get_coordinates(wl_a_sec, sect_a, wl_b_sec, sect_b, 
+                    stellar_lines = get_coords(wl_a_sec, sect_a, wl_b_sec, sect_b, 
                                                     title="Select Spectral Lines", 
                                                     points_a=a_coords, 
                                                     points_b=b_coords, 
@@ -282,10 +285,10 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                 
                 tell = "y"
                 if tell in ["y", "Yes", "YES" "yes"]:
-                    telluric_lines = get_coordinates(wl_b_sec, sect_b, wl_a_sec, sect_a, 
+                    telluric_lines = get_coords(wl_b_sec, sect_b, wl_a_sec, sect_a, 
                                                     title="Select Spectral Lines", 
-                                                    points_a=a_coords, 
-                                                    points_b=b_coords, 
+                                                    points_a=b_coords, 
+                                                    points_b=a_coords, 
                                                     textloc=(np.median(wl_b_sec), np.max(np.min(sect_b), 0.5)), 
                                                     text="Select extra Telluric lines to add.")
                     num_telluric = len(telluric_lines)
@@ -299,7 +302,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                 fit_worked = True    
             except RuntimeError:
                 print("Runtime Error: Fit could not find good parameters" )
-                cont_try = raw_inputer('Would you like to keep trying to fit to this section Y/n?')
+                cont_try = inputer('Would you like to keep trying to fit to this section Y/n?')
                 if cont_try in ['n', 'no','N','No','NO']:
                     fit_worked = False
                     break
@@ -316,7 +319,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             #                             paramsB=fit_params_b, init_params_a=None, init_params_b=None, 
             #                             title="Displaying Fits with Originals", show_plot=True, hor=1) # need to show without stoping  
             
-            goodfit = raw_inputer(" Was this a good fit? y/N/s (skip)?")
+            goodfit = inputer(" Was this a good fit? y/N/s (skip)?")
             if goodfit in ["yes", "y", "Y", "Yes", "YES"]:
                 plt.close(fig)
                 break   # exit while true loop
@@ -354,13 +357,11 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             for i in range(0,len(fitted_coords_a)):
                 coord_a = fitted_coords_a[i]
                 coord_b = fitted_coords_b[i]
-               # include = raw_input("Use Peak #" + str(i+1) +" corresponding to" + 
+                # include = input("Use Peak #" + str(i+1) +" corresponding to" + 
                 #                    str([coord_a[0],'pxls', coord_b[0],'nm']) + " y/N?")
-                include =str(raw_inputer("Use Peak # {} ".format(i+1) + "corresponding to" +
-                             " [a-{0:.2f}, b-{1:.2f}]? y/N?".format(coord_a[0], coord_b[0])))
+                include = input("Use Peak # {} ".format(i+1) + "corresponding to" +
+                             " [a-{0:.2f}, b-{1:.2f}]? y/N?".format(coord_a[0], coord_b[0]))
                 if include.lower() == "y" or include.lower() == "yes":
-                    #best_a_coords.append(CoordsA[i]) # tempry filler for return
-                    #best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
                     best_a_coords.append(coord_a[0])
                     best_b_coords.append(coord_b[0])
                     best_a_peaks.append(coord_a[1])
@@ -369,7 +370,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
             # no - individually ask if want want each line included and append if yes
             # probably plot each individually to identify 
-            #include = raw_input(" Use Coordinate point" + str([CoordsA[i], CoordsB[i]]) + " y/N?")
+            #include = input(" Use Coordinate point" + str([CoordsA[i], CoordsB[i]]) + " y/N?")
             #if include.lower() == "y" or include.lower() == "yes":
              #   best_a_coords.append(CoordsA[i]) # tempry filler for return
             #    best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
@@ -558,12 +559,12 @@ def slice_spectra(wl, spectrum, low, high):
     spectrum_sec = spectrum[map1*map2]   
     return wl_sec, spectrum_sec 
 
-def raw_inputer(question):
-    """ Print raw_input question above.
+def inputer(question):
+    """ Print input question above.
     To enable questions to appear when using Gooey
     """
     print(question)
-    ans = raw_input("")
+    ans = input("")
     return ans
 #######################################################################
 #                                                                     #
