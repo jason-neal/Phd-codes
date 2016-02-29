@@ -157,8 +157,6 @@ def main(fname, output=False, telluric=False, model=False):
     # Sliced to wavelength measurement of detector
     calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
-
-
     gf.print_fit_instructions()  # Instructions on how to calibrate
 
     if model:
@@ -205,12 +203,17 @@ def main(fname, output=False, telluric=False, model=False):
         good_a, peaks_a, good_b, peaks_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b)
-    wl_map = gf.wavelength_mapping(good_a, good_b)
+
+    wl_map, cube_map, quartic_map = gf.wavelength_mapping(good_a, good_b)
 
     calibrated_wl = np.polyval(wl_map, uncalib_data[0])
+    cube_calibrated_wl = np.polyval(cube_map, uncalib_data[0])
+    quartic_calibrated_wl = np.polyval(quartic_map, uncalib_data[0])
     
     fig = plt.figure()
-    plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
+    plt.plot(calibrated_wl, uncalib_data[1], label="Quad Calibrated spectra")
+    plt.plot(cube_calibrated_wl, uncalib_data[1], label="Cube Calibrated spectra")
+    plt.plot(quartic_calibrated_wl, uncalib_data[1], label="Quartic Calibrated spectra")
     plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
     plt.title("Wavelength Calibrated Output")
     # Stopping scientific notation offset in wavelength
@@ -252,7 +255,6 @@ def main(fname, output=False, telluric=False, model=False):
             Output_filename = output
         else:
             Output_filename = fname.replace(".fits", ".wavecal.fits")
-    
 
         T_now = str(time.gmtime()[0:6])
         hdrkeys = ["Calibration", "CALIBRATION TIME", 'PIXELMAP PARAM1', \
