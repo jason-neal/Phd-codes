@@ -203,24 +203,40 @@ def main(fname, output=False, telluric=False, model=False):
         good_a, peaks_a, good_b, peaks_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b)
-
-    wl_map, cube_map, quartic_map = gf.wavelength_mapping(good_a, good_b)
-
+    
+    lin_map = gf.wavelength_mapping(good_a, good_b, order=1)
+    wl_map = gf.wavelength_mapping(good_a, good_b, order=2)
+    cube_map = gf.wavelength_mapping(good_a, good_b, order=3)
+    #quartic_map = gf.wavelength_mapping(good_a, good_b, order=4) # 4th order is not good
+    
+    lin_calibrated_wl = np.polyval(lin_map, uncalib_data[0])
     calibrated_wl = np.polyval(wl_map, uncalib_data[0])
     cube_calibrated_wl = np.polyval(cube_map, uncalib_data[0])
-    quartic_calibrated_wl = np.polyval(quartic_map, uncalib_data[0])
+    #quartic_calibrated_wl = np.polyval(quartic_map, uncalib_data[0])
     
     fig = plt.figure()
+    plt.subplot(2,1,1)
     plt.plot(calibrated_wl, uncalib_data[1], label="Quad Calibrated spectra")
     plt.plot(cube_calibrated_wl, uncalib_data[1], label="Cube Calibrated spectra")
-    plt.plot(quartic_calibrated_wl, uncalib_data[1], label="Quartic Calibrated spectra")
+    #plt.plot(quartic_calibrated_wl, uncalib_data[1], label="Quartic Calibrated spectra")
     plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
-    plt.title("Wavelength Calibrated Output")
+    plt.title("Wavelength Calibrated Spectra")
     # Stopping scientific notation offset in wavelength
-    ax = plt.gca()
-    ax.get_xaxis().get_major_formatter().set_useOffset(False)
+    ax1 = plt.gca()
+    ax1.get_xaxis().get_major_formatter().set_useOffset(False)
     plt.xlabel("Wavelength (nm)")  
     plt.ylabel("Normalized Intensity")  
+    plt.legend()
+
+    plt.subplot(2,1,2)
+    plt.plot(uncalib_data[0], calibrated_wl - lin_calibrated_wl, "+", label="Quad Calibrated spectra")
+    plt.plot(uncalib_data[0], cube_calibrated_wl - lin_calibrated_wl, "x", label="Cube Calibrated spectra")
+    #plt.plot(uncalib_data[0], quartic_calibrated_wl - lin_calibrated_wl, "o", label="Quartic Calibrated spectra")
+    ax2 = plt.gca()
+    ax2.get_xaxis().get_major_formatter().set_useOffset(False)
+    plt.xlabel("Pixel number")  
+    plt.ylabel("Delta lambda(nm)\nfrom Linear Fit") 
+    plt.title("Wavelength Differences of models") 
     plt.show(block=False)
 
 
