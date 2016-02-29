@@ -51,12 +51,13 @@ def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     """
     textloc_a = (np.median(wl_a), max([min(spec_a), 0.7]))
     text_a = "Select Spectral regions/lines for finer calibration fitting"
-    #textloc_b = (np.median(wl_b), max([min(spec_b), 0.5]))
     text_b = "Select matching Telluric regions/lines for finer calibration fitting"
+
     a_coords = get_coords(wl_a, spec_a, wl_b, spec_b, title="Observed Spectra",
                                 textloc=textloc_a, text=text_a) 
     b_coords = get_coords(wl_b, spec_b, wl_a, spec_a, title="Telluric Lines",
                                points_b=a_coords, textloc=textloc_a, text=text_b)
+
     return a_coords, b_coords, 
 
 def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra", 
@@ -69,15 +70,8 @@ def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
 
     """    
     while True:
-        #global coords, fig  #, cid
         coords = []
-        #fig, ax1, ax2 = plot_both_fits(wl_a, spec_a, wl_b, spec_b,title=title)
-        #ax1.set_xlabel("Wavelength/pixels")
-        #ax2.legend()
-        #pfig.show()
-        #testcoords = fig.ginput(n=0, timeout=0, show_clicks=True, 
-        #    mouse_add=1, mouse_pop=2, mouse_stop=3) # better way to do it
-        #print("Test coords with function", testcoords)
+        
         fig = plt.figure(figsize=(15, 15))
         fig.suptitle(title)
         plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95) # remove edge space
@@ -91,6 +85,7 @@ def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         ax2.plot(wl_a, spec_a, "b", lw=2, label="Spectra to Click")
         ax2.plot(wl_a, np.ones_like(spec_a), "b-.")
         ax2.set_ylabel("Normalized Flux/Intensity")
+
         # Stopping scientific notation offset in wavelength
         ax1.get_xaxis().get_major_formatter().set_useOffset(False)
         ax2.get_xaxis().get_major_formatter().set_useOffset(False)
@@ -100,30 +95,20 @@ def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         bmin = np.min(spec_b)
         amax = np.max(spec_a)
         bmax = np.max(spec_b)
-        if amin < 0 or bmin < 0:  #set limits only when large values occur 
+        if amin < 0 or bmin < 0:  # set limits only when large values occur 
             if amax > 1.2 or bmax > 1.2:
                 ax1.set_ylim(0, 1.2)
-                #ax2.set_ylim(0, 1.2)
             else:
                 ax1.set_ylim(0, np.max([amax, bmax]) + 0.02)
 
         if model:
-            ax1.plot(model[0],model[1], 'r', label="model spectrum")
-            ax2.plot(model[0],model[1], 'r', label="model spectrum")
+            ax1.plot(model[0],model[1], 'r', label="Model spectrum")
+            ax2.plot(model[0],model[1], 'r', label="Model spectrum")
         
-        #ymax = np.min([amax, bmax, 1.05]) + 0.02 * np.min([amax-amin,bmax-bmin])
-        #ymin = np.max([amin, bmin, 0.5]) - 0.05 
-        #ax1.set_ylim(ymin, ymax)
-        #ax2.set_ylim(ymin, ymax)
-        #ax2.set_xlabel("Wavelength/pixels")
         ax2.set_xlim(np.min(wl_a), np.max(wl_a))
         ax2.legend()        ### ISSUES with legend
-        #print("get_coords points_A input ", points_a)
-        #print("get_coords points_B input ", points_b)
+
         if points_a is not None:
-            #print("points_a", points_a)
-            #xpoints = points_a[0::3]
-            #ypoints = np.ones_like(points_a[1::3]) - points_a[1::3]
             xpoints = []
             ypoints = []
             for coord in points_a:
@@ -131,8 +116,6 @@ def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
                 ypoints.append(coord[1])
             ax2.plot(xpoints, ypoints, "g<", label="Selected A points", ms=13)    
         if points_b is not None:
-            #xpoints = points_b[0::3]
-            #ypoints = np.ones_like(points_b[1::3]) - points_b[1::3]
             xpoints = []
             ypoints = []
             for coord in points_b:
@@ -151,10 +134,8 @@ def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
         coords = fig.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1,
                             mouse_pop=2, mouse_stop=3) # better way to do it
         plt.close()
-        #cid = fig.canvas.mpl_connect('button_press_event', onclick)      
-        #plt.show()
-        #ans = input("Are these the corrdinate values you want to use to fit these peaks? y/N?")
-        #if ans.lower() == "y":   # Good coordinates to use
+        
+        coords = sorted(coords, key=lambda x: x[0]) # Sort Coords by x position ascending.
         return coords
 
 #######################################################################
