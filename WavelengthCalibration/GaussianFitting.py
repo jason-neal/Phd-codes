@@ -703,7 +703,25 @@ def overlay_fitting(wl_a,  spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
 def print_fit_instructions():
     """ Print to screen the fitting instructions
     """
-    print("\n\n Instructions: \n\n ")
+    print("\n\n Instructions: Wavelength calibration via centroid fitting with tapas model.")
+    
+    print("\nYou will be shown an overlay of the observed specrtra and" 
+        "a model of atmospheric transmission from tapas. A selection "
+        "of the tapas model has been taken accoriding to the start and "
+        "end wavelenght given in the header of the observed spectrum. \n"
+        "The goal of this is to select absorbtion lines that are common "
+        "to both spectra to create a mapping from pixels to wavelength. \n"
+        "First select the peaks of the main telluric lines (left click) in the observed "
+        "spectra (shown in blue) that correspond to telluric lines. This first selection is to define areas to zoom into to create a finer peak selection."
+        "When you have selected all the areas then right click to save these an move onto the tapas spectra."
+        "Now select (left click) the peaks of the telluric lines in the model (now blue) that match the choosen observed lines (indicated with a pink diamonds), Right click to close"
+        "The order of clicking does not mater as the coordinates of the peaks are sorted into ascending order."
+        "\nYou will be now shown a snapshot zoomed in view around the first main peak you selected."
+        ""
+        ""
+        ""
+        "More instrustions to go here"
+        )
 
     return None
 
