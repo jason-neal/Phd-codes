@@ -236,7 +236,8 @@ def main(fname, output=False, telluric=False, model=False):
     ax2.get_xaxis().get_major_formatter().set_useOffset(False)
     plt.xlabel("Pixel number")  
     plt.ylabel("Delta lambda(nm)\nfrom Linear Fit") 
-    plt.title("Wavelength Differences of models") 
+    plt.title("Wavelength Differences of Models") 
+    plt.legend()
     plt.show(block=False)
 
 
