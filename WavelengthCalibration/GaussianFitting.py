@@ -739,52 +739,57 @@ def wavelength_mapping(pixels, wavelengths, order=2):
       default order of polynomial is 2
 
     """
-    #linfit = np.polyfit(pixels, wavelengths,1)
-    lin_map = np.polyfit(pixels, wavelengths, 1)
-    quad_map = np.polyfit(pixels, wavelengths, 2)
-    cube_map = np.polyfit(pixels, wavelengths, 3)
-    quartic_map = np.polyfit(pixels, wavelengths, 4)
+    wl_map = np.polyfit(pixels, wavelengths, order)
+    #lin_map = np.polyfit(pixels, wavelengths, 1)
+    #quad_map = np.polyfit(pixels, wavelengths, 2)
+    #cube_map = np.polyfit(pixels, wavelengths, 3)
+    #quartic_map = np.polyfit(pixels, wavelengths, 4)
     
-    print("linear fit x, c", lin_map)
-    print("wl_quad_map equation x**2, x, c", quad_map)
-    print("wl_cube_map equation x**3, x**2, x, c", cube_map)
-    print("wl_quartic_map equation x**4, x**3, x**2, x, c", quartic_map)
+    print("wl_map params", wl_map)
+    #print("wl_quad_map equation x**2, x, c", quad_map)
+    #print("wl_cube_map equation x**3, x**2, x, c", cube_map)
+    #print("wl_quartic_map equation x**4, x**3, x**2, x, c", quartic_map)
     
-    linvals = np.polyval(linfit, range(1,1025))
-    quadvals = np.polyval(quad_map, range(1,1025))
-    cubevals = np.polyval(cube_map, range(1,1025))
-    quarticvals = np.polyval(quartic_map, range(1,1025))
+    wlvals = np.polyval(wl_map, range(1,1025)) 
+    #linvals = np.polyval(linfit, range(1,1025))
+    #quadvals = np.polyval(quad_map, range(1,1025))
+    #cubevals = np.polyval(cube_map, range(1,1025))
+    #quarticvals = np.polyval(quartic_map, range(1,1025))
 
     plt.plot(pixels, wavelengths , 'ko',lw=4, ms=7, label="Points")
-    plt.plot(range(1,1025), quadvals, "-.r", lw=3, label="Quadfit")
-    plt.plot(range(1,1025), cubevals, "-.g", lw=3, label="Cubefit")
-    plt.plot(range(1,1025), quarticvals, "-.b", lw=3, label="quarticfit")
+    plt.plot(range(1,1025), wlvals, "-.r", lw=3, label="wl map fit")
+    #plt.plot(range(1,1025), cubevals, "-.g", lw=3, label="Cubefit")
+    #plt.plot(range(1,1025), quarticvals, "-.b", lw=3, label="quarticfit")
     plt.title("Plot fitted points and different fits")
     plt.legend()
     plt.show(block=False)
-    print("quad fit vals ", quadvals)
-    print("cube fit vals ", cubevals)
-    print("quartic fit vals ", quarticvals)
+    #print("quad fit vals ", quadvals)
+    #print("cube fit vals ", cubevals)
+    #print("quartic fit vals ", quarticvals)
     
     #lin_pointvals = np.polyval(linfit, pixels)
     #generate mapped wavelength values for the pixel positions
-    quad_pointvals = np.polyval(wl_map, pixels)
-    cube_pointvals = np.polyval(cube_map, pixels)
-    quartic_pointvals = np.polyval(quartic_map, pixels)
-
-    quad_diff = quad_pointvals - wavelengths
-    cube_diff = cube_pointvals - wavelengths
-    quartic_diff = quartic_pointvals - wavelengths
-
-    std_diff = np.std(quad_diff)
-    std_cube_diff = np.std(cube_diff)
-    std_quartic_diff = np.std(quartic_diff)
-    print("Differences in wavelength from mapped points to choosen points")
-    print("quad_diff", quad_diff, "\ncube_diff", cube_diff, "\nquartic_diff", quartic_diff)
-    print("Standard deviation of the differences (wavelength mapping error value?)")
-    print("quad std", std_diff, "\ncube_std", std_cube_diff, "\nquartic_std", std_quartic_diff)
+    wl_pointvals = np.polyval(wl_map, pixels)
+    #quad_pointvals = np.polyval(wl_map, pixels)
+    #cube_pointvals = np.polyval(cube_map, pixels)
+    #quartic_pointvals = np.polyval(quartic_map, pixels)
     
-    return lin_map, quad_map, cube_map, quartic_map
+    wl_diff = wl_pointvals - wavelengths
+    #quad_diff = quad_pointvals - wavelengths
+    #cube_diff = cube_pointvals - wavelengths
+    #quartic_diff = quartic_pointvals - wavelengths
+
+    wl_std_diff = np.std(wl_diff)
+    #std_cube_diff = np.std(cube_diff)
+    #std_quartic_diff = np.std(quartic_diff)
+    print("Differences in wavelength from mapped points to choosen points")
+    print("wl differences", wl_diff)
+    #print("quad_diff", quad_diff, "\ncube_diff", cube_diff, "\nquartic_diff", quartic_diff)
+    print("Standard deviation of the differences (wavelength mapping error value?)")
+    print("wl std diff", wl_std_diff)
+    #print("quad std", std_diff, "\ncube_std", std_cube_diff, "\nquartic_std", std_quartic_diff)
+    
+    return wl_map
 
 
 
