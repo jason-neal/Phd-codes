@@ -14,21 +14,21 @@ def get_telluric_name(path, date, time, ext="*"):
     """ Tapas produces error of 1 hour in timing of observation so need to add +1 to the hour"""
     
     # ext can be specificed .ipac or .fits or left as * for either
-    tapas_time = str(int(time[0:2]) + 1) #+ time[2:]
-    print(tapas_time)
-    #print("date :",date)
-    str1 = "tapas_" + date + "*"
+    #tapas_time = str(int(time[0:2])+1)  # including offset
+    tapas_time = str(int(time[0:2]))  # no time offset
+    print("Hour of observation,", tapas_time)
+    str1 = "tapas_*" + date + "*"
     if int(tapas_time) > 9:
         str2 = "*" + tapas_time + ":*:*"
     else:
         str2 = "*T0" + tapas_time + ":*:*" + ext
-    print(" finding files which match conditions- ", str1, str2)
+    print("Match Filenames to", str1, "and", str2)
     match = get_filenames(path, str1 , str2)
     return match 
 
 def get_telluric_from_obs(path, obs_name):
        """ Load average time list for name then load from there"""
-       # Load ObsAverageTimes.txt
+       #Load ObsAverageTimes.txt
        avg_obs_time = "2012-04-07T00:20:00"
        date = avg_obs_time[0:11]
        time = avg_obs_time[12:20]
