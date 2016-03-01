@@ -457,7 +457,7 @@ def split_telluric_stellar(params, num_stellar):
     #print("line_params in func", line_params)
     #print("stellar_params in func", stellar_params)
     #print("len linelist", len(line_params), "len stellar line params", 
-    #    len(stellar_params), "params length", len(params))
+    #len(stellar_params), "params length", len(params))
     assert len(line_params)%3 is 0, "Line list is not correct length"
     assert len(stellar_params)%3 is 0, "Stellar line list not correct length"
     return line_params, stellar_params,
@@ -510,15 +510,15 @@ def upper_quartile(nums):
         #print("upper quartile value", uq)
     return upq
 
-def slice_percentage(wl, spectrum, pos, prcnt=0.15):
+def slice_percentage(wl, spectrum, pos, perecnt=0.15):
     """ Extract a section of a spectrum around a given wavelenght position. 
         percnt is the percentage lenght of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
         """
     span = np.abs(wl[-1] - wl[0])
-    print("Span Size", span)
-    print("pos", pos, type(pos))
-    print("percent", prcnt, type(prcnt))
+    #print("Span Size", span)
+    #print("pos", pos, type(pos))
+    #print("percent", prcnt, type(prcnt))
     map1 = wl > (pos - (prcnt/2)*span)
     map2 = wl < (pos + (prcnt/2)*span)
     wl_sec = wl[map1*map2]
@@ -530,10 +530,8 @@ def slice_spectra(wl, spectrum, low, high):
         percnt is the percentage lenght of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
         """
-    #span = np.abs(wl[-1] - wl[0])
-    #print("Span Size", span)
-    print("lower bound", low)
-    print("upper bound", high)
+    #print("lower bound", low)
+    #print("upper bound", high)
     map1 = wl > low
     map2 = wl < high
     wl_sec = wl[map1*map2]
@@ -547,6 +545,7 @@ def inputer(question):
     print(question)
     ans = input("")
     return ans
+
 #######################################################################
 #                                                                     #
 #                        # Plotting Functions                         #
@@ -592,9 +591,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         ax1.plot(wl_b, hor*np.ones_like(wl_b), "k-.")
     ax1.plot(wl_b, spec_b, "k", label="Spectra B", lw=2)
     ax1.set_xlim(np.min(wl_b), np.max(wl_b))
-    #if init_params_b is not None:
-    #    guessfit_b = func_for_plotting(wl_b, init_params_b)
-    #    ax1.plot(wl_b, guessfit_b, "c.", label="Guess Fit", lw=2)
+
     if paramsB is not None:      
         returnfit_b = func_for_plotting(wl_b, paramsB)
         ax1.plot(wl_b, returnfit_b, "r-", label="Fit", lw=2)
@@ -613,13 +610,10 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     # plot also on ax1 for legend
     ax1.plot(wl_a, spec_a, "g-", label="Spectra A", lw=2) # for label
     ax2.set_xlim(np.min(wl_a), np.max(wl_a))
-    #if init_params_a is not None:
-    #    guessfit_a = func_for_plotting(wl_a, init_params_a)
-    #   ax2.plot(wl_a, guessfit_a, "g.", label="Guess Fit", lw=2) 
+    
     if paramsA is not None:
         returnfit_a = func_for_plotting(wl_a, paramsA)
         ax2.plot(wl_a, returnfit_a, "m-", label="Fit A", lw=2)
-        # plot also on ax1 for legend
         ax1.plot(wl_a, returnfit_a, "m-", label="Fit A", lw=2)
     ax2.set_xlabel("2nd axis")
 
@@ -690,7 +684,6 @@ def overlay_fitting(wl_a,  spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     ax2.set_title("TAPAS Telluric Spectra")
     ax2.set_xlabel("Wavelength (nm)")
     ax2.get_xaxis().get_major_formatter().set_useOffset(False)
-    #ax2.get_xaxis().get_major_formatter().set_scientific(False)
     ax2.legend(loc="best")
     
     if show_plot:
@@ -803,9 +796,7 @@ if __name__ == "__main__":
                                        CoordsA, Calibdata[0], Calibdata[1],
                                        CoordsB)
     
-    
-     # to continue on with the wavelength maping 
-    #('Good coords val = ', ([58.751104497854982, 81.658541491501651, 189.34108796650241, 583.07310836733564, 674.44574875440139, 688.75467383238379, 715.71056015872659, 741.04649082758874, 755.65385861534787, 971.61400877925826], [2112.5013784537928, 2112.7671666575789, 2114.0161400469569, 2118.5337956108197, 2119.5747945058301, 2119.7372298600226, 2120.0462545073347, 2120.3424115686403, 2120.505718389647, 2122.9485968267259]))
+    # to continue on with the wavelength maping 
     good_coords_a = [58.751104497854982, 81.658541491501651, 189.34108796650241, 583.07310836733564, 674.44574875440139, 688.75467383238379, 715.71056015872659, 741.04649082758874, 755.65385861534787, 971.61400877925826]
     good_coords_b = [2112.5013784537928, 2112.7671666575789, 2114.0161400469569, 2118.5337956108197, 2119.5747945058301, 2119.7372298600226, 2120.0462545073347, 2120.3424115686403, 2120.505718389647, 2122.9485968267259]
     print("Skipping ahead to wavelength mapping part")
