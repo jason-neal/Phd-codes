@@ -66,7 +66,7 @@ def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
 #     return None
 def airmass_scaling(spectra, spec_airmass, obs_airmass):
     """Scale the Telluric spectra to match the airmass of the observation"""
-    B = obs_airmass/spec_airmass
+    B = obs_airmass / spec_airmass
     new_spec = spectra ** B
     return new_spec 
 
@@ -99,11 +99,12 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     Correction_Bs.append(1)
     Correction_tells.append(interped_tell)
     Correction_labels.append("No Airmass B Correction")
-
+ 
     B = obs_airmass/tell_airmass
-    print("Airmass Ratio B = ", B)
+    print("Airmass scaling Ratio B = ", B)
 
-    new_tell = interped_tell ** B
+    #new_tell = interped_tell ** B
+    new_tell = airmass_scaling(interped_tell, tell_airmass, obs_airmass)
     corr_spec = divide_spectra(spec_obs, new_tell) # Divide by telluric spectra
 
     Corrections.append(corr_spec)
@@ -145,7 +146,7 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
     """
     Find Optimal B that scales the telluric spectra to best match the
     intesity of the observed spectra
-    
+
     """
     blist = np.linspace(0.10, 1.5, 500)
     subtracts = []
@@ -290,17 +291,26 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
     datetime = hdr["DATE-OBS"]
     airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
     airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
-    obs_airmass = (airmass_start + airmass_end)/2
-    print("Starting Airmass", airmass_start, "Ending Airmass", airmass_end)
+    obs_airmass = (airmass_start + airmass_end) / 2
+    print("Starting Airmass", airmass_start, "\nEnding Airmass", airmass_end)
+    
     obsdate, obstime = datetime.split("T")
     obstime, __ = obstime.split(".")
     tellpath = "/home/jneal/Phd/data/Tapas/"
     tellname = obt.get_telluric_name(tellpath, obsdate, obstime) 
-    print("tell name", tellname)
+    print("Returned Mathching filenames", tellname)
     
+    assert len(tellname) < 2, "Multiple tapas filenames match"
+
+
     tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
+    #print("Telluric Header ", tell_hdr)
     tell_airmass = float(tell_hdr["airmass"])
+    print("Observation Airmass ", obs_airmass)
     print("Telluric Airmass ", tell_airmass)
+    tell_respower = int(float((tell_hdr["respower"])))
+    print("Telluric Resolution Power =", tell_respower)
+    
     wl_lower = np.min(wl/1.0001)
     wl_upper = np.max(wl*1.0001)
     tell_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
@@ -329,6 +339,7 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
         plt.plot(wl, tell, linewidth=2, label=("Telluric " + label + ", B = {0:.3f}".format(B)))
         plt.plot(wl, np.ones_like(wl), "-.")
         plt.legend(loc="best")
+        plt.title("Telluric Scaling with Tapas Resolution power = {}".format(tell_respower))
 
     plt.figure() # Corrections
     plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
@@ -337,6 +348,7 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
         #plt.plot(wl, tell, label=("Telluric " + label + ", B = {0:.2f}".format(B)))
         plt.plot(wl, np.ones_like(wl), "-.")
         plt.legend(loc="best")
+        plt.title("Telluric Corrections with tapas Resolution power = {}".format(tell_respower))
 
 
     plt.show()
