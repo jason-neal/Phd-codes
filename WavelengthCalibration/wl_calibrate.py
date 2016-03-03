@@ -80,7 +80,18 @@ def export_wavecal_2fits(filename, wavelength, spectrum, pixelpos, hdr, hdrkeys,
     prihdu = fits.PrimaryHDU(header=prihdr)
     thdulist = fits.HDUList([prihdu, tbhdu])
     #print("Writing to fits file")
-    thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
+    try:
+        thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
+    except IOError:
+        print("A calibtration already exists. What do you want to do?")
+        ans = input(" o-Overwrite, a-append number")
+        if ans.lower() == "o":
+            os.rename(filename, filename + "_old")
+            thdulist.writeto(filename, output_verify="silentfix")
+        elif ans.lower() == "a":
+            thdulist.writeto(filename+"_new", output_verify="silentfix")
+        else: 
+            print("Did not append to name or overwrite fits file")    
     return None
 
 # could make new module for fits handlers like this
@@ -100,6 +111,13 @@ def append_hdr(hdr, keys, values ,item=0):
             hdr[keys[i]] = values[i]
             print(repr(hdr[-2:10]))
     return hdr
+
+def save_calibration_coords(filename, pixels, wavelengths ,linedepths):
+    with open(filename,"w") as f:
+        f.write("# Pixels \t Wavelengths \t Line depths\n")
+        for pxls, wl, depth in zip(pixels, wavelengths, linedepths):
+           f.write("{} \t {} \t {} \n".format(int(pxls), round(wl, 4), round(1 - depth, 3)))
+    return None
 
 def main(fname, output=False, telluric=False, model=False):
     homedir = os.getcwd()
@@ -240,7 +258,6 @@ def main(fname, output=False, telluric=False, model=False):
     plt.legend()
     plt.show(block=False)
 
-
     # Save output now
     #Do you want to fine turn this calibration?
     ans = input("Do you want to finetune the calibtration?\n")
@@ -260,12 +277,13 @@ def main(fname, output=False, telluric=False, model=False):
         plt.ylabel("Normalized Intensity")
         plt.legend()
         plt.show(block=True)
- 
+    
+        print(" Warning - at this stage the fine tuning does not get saved.")
     # This to possible tune,  sample_num, ratio, increment        
     else:
         print("Did not fine tune calibration with Xcorr")
     #Do you want to save this output?
-    ans = input("Do you want to save this calibration?\n")
+    ans = input("Do you want to save the calibration?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         os.chdir(homedir)   # to make sure saving where running
         if output:  
@@ -281,10 +299,16 @@ def main(fname, output=False, telluric=False, model=False):
                    (wl_map[1], "Linear term"), (wl_map[2], "Constant term")]
                 ###### ADD OTHER parameter need to store above - estimated errors of fitting?
         export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], uncalib_data[0], hdr, hdrkeys, hdrvals)
+        
+        # Save calibration values to a txt file
+        coord_txt_fname = "Coordinates_" + fname[:-5] + ".txt"
+        save_calibration_coords(coord_txt_fname, good_a, good_b, peaks_a)
+
         print("Succesfully saved calibration to file -".format(Output_filename))
     else:
         print("Did not save calibration to file.")
     
+
     ans = input("Do you want to observe the line depths?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
     # observe heights of fitted peaks
