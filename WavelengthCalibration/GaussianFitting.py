@@ -510,7 +510,7 @@ def upper_quartile(nums):
         #print("upper quartile value", uq)
     return upq
 
-def slice_percentage(wl, spectrum, pos, perecnt=0.15):
+def slice_percentage(wl, spectrum, pos, percent=0.15):
     """ Extract a section of a spectrum around a given wavelenght position. 
         percnt is the percentage lenght of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
@@ -518,9 +518,9 @@ def slice_percentage(wl, spectrum, pos, perecnt=0.15):
     span = np.abs(wl[-1] - wl[0])
     #print("Span Size", span)
     #print("pos", pos, type(pos))
-    #print("percent", prcnt, type(prcnt))
-    map1 = wl > (pos - (prcnt/2)*span)
-    map2 = wl < (pos + (prcnt/2)*span)
+    #print("percent", percent, type(percent))
+    map1 = wl > (pos - (percent/2)*span)
+    map2 = wl < (pos + (percent/2)*span)
     wl_sec = wl[map1*map2]
     spectrum_sec = spectrum[map1*map2]   
     return wl_sec, spectrum_sec 
@@ -836,7 +836,7 @@ if __name__ == "__main__":
         # init_params += [Coords[i][0], Coords[i][1] ,sig]
 
 
-    #prcnt = 0.05
+    #percent = 0.05
     #Span_A = np.abs(wl_a[-1]-wl_a[0])
     #Span_B = np.abs(wl_b[-1]-wl_b[0])
     ##print("SpanA", Span_A,type(Span_A), "SpanB", Span_B,type(Span_B))
@@ -846,10 +846,10 @@ if __name__ == "__main__":
       # # print(" coordsA", CoordsA,"type",type(CoordsA))
       # # print("wl_b ", type(wl_b))
       # # print("CoordsB",CoordsB, "type",type(CoordsB))
-       #  wl_a_up = CoordsA[i] + (prcnt/2)*Span_A
-       #  wl_a_low = CoordsA[i] - (prcnt/2)*Span_A
-       #  wl_b_up = CoordsB[i] + (prcnt/2)*Span_B
-       #  wl_b_low = CoordsB[i] - (prcnt/2)*Span_B
+       #  wl_a_up = CoordsA[i] + (percent/2)*Span_A
+       #  wl_a_low = CoordsA[i] - (percent/2)*Span_A
+       #  wl_b_up = CoordsB[i] + (percent/2)*Span_B
+       #  wl_b_low = CoordsB[i] - (percent/2)*Span_B
        #  mapA1 = wl_a > wl_a_low
        #  mapA2 = wl_a < wl_a_up
        #  mapB1 = wl_b > wl_b_low
@@ -898,8 +898,8 @@ if __name__ == "__main__":
 
 # Old code from extract chunks
 
-    #wl_up = wlpos + (prcnt/2)*Span
-    #wl_low = wlpos - (prcnt/2)*Span
+    #wl_up = wlpos + (percent/2)*Span
+    #wl_low = wlpos - (percent/2)*Span
     #map1 = wl > wl_low
     
     #map2 = wl < wl_up
