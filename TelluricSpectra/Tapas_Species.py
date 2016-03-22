@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #Tapas Species
 #Test Joining a Separated Tapas sectra
 # Want to plot all 4 chips to see what liens are present.
@@ -11,7 +13,7 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 
 
-tapas_path = "/home/jason/Desktop/Shared Files/Tapas/Tapas_march2016/HD30501_1_separated/"
+tapas_path = "/home/jason/Phd/data/Tapas/Tapas_march2016/HD30501_1_separated/"
 
 filenames = ["tapas_00000{0}.ipac".format(i+1) for i in range(6)]
 
