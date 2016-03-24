@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """ Script to run wavelength calibration on input fits file"""
-from __future__ import division, print_function
+#from __future__ import division, print_function
 
 import os
 import time
