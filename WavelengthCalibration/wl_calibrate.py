@@ -37,6 +37,8 @@ def _parser():
                        help='Telluric line Calibrator')
     parser.add_argument('-m', '--model', default=False,
                        help='Stellar Model')
+    parser.add_argument('-r', '--ref', default=False,
+                       help='Reference Object with different RV') # The other observation to identify shifted lines
     #parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
     #parser.add_argument('fname',
     #                    action='store',
@@ -112,21 +114,21 @@ def append_hdr(hdr, keys, values ,item=0):
             print(repr(hdr[-2:10]))
     return hdr
 
-def save_calibration_coords(filename, pixels, wavelengths ,linedepths):
+def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
     with open(filename,"w") as f:
-        f.write("# Pixels \t Wavelengths \t Line depths\n")
-        for pxls, wl, depth in zip(pixels, wavelengths, linedepths):
-           f.write("{} \t {} \t {} \n".format(int(pxls), round(wl, 4), round(1 - depth, 3)))
+        f.write("# Pixels  \t Obs Depths \t Obs STD \t Wavelengths \t Tell depths \t Tell STD\n")
+        for pixel, obs_depth, obs_std, wl, wl_depth, wl_std in zip(obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
+           f.write("{} \t {} \t {} \t {} \t {} \t {} \n".format(round(pixel, 4), round(1-obs_depth, 4), round(obs_std, 4), round(wl, 4), round(1-wl_depth, 4), round(wl_std, 4)))
     return None
 
-def main(fname, output=False, telluric=False, model=False):
+def main(fname, output=False, telluric=False, model=False, ref=False):
     homedir = os.getcwd()
     print("Input name", fname)
     print("Output name", output)
    
     data = fits.getdata(fname)
 
-    test0 = ".ms.norm.comb.fits" in fname
+    test0 = ".ms.norm.comb.fits" in fname  # from python combination
     test1 = ".ms.sum.norm.fits" in fname
     test2 = ".ms.Apos.norm.fits" in fname
     test3 = ".ms.Bpos.norm.fits" in fname
@@ -176,6 +178,11 @@ def main(fname, output=False, telluric=False, model=False):
     calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
     gf.print_fit_instructions()  # Instructions on how to calibrate
+    if ref:  # Reference object spectra to possibly identify shifted/blended lines
+        I_ref = fits.getdata(ref)
+        w_ref = range(1,1025)
+        maxes = I_ref[(I_ref < 1.2)].argsort()[-50:][::-1]
+        I_ref /= np.median(I_ref[maxes])
 
     if model:
         modelpath = "/home/jneal/Phd/data/phoenixmodels/"
@@ -214,11 +221,15 @@ def main(fname, output=False, telluric=False, model=False):
     rough_x_a = [coord[0] for coord in rough_a]
     rough_x_b = [coord[0] for coord in rough_b]
     if model:
-        good_a, peaks_a, good_b, peaks_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+        good_a, peaks_a, std_a, good_b, peaks_b, std_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b, model=[w_mod, I_mod])
+    elif ref:
+        good_a, peaks_a, std_a, good_b, peaks_b, std_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+                                       rough_x_a, calib_data[0], calib_data[1],
+                                       rough_x_b, ref=[w_ref, I_ref])
     else:
-        good_a, peaks_a, good_b, peaks_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+        good_a, peaks_a, std_a, good_b, peaks_b, std_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b)
     
@@ -278,7 +289,7 @@ def main(fname, output=False, telluric=False, model=False):
         plt.legend()
         plt.show(block=True)
     
-        print(" Warning - at this stage the fine tuning does not get saved.")
+        print("Warning - at this stage the fine tuning does not get saved.")
     # This to possible tune,  sample_num, ratio, increment        
     else:
         print("Did not fine tune calibration with Xcorr")
@@ -302,8 +313,9 @@ def main(fname, output=False, telluric=False, model=False):
         
         # Save calibration values to a txt file
         coord_txt_fname = "Coordinates_" + fname[:-5] + ".txt"
-        save_calibration_coords(coord_txt_fname, good_a, good_b, peaks_a)
-
+         
+        save_calibration_coords(coord_txt_fname, good_a, std_a, peaks_a, good_b, peaks_b, std_a)
+        #save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs)
         print("Succesfully saved calibration to file -".format(Output_filename))
     else:
         print("Did not save calibration to file.")
