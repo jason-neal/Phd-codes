@@ -62,7 +62,7 @@ def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
 
 def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra", 
                     points_a=None, points_b=None, textloc=False, text=False, 
-                    model=False):
+                    model=False, ref=False):
     """ Obtains Coordinates of clicked points on the plot of spectra.
      The blue plot is the plot to click on to get peak coordinates
      the black plot is the other spectra to compare against.
@@ -100,13 +100,19 @@ def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
                 ax1.set_ylim(0, 1.2)
             else:
                 ax1.set_ylim(0, np.max([amax, bmax]) + 0.02)
+        else:
+            ax1.set_ylim(np.min([amin, bmin, 0.95])-0.02, np.max([amax, bmax]) + 0.02)
+
+        if ref:
+            ax1.plot(ref[0], ref[1], 'm', label="Ref spectrum")
+            ax2.plot(ref[0], ref[1], 'm', label="Ref spectrum")        
 
         if model:
-            ax1.plot(model[0],model[1], 'r', label="Model spectrum")
-            ax2.plot(model[0],model[1], 'r', label="Model spectrum")
+            ax1.plot(model[0], model[1], 'r', label="Model spectrum")
+            ax2.plot(model[0], model[1], 'r', label="Model spectrum")
         
         ax2.set_xlim(np.min(wl_a), np.max(wl_a))
-        ax2.legend()        ### ISSUES with legend
+        ax2.legend(loc='best')        ### ISSUES with legend
 
         if points_a is not None:
             xpoints = []
@@ -180,14 +186,16 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
     assert len(params) is len(init_params), "len(Params) do not match"     
     return params
 
-def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model=False):
-    """ Returns the positions of matching peaks for calibration map
+def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model=False, ref=False):
+    """ Returns the parameters of matching peaks for calibration map
 
     """
     best_a_coords = []
     best_a_peaks = []
+    best_a_std = []
     best_b_coords = []
     best_b_peaks = []
+    best_b_std = []
 
     wl_a = np.array(wl_a)      # make sure all are numpy arrays
     spec_a = np.array(spec_a)  # make sure all are numpy arrays
@@ -222,12 +230,12 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                 a_coords = get_coords(wl_a_sec, sect_a, wl_b_sec, sect_b,
                                            title="Select Spectra Lines",
                                            textloc= (np.median(wl_a_sec), max(min(sect_a), 0.5)),
-                                           text="Choose lines for calibration", model=model)  #(x,y)'s
+                                           text="Choose lines for calibration", model=model, ref=ref)  #(x,y)'s
                 b_coords = get_coords(wl_b_sec, sect_b, wl_a_sec, sect_a,
                                            title="Select Telluric Lines", 
                                            points_b=a_coords,
                                            textloc= (np.median(wl_b_sec), max(min(sect_b), 0.5)),
-                                           text="Choose lines to calibrate with", model=model)
+                                           text="Choose lines to calibrate with", model=model, ref=ref)
                 print("Returned a_coords = ", a_coords)
                 print("Returned b_coords = ", b_coords)
             
@@ -347,6 +355,8 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                     best_b_coords.append(coord_b[0])
                     best_a_peaks.append(coord_a[1])
                     best_b_peaks.append(coord_b[1])
+                    best_a_std.append(coord_a[2])
+                    best_b_std.append(coord_b[2])
 
             # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
             # no - individually ask if want want each line included and append if yes
@@ -358,7 +368,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             print("best_a_coords", best_a_coords)
             print("best_b_coords", best_b_coords)
             plt.close(fig)
-    return best_a_coords, best_a_peaks, best_b_coords, best_b_peaks
+    return best_a_coords, best_a_peaks, best_a_std, best_b_coords, best_b_peaks, best_b_std
 
 
 #######################################################################
@@ -493,7 +503,8 @@ def params2coords(params):
     for i in range(0, len(params), 3):
         xpos = params[i]
         ypos = params[i+1]
-        coords.append((xpos, 1-ypos))
+        std = params[i+2]
+        coords.append((xpos, 1-ypos, std))
     return coords
 
 def upper_quartile(nums):
@@ -563,7 +574,7 @@ def plot_fit(wl, Spec, params, init_params=None, title=None):
     returnfit = func_for_plotting(wl, params)
     plt.plot(wl, returnfit, label="Fitted Lines")
     plt.title(title)
-    plt.legend(loc=0)
+    plt.legend(loc='best')
     # Stopping scientific notation offset in wavelength
     plt.get_xaxis().get_major_formatter().set_useOffset(False)
       
@@ -605,7 +616,8 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         for xpos in best_b:
             print("Xpos", xpos)
             ax1.plot(xpos, 1, "kx", ms=20, label="already picked", lw=4)
-    
+            ax1.vlines(xpos, .1, 1, colors="k", lw=4)
+
     ax2.plot(wl_a, spec_a, "g-", label="Spectra A", lw=2)
     # plot also on ax1 for legend
     ax1.plot(wl_a, spec_a, "g-", label="Spectra A", lw=2) # for label
@@ -643,7 +655,8 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         for xpos in best_a:
             print("Xpos", xpos)
             ax2.plot(xpos, 1, "kx", ms=20, lw=5, label="Already picked line")
-    ax1.legend(loc="best")
+            ax2.vlines(xpos, .1, 1, colors="k", lw=4)
+    #ax1.legend(loc="best")
     
     if textloc and text:
         """ display text on the plot"""
@@ -738,7 +751,7 @@ def wavelength_mapping(pixels, wavelengths, order=2):
     plt.plot(pixels, wavelengths , 'ko',lw=4, ms=7, label="Points")
     plt.plot(range(1,1025), wlvals, "-.r", lw=3, label="wl map fit")
     plt.title("Plot fitted points and different fits")
-    plt.legend()
+    plt.legend(loc='best')
     plt.show(block=False)
     
     #generate mapped wavelength values for the pixel positions
