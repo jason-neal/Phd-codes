@@ -121,7 +121,7 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
            f.write("{} \t {} \t {} \t {} \t {} \t {} \n".format(round(pixel, 4), round(1-obs_depth, 4), round(obs_std, 4), round(wl, 4), round(1-wl_depth, 4), round(wl_std, 4)))
     return None
 
-def main(fname, output=False, telluric=False, model=False, ref=False):
+def main(fname, output=None, telluric=None, model=None, ref=None):
     homedir = os.getcwd()
     print("Input name", fname)
     print("Output name", output)
@@ -155,13 +155,17 @@ def main(fname, output=False, telluric=False, model=False, ref=False):
     
     obsdate, obstime = datetime.split("T")
     obstime, __ = obstime.split(".")
-
-    tellpath = "/home/jneal/Phd/data/Tapas/"
-    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
-    print("Telluric Name", tellname)
     
-    # Telluric spectra is way to long, need to reduce it to similar size as ccd    
-    tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
+    if telluric:  # manually spcified telluric line
+        tellpath = os.getcwd() + "/"
+        tell_data, tell_header = obt.load_telluric(tellpath, telluric)
+    else:
+        tellpath = "/home/jneal/Phd/data/Tapas/"
+        tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
+        print("Telluric Name", tellname)
+    
+        # Telluric spectra is way to long, need to reduce it to similar size as ccd    
+        tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
     
     # Scale telluric lines to airmass
     start_airmass = hdr["HIERARCH ESO TEL AIRM START"]
