@@ -17,7 +17,9 @@ tapas_path = "/home/jason/Phd/data/Tapas/Tapas_march2016/HD30501_1_separated/"
 
 filenames = ["tapas_00000{0}.ipac".format(i+1) for i in range(6)]
 
-cr_name = r"/home/jason/MyCodes/Phd-codes/TelluricSpectra/CRIRE.2012-04-07T00%3A08%3A29.976_1.nod.ms.sum.norm.wavecal.fits"
+#cr_name = r"/home/jason/MyCodes/Phd-codes/TelluricSpectra/CRIRE.2012-04-07T00%3A08%3A29.976_1.nod.ms.sum.norm.wavecal.fits"
+cr_name = r"/home/jason/Phd/Codes/Phd-codes/TelluricSpectra/CRIRE.2012-04-07T00%3A08%3A29.976_1.nod.ms.sum.norm.wavecal.fits"
+
 cr_data = fits.getdata(cr_name)
 wl = cr_data["Wavelength"] 
 I = cr_data["Extracted_DRACS"]
