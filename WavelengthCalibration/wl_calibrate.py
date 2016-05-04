@@ -160,12 +160,13 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
         tellpath = os.getcwd() + "/"
         tell_data, tell_header = obt.load_telluric(tellpath, telluric)
     else:
-        tellpath = "/home/jneal/Phd/data/Tapas/"
-        tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
-        print("Telluric Name", tellname)
+        raise("Please specify the telluric line model to calibrate against.")
+    #    tellpath = "/home/jneal/Phd/data/Tapas/"
+    #    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
+    #    print("Telluric Name", tellname)
     
         # Telluric spectra is way to long, need to reduce it to similar size as ccd    
-        tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
+    #    tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
     
     # Scale telluric lines to airmass
     start_airmass = hdr["HIERARCH ESO TEL AIRM START"]
