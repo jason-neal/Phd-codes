@@ -521,7 +521,7 @@ def upper_quartile(nums):
         #print("upper quartile value", uq)
     return upq
 
-def slice_percentage(wl, spectrum, pos, percent=0.15):
+def slice_percentage(wl, spectrum, pos, percent=0.20):
     """ Extract a section of a spectrum around a given wavelenght position. 
         percnt is the percentage lenght of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
@@ -616,7 +616,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         for xpos in best_b:
             print("Xpos", xpos)
             ax1.plot(xpos, 1, "kx", ms=20, label="already picked", lw=4)
-            ax1.vlines(xpos, .1, 1, colors="k", lw=4)
+            ax1.vlines(xpos, .9, 1, colors="k", lw=4)
 
     ax2.plot(wl_a, spec_a, "g-", label="Spectra A", lw=2)
     # plot also on ax1 for legend
@@ -655,7 +655,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         for xpos in best_a:
             print("Xpos", xpos)
             ax2.plot(xpos, 1, "kx", ms=20, lw=5, label="Already picked line")
-            ax2.vlines(xpos, .1, 1, colors="k", lw=4)
+            ax2.vlines(xpos, .9, 1, colors="k", lw=4)
     #ax1.legend(loc="best")
     
     if textloc and text:
