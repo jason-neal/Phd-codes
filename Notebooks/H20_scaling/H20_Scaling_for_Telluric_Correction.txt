@@ -1,17 +1,4 @@
 
-# coding: utf-8
-
-# # H20 Scaling for Telluric Correction
-# 
-# Notebook for developing ideas to go into TellRemoval code.
-# 
-# Need to apply scaling of T^x to transmision of water at full resolving power and then apply a kernal to apply in at resolution of CRIRES.
-# 
-# Fit to the observed data (Probably with the other lines removed) to fnd the best x to apply for the correction. (Gives flatest result or zero linewidth.) 
-# 
-
-# In[1]:
-
 ### Load modules and Bokeh
 # Imports from __future__ in case we're running Python 2
 from __future__ import division, print_function
@@ -25,7 +12,7 @@ from astropy.io import fits
 import seaborn as sns
 
 # Magic function to make matplotlib inline; other style specs must come AFTER
-get_ipython().magic('matplotlib inline')
+%matplotlib inline
 
 # Import Bokeh modules for interactive plotting
 import bokeh.io
@@ -33,7 +20,7 @@ import bokeh.mpl
 import bokeh.plotting
 
 # This enables SVG graphics inline.  There is a bug, so uncomment if it works.
-get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
+%config InlineBackend.figure_formats = {'svg',}
 
 # This enables high resolution PNGs. SVG is preferred, but has problems
 # rendering vertical and horizontal lines
@@ -49,11 +36,6 @@ sns.set_style('darkgrid', rc=rc)
 
 # Set up Bokeh for inline viewing
 bokeh.io.output_notebook()
-
-
-# ### Load in Observed Data
-
-# In[2]:
 
 chip1 = "CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.fits"
 chip2 = "CRIRE.2012-04-07T00-08-29.976_2.nod.ms.norm.sum.wavecal.fits"
@@ -88,22 +70,12 @@ obs_airmass = (start_airmass + end_airmass) / 2
 print("Data from Detectors is now loaded")
 
 
-# In[3]:
-
 ## Rough berv correction until input calibrated file is calibrated with non berv tapas 
-
-
-# In[4]:
 
 wl1 = wl1-.5   #including rough berv correction
 wl2 = wl2-.54  #including rough berv correction
 wl3 = wl3-.55  #including rough berv correction
 wl4 = wl4-.7
-
-
-# ### Load in the tapas data
-
-# In[5]:
 
 import Obtain_Telluric as obt
 tapas_all = "tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
@@ -137,12 +109,6 @@ print("Telluric Resolution Power =", tapas_not_h20_respower)
     
 
 
-# ### Plot the data
-# Including the 3 tapas models to show they align well and are consistent.
-# 
-
-# In[6]:
-
 plt.plot(wl1, I1_uncorr, 'b') #including rough berv correction
 plt.plot(wl2, I2_uncorr, 'b') #including rough berv correction
 plt.plot(wl3, I3_uncorr, 'b') #including rough berv correction
@@ -155,13 +121,6 @@ plt.plot(tapas_not_h20_data[0], tapas_not_h20_data[1], "-.g", label="Not H20")
 
 # Make it interactive with Bokeh
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
-
-
-# ### Remove non-H20 lines
-# (Use telluric removal modules)
-# And plot the result.  
-
-# In[7]:
 
 
 from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
@@ -197,11 +156,6 @@ plt.plot(tapas_not_h20_data[0], tapas_not_h20_data[1], "k")
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# ### Convole instrument profile function:
-# To use inside fit
-
-# In[8]:
-
 def colvolution_function(wl, I, respower):
     return I_conv
 
@@ -214,12 +168,7 @@ from PyAstronomy import pyasl
 
 
 
-# In[9]:
-
 #print(hdr3)
-
-
-# In[8]:
 
 ## Convolution from Pedro NIR analysis code
 
@@ -320,11 +269,6 @@ def convolution_nir(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
         plt.show() 
     return wav_chip, flux_conv_res
 
-
-# # Test convolution
-
-# In[ ]:
-
 import time
 start = time.time()
 print("start time", start)
@@ -335,9 +279,6 @@ done = time.time()
 elapsed = done - start
 print("Convolution time = ", elapsed)
 
-
-# In[ ]:
-
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
 plt.plot(x,y, "r")
 plt.xlabel("Wavelength (nm)")
@@ -347,27 +288,15 @@ plt.show()
 # Make it interactive with Bokeh
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
-
-# In[10]:
-
 print("test")
 
 
-# In[ ]:
-
-
-
-
-# In[11]:
 
 # Try parrellel processing for the convolution
 
 # from math import sqrt
 # from joblib import Parallel, delayed
 # Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
-
-
-# In[9]:
 
 from math import sqrt
 from joblib import Parallel, delayed
@@ -424,7 +353,7 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
     
     
     #parallel_result = Parallel(n_jobs=2)(delayed(lambda_funct)(wav) for wav in wav_chip)
-    parallel_result = Parallel(n_jobs=2)(delayed(convolve)(wav,R,wav_extended, flux_extended,FWHM_lim) for wav in wav_chip)
+    parallel_result = Parallel(n_jobs=1)(delayed(convolve)(wav,R,wav_extended, flux_extended,FWHM_lim) for wav in wav_chip)
     flux_conv_res = np.array(parallel_result, dtype="float64")
     print("Done.\n")
     
@@ -432,24 +361,23 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
     return wav_chip, flux_conv_res 
 print("function done")
 
-
-# In[ ]:
-
 import time
+import datetime
 start = time.time()
-print("start time", start)
+print("start time", datetime.datetime.now().time())
 
 parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
   
 done = time.time()
+print("end time", datetime.datetime.now().time())
 elapsed = done - start
 print("Convolution time = ", elapsed)
 
 
-# 
-# Convolution time =  868.3053071498871  # parallel code 1 process
+### Need to try running this code as a script not in the notebook to see if it works and is faster.
+#Will be benificial if trying to find the best scaling factor
 
-# In[ ]:
+#Maybe good idea to find a general rule of thumb for height/depth of lines need to get to 
 
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
 plt.plot(x,y, "r")
@@ -461,21 +389,6 @@ plt.show()
 # Make it interactive with Bokeh
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
-
-# ### Fit best scaling power.
-# Does each chip need a differnet scaling power?
-# 
-
-# In[ ]:
-
-
-
-
-# ### Apply correction with best scaling power:
-# 
-# And plot the result.
-
-# In[ ]:
 
 
 
