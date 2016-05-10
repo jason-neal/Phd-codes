@@ -25,7 +25,7 @@ from astropy.io import fits
 import seaborn as sns
 
 # Magic function to make matplotlib inline; other style specs must come AFTER
-get_ipython().magic('matplotlib inline')
+get_ipython().magic(u'matplotlib inline')
 
 # Import Bokeh modules for interactive plotting
 import bokeh.io
@@ -33,7 +33,7 @@ import bokeh.mpl
 import bokeh.plotting
 
 # This enables SVG graphics inline.  There is a bug, so uncomment if it works.
-get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
+get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
 
 # This enables high resolution PNGs. SVG is preferred, but has problems
 # rendering vertical and horizontal lines
@@ -219,7 +219,7 @@ from PyAstronomy import pyasl
 #print(hdr3)
 
 
-# In[8]:
+# In[10]:
 
 ## Convolution from Pedro NIR analysis code
 
@@ -323,27 +323,32 @@ def convolution_nir(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
 
 # # Test convolution
 
-# In[ ]:
+# In[11]:
 
 import time
+import datetime
 start = time.time()
 print("start time", start)
+print("start time", datetime.datetime.now().time())
 
 x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
   
 done = time.time()
+print("end time", datetime.datetime.now().time())
 elapsed = done - start
 print("Convolution time = ", elapsed)
 
 
-# In[ ]:
+# Time on work comp - 188.6781919 s  
+
+# In[16]:
 
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
-plt.plot(x,y, "r")
+plt.plot(x,y/np.max(y), "r")
 plt.xlabel("Wavelength (nm)")
 plt.ylabel("Flux")
 plt.title("Test of convolution")
-plt.show()
+#plt.show()
 # Make it interactive with Bokeh
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
@@ -367,7 +372,7 @@ print("test")
 # Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
 
 
-# In[9]:
+# In[28]:
 
 from math import sqrt
 from joblib import Parallel, delayed
@@ -381,17 +386,16 @@ def convolve(wav, R, wav_extended, flux_extended, FWHM_lim):
         val = np.sum(IP*flux_2convolve)
         return val
     
-def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
+def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, n_jobs=-1):
     """Convolution code adapted from pedros code"""
     
     wav_chip, flux_chip = chip_selector(wav, flux, chip)
     #we need to calculate the FWHM at this value in order to set the starting point for the convolution
     
-    print(wav_chip)
-    print(flux_chip)
+    #print(wav_chip)
+    #print(flux_chip)
     FWHM_min = wav_chip[0]/R    #FWHM at the extremes of vector
     FWHM_max = wav_chip[-1]/R       
-    
     
     #wide wavelength bin for the resolution_convolution
     wav_extended, flux_extended = wav_selector(wav, flux, wav_chip[0]-FWHM_lim*FWHM_min, wav_chip[-1]+FWHM_lim*FWHM_max) 
@@ -402,9 +406,10 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
     
     flux_conv_res = []
     counter = 0    
-    
+    # lambda doesnt work in parallel - it doesn't pickel 
     #lambda_funct = lambda x: convolve(x,R,wav_extended, flux_extended,FWHM_lim)
-   
+    #parallel_result = Parallel(n_jobs=-1)(delayed(lambda_funct)(wav) for wav in wav_chip)
+    
     #for wav in wav_chip:
     #    a = convolve(wav,R,wav_extended, flux_extended,FWHM_lim)
     #    a = lambda_funct(wav)
@@ -422,9 +427,7 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
     #   IP = unitary_Gauss(wav_extended[indexes[0]:indexes[-1]+1], wav, FWHM)
     #   flux_conv_res.append(np.sum(IP*flux_2convolve))
     
-    
-    #parallel_result = Parallel(n_jobs=2)(delayed(lambda_funct)(wav) for wav in wav_chip)
-    parallel_result = Parallel(n_jobs=2)(delayed(convolve)(wav,R,wav_extended, flux_extended,FWHM_lim) for wav in wav_chip)
+    parallel_result = Parallel(n_jobs=n_jobs)(delayed(convolve)(wav,R,wav_extended, flux_extended,FWHM_lim) for wav in wav_chip)
     flux_conv_res = np.array(parallel_result, dtype="float64")
     print("Done.\n")
     
@@ -433,31 +436,62 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
 print("function done")
 
 
-# In[ ]:
+# In[30]:
 
 import time
+import datetime
 start = time.time()
-print("start time", start)
+print("start time", datetime.datetime.now().time())
 
-parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
+parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, n_jobs=1)
   
 done = time.time()
+print("end time", datetime.datetime.now().time())
 elapsed = done - start
 print("Convolution time = ", elapsed)
 
 
-# 
-# Convolution time =  868.3053071498871  # parallel code 1 process
+### Need to try running this code as a script not in the notebook to see if it works and is faster.
+#Will be benificial if trying to find the best scaling factor
 
-# In[ ]:
+#Maybe good idea to find a general rule of thumb for height/depth of lines need to get to 
+
+
+# # Testing Parallel processing convolution times.
+# 
+# ### Windows laptop
+# Convolution time =  868.3053071498871   # parallel code 1 process
+# 
+# Convolution time =  981.6766209602356   # parallel 2 jobs, backend="threading"
+# 
+# Convolution time =  899.5289189815521   # parallel -1 jobs, backend="threading"
+# 
+# Convolution time =  2408.0208117961884  # parallel n_jobs=4, backend="threading"   ~40min
+# 
+# Convolution time =  983.7938089370728   # n_jobs=1, backend="threading"   ~16min
+# 
+# 
+# ### Linux Work comp
+# Convolution time =  54.9865338802               # n_jobs=-1
+# Convolution time =  184.560889959               # n_jobs=1      ~ 3 min
+# Convolution time =  99.8279280663               # n_jobs=2      ~ 1.5 min 
+# Convolution time =  68.0848469734               # n_jobs=3      ~ 1 min
+# Convolution time =  56.3469331264               # n_jobs=4      < 1 min
+# 
+# Convolution time =  253.075296164             # Work comp  # n_jobs=-1, backend="threading"
+# 
+# 
+# My conclusion is that joblib does a great job and increase the convolution speed for this task on linux. Threading is not good for this instance.
+
+# In[32]:
 
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
-plt.plot(x,y, "r")
-plt.plot(parallel_x,parallel_y, "--g")
+plt.plot(x,y/np.max(y), "r")
+plt.plot(parallel_x,parallel_y/np.max(parallel_y), "--g")
 plt.xlabel("Wavelength (nm)")
 plt.ylabel("Flux")
 plt.title("Test of convolution")
-plt.show()
+#plt.show()
 # Make it interactive with Bokeh
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
