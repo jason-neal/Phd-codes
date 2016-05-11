@@ -25,7 +25,7 @@ from astropy.io import fits
 import seaborn as sns
 
 # Magic function to make matplotlib inline; other style specs must come AFTER
-get_ipython().magic(u'matplotlib inline')
+get_ipython().magic('matplotlib inline')
 
 # Import Bokeh modules for interactive plotting
 import bokeh.io
@@ -33,7 +33,7 @@ import bokeh.mpl
 import bokeh.plotting
 
 # This enables SVG graphics inline.  There is a bug, so uncomment if it works.
-get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
+get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
 
 # This enables high resolution PNGs. SVG is preferred, but has problems
 # rendering vertical and horizontal lines
@@ -200,7 +200,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # ### Convole instrument profile function:
 # To use inside fit
 
-# In[8]:
+# In[ ]:
 
 def colvolution_function(wl, I, respower):
     return I_conv
@@ -214,12 +214,12 @@ from PyAstronomy import pyasl
 
 
 
-# In[9]:
+# In[ ]:
 
 #print(hdr3)
 
 
-# In[10]:
+# In[13]:
 
 ## Convolution from Pedro NIR analysis code
 
@@ -323,7 +323,7 @@ def convolution_nir(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
 
 # # Test convolution
 
-# In[11]:
+# In[15]:
 
 import time
 import datetime
@@ -331,7 +331,7 @@ start = time.time()
 print("start time", start)
 print("start time", datetime.datetime.now().time())
 
-x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
+x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "0", 50000, FWHM_lim=5.0, plot=True)
   
 done = time.time()
 print("end time", datetime.datetime.now().time())
@@ -340,6 +340,11 @@ print("Convolution time = ", elapsed)
 
 
 # Time on work comp - 188.6781919 s  
+
+# In[ ]:
+
+
+
 
 # In[16]:
 
@@ -372,7 +377,7 @@ print("test")
 # Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
 
 
-# In[28]:
+# In[11]:
 
 from math import sqrt
 from joblib import Parallel, delayed
@@ -436,14 +441,14 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, n_jobs=-1):
 print("function done")
 
 
-# In[30]:
+# In[12]:
 
 import time
 import datetime
 start = time.time()
 print("start time", datetime.datetime.now().time())
 
-parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, n_jobs=1)
+parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "0", 50000, FWHM_lim=5.0, n_jobs=1)
   
 done = time.time()
 print("end time", datetime.datetime.now().time())
@@ -455,6 +460,15 @@ print("Convolution time = ", elapsed)
 #Will be benificial if trying to find the best scaling factor
 
 #Maybe good idea to find a general rule of thumb for height/depth of lines need to get to 
+
+
+# In[ ]:
+
+#Saving a result for comparison
+
+with open("Convolved_50000_tapas_allchips.txt") as f:
+    for xx, yy in zip(parallel_x, parallel_y/np.max(parallel_y):
+        f.write("{} /t {}/n".format(xx,yy))
 
 
 # # Testing Parallel processing convolution times.
@@ -483,7 +497,7 @@ print("Convolution time = ", elapsed)
 # 
 # My conclusion is that joblib does a great job and increase the convolution speed for this task on linux. Threading is not good for this instance.
 
-# In[32]:
+# In[ ]:
 
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
 plt.plot(x,y/np.max(y), "r")
