@@ -188,6 +188,17 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
         print("Old detector limits", [old_wl_lower, old_wl_upper])
         print("New berv shifted detector limits", [wl_lower, wl_upper])
 
+    ### Air wavelengths 
+    # Convert for air wavelengths 
+        if tell_header["wavelength scale"] == "air":
+            # vac2air on the crires limits
+            wl_lower_vac = wl_lower
+            wl_upper_vac = wl_upper
+            wl_lower = pyasl.vactoair2(wl_lower)     
+            wl_upper = pyasl.vactoair2(wl_upper)
+
+            print("Vacuum detector limits", [wl_lower_vac, wl_upper_vac])
+            print("New berv shifted detector limits", [wl_lower, wl_upper])
     # Sliced to wavelength measurement of detector
     calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
