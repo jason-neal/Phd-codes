@@ -74,7 +74,12 @@ def load_telluric(tapas_path, filename):
                     tell_hdr[items[0]] = items[1] # Add to header
 
                 elif line.startswith("|"):
-                    continue    # skip pipes
+                    # Obtian wavelength scale from piped lines
+                    if "in air" in line:
+                        tell_hdr["wavelength scale"] = "air"
+                    elif "nm|" in line:
+                        tell_hdr["wavelength scale"] = "vacuum"
+                    # Need extra condition to deal with wavenumber
                 else:
                     line = line.strip()
                     val1, val2 = line.split()
@@ -84,6 +89,7 @@ def load_telluric(tapas_path, filename):
     elif ext == "fits":
         i_tell = fits.getdata(file_, 1)
         tell_hdr = fits.getheader(file_, 1)
+        # TODO ... Need to get wavelenght scale (air/wavelenght) from fits file somehow... 
         col1 = i_tell["wavelength"]
         col2 = i_tell["transmittance"]
 
