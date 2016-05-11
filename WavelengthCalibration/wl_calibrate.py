@@ -19,8 +19,8 @@ from TellRemoval import airmass_scaling
 import XCorrWaveCalScript as XCorrWaveCal
 #from plot_fits import get_wavelength
 
-
-
+from Tapas_Berv_corr import tapas_helcorr
+from PyAstronomy import pyasl
 #@Gooey(program_name='Plot fits - Easy 1D fits plotting', default_size=(610, 730))
 def _parser():
     """Take care of all the argparse stuff.
@@ -163,22 +163,31 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
         raise("Please specify the telluric line model to calibrate against.")
     #    tellpath = "/home/jneal/Phd/data/Tapas/"
     #    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
-    #    print("Telluric Name", tellname)
-    
-        # Telluric spectra is way to long, need to reduce it to similar size as ccd    
     #    tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
     
     # Scale telluric lines to airmass
-    start_airmass = hdr["HIERARCH ESO TEL AIRM START"]
-    end_airmass = hdr["HIERARCH ESO TEL AIRM END"]
-    obs_airmass = (start_airmass + end_airmass) / 2
+    obs_airmass = (hdr["HIERARCH ESO TEL AIRM START"] + hdr["HIERARCH ESO TEL AIRM END"]) / 2
     
-    #print(tell_header)
     tell_airmass = float(tell_header["airmass"])
-    #print(obs_airmass, type(obs_airmass))
-    #print(tell_airmass, type(tell_airmass))
+  
     tell_data[1] = airmass_scaling(tell_data[1], tell_airmass, obs_airmass)
     
+    if tell_header["barydone"] == "NO": 
+        ### BERV adjust from tapas the wl_limits to align the plotting
+        print("BERV adjustments")
+        old_wl_lower = wl_lower 
+        old_wl_upper = wl_upper
+        
+        tapas_berv_value = tapas_helcorr(tell_header)
+        print(tapas_berv_value)
+        # Doppler shift the detector limits
+        __ , wlprime= pyasl.dopplerShift(np.array([wl_lower, wl_upper]),np.array([1, 1]), -tapas_berv_value[0], edgeHandling=None, fillValue=None)
+        wl_lower = wlprime[0] 
+        wl_upper = wlprime[1]
+
+        print("Old detector limits", [old_wl_lower, old_wl_upper])
+        print("New berv shifted detector limits", [wl_lower, wl_upper])
+
     # Sliced to wavelength measurement of detector
     calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
