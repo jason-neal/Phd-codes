@@ -76,9 +76,9 @@ def load_telluric(tapas_path, filename):
                 elif line.startswith("|"):
                     # Obtian wavelength scale from piped lines
                     if "in air" in line:
-                        tell_hdr["wavelength scale"] = "air"
+                        tell_hdr["WAVSCALE"] = "air"
                     elif "nm|" in line:
-                        tell_hdr["wavelength scale"] = "vacuum"
+                        tell_hdr["WAVSCALE"] = "vacuum"
                     # Need extra condition to deal with wavenumber
                 else:
                     line = line.strip()

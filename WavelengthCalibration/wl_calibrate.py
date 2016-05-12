@@ -181,7 +181,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
         tapas_berv_value = tapas_helcorr(tell_header)
         print(tapas_berv_value)
         # Doppler shift the detector limits
-        __ , wlprime= pyasl.dopplerShift(np.array([wl_lower, wl_upper]),np.array([1, 1]), -tapas_berv_value[0], edgeHandling=None, fillValue=None)
+        __ , wlprime = pyasl.dopplerShift(np.array([wl_lower, wl_upper]),np.array([1, 1]), -tapas_berv_value[0], edgeHandling=None, fillValue=None)
         wl_lower = wlprime[0] 
         wl_upper = wlprime[1]
 
@@ -190,12 +190,14 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
 
     ### Air wavelengths 
     # Convert for air wavelengths 
-        if tell_header["wavelength scale"] == "air":
+        if tell_header["WAVSCALE"] == "air":
             # vac2air on the crires limits
+            print("Using AIR wavelength scale so changing wl limits")
             wl_lower_vac = wl_lower
             wl_upper_vac = wl_upper
-            wl_lower = pyasl.vactoair2(wl_lower)     
-            wl_upper = pyasl.vactoair2(wl_upper)
+            # the other modes don't work above 1.69 micron   
+            wl_lower = pyasl.vactoair2(wl_lower, mode="edlen53")   
+            wl_upper = pyasl.vactoair2(wl_upper, mode="edlen53")
 
             print("Vacuum detector limits", [wl_lower_vac, wl_upper_vac])
             print("New berv shifted detector limits", [wl_lower, wl_upper])
