@@ -377,7 +377,7 @@ print("test")
 # Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
 
 
-# In[11]:
+# In[16]:
 
 from math import sqrt
 from joblib import Parallel, delayed
@@ -441,7 +441,7 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, n_jobs=-1):
 print("function done")
 
 
-# In[12]:
+# In[17]:
 
 import time
 import datetime
@@ -462,13 +462,20 @@ print("Convolution time = ", elapsed)
 #Maybe good idea to find a general rule of thumb for height/depth of lines need to get to 
 
 
-# In[ ]:
+# In[37]:
 
 #Saving a result for comparison
 
-with open("Convolved_50000_tapas_allchips.txt") as f:
-    for xx, yy in zip(parallel_x, parallel_y/np.max(parallel_y):
-        f.write("{} /t {}/n".format(xx,yy))
+#with open("Convolved_50000_tapas_allchips.txt", "w") as f:
+   # for xx, yy in zip(parallel_x, parallel_y/np.max(parallel_y):
+    #    f.write("{} \t {}\n".format(xx,yy))
+
+stack = np.vstack((parallel_x, parallel_y/np.max(parallel_y)))
+
+#np.savetxt("Convolved_50000_tapas_allchips.txt", save_array, delimiter=",")
+
+np.savetxt("Convolved_50000_tapas_wavelength_allchips.txt", parallel_x)
+np.savetxt("Convolved_50000_tapas_transmitance_allchips.txt", parallel_y/np.max(parallel_y))
 
 
 # # Testing Parallel processing convolution times.

@@ -5,7 +5,7 @@
 # 
 # 
 
-# In[1]:
+# In[14]:
 
 ### Load modules and Bokeh
 # Imports from __future__ in case we're running Python 2
@@ -48,7 +48,7 @@ bokeh.io.output_notebook()
 
 # ## Load non convolved telluric
 
-# In[2]:
+# In[15]:
 
 import Obtain_Telluric as obt
 
@@ -65,15 +65,21 @@ except:
 print("Telluric Resolution Power =", tapas_h20_respower)
 
 
-# In[3]:
+# In[16]:
 
 # Load convolved
 
 
-# In[5]:
+# In[17]:
 
-conv_wav, conv_flux = np.loadtxt("Convolved_50000_tapas_allchips.txt", unpack=True)
+#conv_wav, conv_flux = np.loadtxt("Convolved_50000_tapas_allchips.txt", delimiter="'",unpack=True)
 
+
+conv_wav = np.loadtxt("Convolved_50000_tapas_wavelength_allchips.txt")
+conv_flux = np.loadtxt("Convolved_50000_tapas_transmitance_allchips.txt")
+
+print(conv_wav)
+print(conv_flux)
 
 
 # In[ ]:
@@ -81,9 +87,9 @@ conv_wav, conv_flux = np.loadtxt("Convolved_50000_tapas_allchips.txt", unpack=Tr
 
 
 
-# In[ ]:
+# In[20]:
 
-orig_flux = np.array([flux for flux in tapas_h20_data[0] if flux in conv_wav])
+orig_flux = np.array([flux for wav, flux in zip(tapas_h20_data[0],tapas_h20_data[1]) if wav in conv_wav])
 
 plt.plot(orig_flux, conv_flux, "o")
 plt.title("Affect of Convolution R=50000")
@@ -93,9 +99,24 @@ plt.ylabel("Convolved Flux\nR=50000")
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[ ]:
+# In[21]:
+
+plt.plot(tapas_h20_data[0],tapas_h20_data[1])
+plt.plot(conv_wav, conv_flux)
+plt.xlabel("Wavelenght")
+plt.ylabel("Flux")
+
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
+# In[26]:
+
+#Wavelenght density
+plt.plot(tapas_h20_data[0][1:],tapas_h20_data[0][1:]-tapas_h20_data[0][:-1])
+plt.ylabel("Delta Wavelength")
+plt.xlabel("Wavelength (nm)")
+plt.title("Distribution of wavelength is not uniform")
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # In[ ]:
