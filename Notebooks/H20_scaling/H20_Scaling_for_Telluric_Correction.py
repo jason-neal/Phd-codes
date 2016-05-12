@@ -10,7 +10,7 @@
 # Fit to the observed data (Probably with the other lines removed) to fnd the best x to apply for the correction. (Gives flatest result or zero linewidth.) 
 # 
 
-# In[1]:
+# In[2]:
 
 ### Load modules and Bokeh
 # Imports from __future__ in case we're running Python 2
@@ -25,7 +25,7 @@ from astropy.io import fits
 import seaborn as sns
 
 # Magic function to make matplotlib inline; other style specs must come AFTER
-get_ipython().magic('matplotlib inline')
+get_ipython().magic(u'matplotlib inline')
 
 # Import Bokeh modules for interactive plotting
 import bokeh.io
@@ -33,7 +33,7 @@ import bokeh.mpl
 import bokeh.plotting
 
 # This enables SVG graphics inline.  There is a bug, so uncomment if it works.
-get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
+get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
 
 # This enables high resolution PNGs. SVG is preferred, but has problems
 # rendering vertical and horizontal lines
@@ -53,7 +53,7 @@ bokeh.io.output_notebook()
 
 # ### Load in Observed Data
 
-# In[2]:
+# In[3]:
 
 chip1 = "CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.fits"
 chip2 = "CRIRE.2012-04-07T00-08-29.976_2.nod.ms.norm.sum.wavecal.fits"
@@ -88,12 +88,12 @@ obs_airmass = (start_airmass + end_airmass) / 2
 print("Data from Detectors is now loaded")
 
 
-# In[3]:
+# In[4]:
 
 ## Rough berv correction until input calibrated file is calibrated with non berv tapas 
 
 
-# In[4]:
+# In[5]:
 
 wl1 = wl1-.5   #including rough berv correction
 wl2 = wl2-.54  #including rough berv correction
@@ -103,7 +103,7 @@ wl4 = wl4-.7
 
 # ### Load in the tapas data
 
-# In[5]:
+# In[6]:
 
 import Obtain_Telluric as obt
 tapas_all = "tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
@@ -134,14 +134,14 @@ print("Telluric Airmass ", tapas_not_h20_airmass)
 tapas_not_h20_respower = int(float((tapas_not_h20_hdr["respower"])))
 print("Telluric Resolution Power =", tapas_not_h20_respower)
     
-    
+print(tapas_all_hdr)
 
 
 # ### Plot the data
 # Including the 3 tapas models to show they align well and are consistent.
 # 
 
-# In[6]:
+# In[7]:
 
 plt.plot(wl1, I1_uncorr, 'b') #including rough berv correction
 plt.plot(wl2, I2_uncorr, 'b') #including rough berv correction
@@ -161,7 +161,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # (Use telluric removal modules)
 # And plot the result.  
 
-# In[7]:
+# In[8]:
 
 
 from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
@@ -200,26 +200,47 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # ### Convole instrument profile function:
 # To use inside fit
 
-# In[ ]:
+# #pyasl.instrBroadGaussFast(wvl, flux, resolution, edgeHandling=None, fullout=False, maxsig=None)
+# 
+#   ## Apply Gaussian instrumental broadening.
+# 
+#     This function broadens a spectrum assuming a Gaussian kernel. The width of the kernel is determined by the resolution. In particular, the function will determine the mean wavelength and set the Full Width at Half Maximum (FWHM) of the Gaussian to (mean wavelength)/resolution.
+#     Parameters :	
+#     wvl : array
+#         The wavelength
+# 
+#     flux : array
+#         The spectrum
+# 
+#     resolution : int
+#         The spectral resolution.
+# 
+#     edgeHandling : string, {None, “firstlast”}, optional
+#         Determines the way edges will be handled. If None, nothing will be done about it. If set to “firstlast”, the spectrum will be extended by using the first and last value at the start or end. Note that this is not necessarily appropriate. The default is None.
+# 
+#     fullout : boolean, optional
+#         If True, also the FWHM of the Gaussian will be returned.
+# 
+#     maxsig : float, optional
+#         The extent of the broadening kernel in terms of standrad deviations. By default, the Gaussian broadening kernel will be extended over the entire given spectrum, which can cause slow evaluation in the case of large spectra. A reasonable choice could, e.g., be five.
+# 
+#     Returns :	
+#     Broadened spectrum : array
+#         The input spectrum convolved with a Gaussian kernel.
+# 
+#     FWHM : float, optional
+#         The Full Width at Half Maximum (FWHM) of the used Gaussian kernel.
+# 
 
-def colvolution_function(wl, I, respower):
-    return I_conv
-
-
-# Convolution from NIR analysis
-
+# In[9]:
 
 # Convolution from Pyastronomy
 from PyAstronomy import pyasl
 
+#ans = pyasl.instrBroadGaussFast(wvl, flux, resolution, edgeHandling=None, fullout=False, maxsig=None)
 
 
-# In[ ]:
-
-#print(hdr3)
-
-
-# In[13]:
+# In[10]:
 
 ## Convolution from Pedro NIR analysis code
 
@@ -377,7 +398,7 @@ print("test")
 # Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
 
 
-# In[16]:
+# In[11]:
 
 from math import sqrt
 from joblib import Parallel, delayed
@@ -389,6 +410,9 @@ def convolve(wav, R, wav_extended, flux_extended, FWHM_lim):
         flux_2convolve = flux_extended[indexes[0]:indexes[-1]+1]
         IP = unitary_Gauss(wav_extended[indexes[0]:indexes[-1]+1], wav, FWHM)
         val = np.sum(IP*flux_2convolve)
+        
+        # Test dividing by number of points in convolution
+        #val = val/len(indexes)         # This does not work well
         return val
     
 def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, n_jobs=-1):
@@ -441,14 +465,14 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, n_jobs=-1):
 print("function done")
 
 
-# In[17]:
+# In[14]:
 
 import time
 import datetime
 start = time.time()
 print("start time", datetime.datetime.now().time())
 
-parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "0", 50000, FWHM_lim=5.0, n_jobs=1)
+parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "0", 50000, FWHM_lim=5.0, n_jobs=-1)
   
 done = time.time()
 print("end time", datetime.datetime.now().time())
@@ -462,20 +486,12 @@ print("Convolution time = ", elapsed)
 #Maybe good idea to find a general rule of thumb for height/depth of lines need to get to 
 
 
-# In[37]:
+# In[15]:
 
-#Saving a result for comparison
+# Saving a result for comparison
 
-#with open("Convolved_50000_tapas_allchips.txt", "w") as f:
-   # for xx, yy in zip(parallel_x, parallel_y/np.max(parallel_y):
-    #    f.write("{} \t {}\n".format(xx,yy))
-
-stack = np.vstack((parallel_x, parallel_y/np.max(parallel_y)))
-
-#np.savetxt("Convolved_50000_tapas_allchips.txt", save_array, delimiter=",")
-
-np.savetxt("Convolved_50000_tapas_wavelength_allchips.txt", parallel_x)
-np.savetxt("Convolved_50000_tapas_transmitance_allchips.txt", parallel_y/np.max(parallel_y))
+#np.savetxt("Convolved_50000_tapas_wavelength_allchips_dividebynumber.txt", parallel_x)
+#np.savetxt("Convolved_50000_tapas_transmitance_allchips_dividebynumber.txt", parallel_y/np.max(parallel_y))
 
 
 # # Testing Parallel processing convolution times.
@@ -500,6 +516,12 @@ np.savetxt("Convolved_50000_tapas_transmitance_allchips.txt", parallel_y/np.max(
 # Convolution time =  56.3469331264               # n_jobs=4      < 1 min
 # 
 # Convolution time =  253.075296164             # Work comp  # n_jobs=-1, backend="threading"
+# 
+# 
+# ### All chips at once - condition "0"
+# linux on parallel  
+# Convolution time =  1150.128829s
+# 
 # 
 # 
 # My conclusion is that joblib does a great job and increase the convolution speed for this task on linux. Threading is not good for this instance.
