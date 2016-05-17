@@ -359,13 +359,14 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
     linedepthpath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
     ans = input("Do you want to export the line depths to a file?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
-        with open(linedepthpath + "Spectral_linedepths.txt","a") as f:
+        with open(linedepthpath + "New_Spectral_linedepths.txt","a") as f:
             for peak in peaks_a:
                 print(peak)
                 f.write(str(peak) + "\n")
-        with open(linedepthpath + "Telluric_linedepths.txt","a") as f:
+        with open(linedepthpath + "New_Telluric_linedepths.txt","a") as f:
             for peak in peaks_b:
                 f.write(str(peak) + "\n")
+        print("Saved line depths to New_xxxx_linedepths.txt in {}".format(linedepthpath))
 
 if __name__ == '__main__':
     args = vars(_parser())
