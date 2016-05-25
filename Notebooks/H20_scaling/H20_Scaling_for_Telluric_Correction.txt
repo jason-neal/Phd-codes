@@ -1,41 +1,5 @@
 
-### Load modules and Bokeh
-# Imports from __future__ in case we're running Python 2
-from __future__ import division, print_function
-from __future__ import absolute_import, unicode_literals
-
-import numpy as np
-import matplotlib.pyplot as plt
-from astropy.io import fits
-
-# Seaborn, useful for graphics
-import seaborn as sns
-
-# Magic function to make matplotlib inline; other style specs must come AFTER
-%matplotlib inline
-
-# Import Bokeh modules for interactive plotting
-import bokeh.io
-import bokeh.mpl
-import bokeh.plotting
-
-# This enables SVG graphics inline.  There is a bug, so uncomment if it works.
-%config InlineBackend.figure_formats = {'svg',}
-
-# This enables high resolution PNGs. SVG is preferred, but has problems
-# rendering vertical and horizontal lines
-#%config InlineBackend.figure_formats = {'png', 'retina'}
-
-# JB's favorite Seaborn settings for notebooks
-rc = {'lines.linewidth': 1, 
-      'axes.labelsize': 14, 
-      'axes.titlesize': 16, 
-      'axes.facecolor': 'DFDFE5'}
-sns.set_context('notebook', rc=rc)
-sns.set_style('darkgrid', rc=rc)
-
-# Set up Bokeh for inline viewing
-bokeh.io.output_notebook()
+-
 
 chip1 = "CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.fits"
 chip2 = "CRIRE.2012-04-07T00-08-29.976_2.nod.ms.norm.sum.wavecal.fits"
@@ -106,7 +70,7 @@ print("Telluric Airmass ", tapas_not_h20_airmass)
 tapas_not_h20_respower = int(float((tapas_not_h20_hdr["respower"])))
 print("Telluric Resolution Power =", tapas_not_h20_respower)
     
-    
+#print(tapas_all_hdr)
 
 
 plt.plot(wl1, I1_uncorr, 'b') #including rough berv correction
@@ -121,7 +85,6 @@ plt.plot(tapas_not_h20_data[0], tapas_not_h20_data[1], "-.g", label="Not H20")
 
 # Make it interactive with Bokeh
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
-
 
 from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
 
@@ -156,21 +119,7 @@ plt.plot(tapas_not_h20_data[0], tapas_not_h20_data[1], "k")
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-def colvolution_function(wl, I, respower):
-    return I_conv
-
-
-# Convolution from NIR analysis
-
-
-# Convolution from Pyastronomy
-from PyAstronomy import pyasl
-
-
-
-#print(hdr3)
-
-## Convolution from Pedro NIR analysis code
+## USEFUL functions from pedros code:
 
 def wav_selector(wav, flux, wav_min, wav_max):
     """
@@ -222,7 +171,81 @@ def unitary_Gauss(x, center, FWHM):
     tau = -((x - center)**2) / (2*(sigma**2))
     result = Amp * np.exp( tau );
     
-    return result; 	
+    return result
+
+# Convolution from Pyastronomy
+from PyAstronomy import pyasl
+#tapas_h20_data[0], tapas_h20_data[1], "0", 50000, FWHM_lim=5.0, plot=True
+#ans = pyasl.instrBroadGaussFast(wvl, flux, resolution, edgeHandling=None, fullout=False, maxsig=None)
+
+
+# Just to my CRIRES range 
+    
+R = 50000  
+
+chipmin = float(hdr1["HIERARCH ESO INS WLEN STRT1"])  # Wavelength start on detector [nm]
+chipmax = float(hdr1["HIERARCH ESO INS WLEN END4"])   # Wavelength end on detector [nm]
+wav_chip, flux_chip = wav_selector(tapas_h20_data[0], tapas_h20_data[1], chipmin, chipmax)
+
+FWHM_min = wav_chip[0]/R    #FWHM at the extremes of vector
+FWHM_max = wav_chip[-1]/R   
+
+print("Min FWHM", FWHM_min)
+print("Max FWHM", FWHM_max)
+
+# pyasl needs equidistant wavelenghts
+
+
+from Find_gcdt import gcdt
+greatest_common_divisor = gcdt(wav_chip, 4)
+print("Found divisor = ", greatest_common_divisor)
+steps = (wav_chip[-1] - wav_chip[0])/greatest_common_divisor
+print("NUmber of steps =", steps)
+
+
+
+new_wav = np.linspace(wav_chip[0], wav_chip[-1], num=steps, endpoint=True)
+
+
+# Inperolate_to_new_wave  
+new_flux = match_wl(wav_chip, flux_chip, new_wav)
+print("length of new flux", len(new_flux))
+
+
+diffs = np.diff(wav_chip)
+print("First Diff={}, last diff={}".format(diffs[0], diffs[-1]))
+
+data_step = 2 * (wav_chip[-1] - wav_chip[0])/np.min(diffs) 
+new_diff_wav = np.linspace(wav_chip[0], wav_chip[-1], num=data_step, endpoint=True)
+
+new_diff_flux = match_wl(wav_chip, flux_chip, new_diff_wav)
+print("length of new flux", len(new_diff_flux))
+
+#new_flux = np.interp(new_wav, wav_chip, flux_chip)
+
+
+import time
+import datetime
+start = time.time()
+print("start time", datetime.datetime.now().time())
+
+Conv_flux_pysal = pyasl.instrBroadGaussFast(new_wav, new_flux, 50000, edgeHandling=None, fullout=False, maxsig=None)
+
+done = time.time()
+print("end time", datetime.datetime.now().time())
+elapsed = done - start
+print("Convolution time = ", elapsed)
+
+
+plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
+plt.plot(new_wav,Conv_flux_pysal, "r")
+plt.xlabel("Wavelength (nm)")
+plt.ylabel("Flux")
+plt.title("Test of Pyasl convolution \n (Used interpolation to equidistant points)")
+#plt.show()
+# Make it interactive with Bokeh
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
+
 
 def convolution_nir(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
     """Convolution code adapted from pedros code"""
@@ -269,34 +292,33 @@ def convolution_nir(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
         plt.show() 
     return wav_chip, flux_conv_res
 
+print("Done")
+
 import time
+import datetime
 start = time.time()
 print("start time", start)
+print("start time", datetime.datetime.now().time())
 
-x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
+x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "0", 50000, FWHM_lim=5.0, plot=True)
   
 done = time.time()
+print("end time", datetime.datetime.now().time())
 elapsed = done - start
 print("Convolution time = ", elapsed)
 
+
+
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
-plt.plot(x,y, "r")
+plt.plot(x,y/np.max(y), "r")
 plt.xlabel("Wavelength (nm)")
 plt.ylabel("Flux")
 plt.title("Test of convolution")
-plt.show()
+#plt.show()
 # Make it interactive with Bokeh
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
-print("test")
 
-
-
-# Try parrellel processing for the convolution
-
-# from math import sqrt
-# from joblib import Parallel, delayed
-# Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
 
 from math import sqrt
 from joblib import Parallel, delayed
@@ -307,20 +329,20 @@ def convolve(wav, R, wav_extended, flux_extended, FWHM_lim):
         indexes = [ i for i in range(len(wav_extended)) if ((wav - FWHM_lim*FWHM) < wav_extended[i] < (wav + FWHM_lim*FWHM))]
         flux_2convolve = flux_extended[indexes[0]:indexes[-1]+1]
         IP = unitary_Gauss(wav_extended[indexes[0]:indexes[-1]+1], wav, FWHM)
-        val = np.sum(IP*flux_2convolve)
-        return val
+        val = np.sum(IP*flux_2convolve) 
+        unitary_val = np.sum(IP*np.ones_like(flux_2convolve))  # Effect of convolution onUnitary. For changing number of points
+        return val/unitary_val
     
-def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
+def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, n_jobs=-1):
     """Convolution code adapted from pedros code"""
     
     wav_chip, flux_chip = chip_selector(wav, flux, chip)
     #we need to calculate the FWHM at this value in order to set the starting point for the convolution
     
-    print(wav_chip)
-    print(flux_chip)
+    #print(wav_chip)
+    #print(flux_chip)
     FWHM_min = wav_chip[0]/R    #FWHM at the extremes of vector
     FWHM_max = wav_chip[-1]/R       
-    
     
     #wide wavelength bin for the resolution_convolution
     wav_extended, flux_extended = wav_selector(wav, flux, wav_chip[0]-FWHM_lim*FWHM_min, wav_chip[-1]+FWHM_lim*FWHM_max) 
@@ -331,9 +353,10 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
     
     flux_conv_res = []
     counter = 0    
-    
+    # lambda doesnt work in parallel - it doesn't pickel 
     #lambda_funct = lambda x: convolve(x,R,wav_extended, flux_extended,FWHM_lim)
-   
+    #parallel_result = Parallel(n_jobs=-1)(delayed(lambda_funct)(wav) for wav in wav_chip)
+    
     #for wav in wav_chip:
     #    a = convolve(wav,R,wav_extended, flux_extended,FWHM_lim)
     #    a = lambda_funct(wav)
@@ -351,9 +374,7 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
     #   IP = unitary_Gauss(wav_extended[indexes[0]:indexes[-1]+1], wav, FWHM)
     #   flux_conv_res.append(np.sum(IP*flux_2convolve))
     
-    
-    #parallel_result = Parallel(n_jobs=2)(delayed(lambda_funct)(wav) for wav in wav_chip)
-    parallel_result = Parallel(n_jobs=1)(delayed(convolve)(wav,R,wav_extended, flux_extended,FWHM_lim) for wav in wav_chip)
+    parallel_result = Parallel(n_jobs=n_jobs)(delayed(convolve)(wav,R,wav_extended, flux_extended,FWHM_lim) for wav in wav_chip)
     flux_conv_res = np.array(parallel_result, dtype="float64")
     print("Done.\n")
     
@@ -366,7 +387,7 @@ import datetime
 start = time.time()
 print("start time", datetime.datetime.now().time())
 
-parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
+parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "0", 50000, FWHM_lim=5.0, n_jobs=-1)
   
 done = time.time()
 print("end time", datetime.datetime.now().time())
@@ -379,16 +400,111 @@ print("Convolution time = ", elapsed)
 
 #Maybe good idea to find a general rule of thumb for height/depth of lines need to get to 
 
-plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
-plt.plot(x,y, "r")
-plt.plot(parallel_x,parallel_y, "--g")
+
+# Saving a result for comparison
+
+np.savetxt("Convolved_50000_tapas_wavelength_allchips.txt", parallel_x)
+np.savetxt("Convolved_50000_tapas_transmitance_allchips.txt", parallel_y)
+
+#np.savetxt("Convolved_50000_tapas_wavelength_allchips_dividebynumber.txt", parallel_x)
+#np.savetxt("Convolved_50000_tapas_transmitance_allchips_dividebynumber.txt", parallel_y)
+
+plt.plot(tapas_h20_data[0], tapas_h20_data[1], "b")
+#plt.plot(x,y/np.max(y), "r")
+plt.plot(parallel_x, parallel_y, "-r")
 plt.xlabel("Wavelength (nm)")
 plt.ylabel("Flux")
-plt.title("Test of convolution")
-plt.show()
+plt.title("Test of convolutions")
+#plt.show()
 # Make it interactive with Bokeh
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
+from lmfit import minimize, Parameters
+import lmfit
+
+from scipy.interpolate import interp1d
+def match_wl(wl, spec, ref_wl, method="scipy", kind="linear"):
+    """Interpolate Wavelengths of spectra to common WL
+    Most likely convert telluric to observed spectra wl after wl mapping performed"""
+    starttime = time.time()
+    if method == "scipy":
+        print(kind + " scipy interpolation")
+        linear_interp = interp1d(wl, spec, kind=kind)
+        new_spec = linear_interp(ref_wl)
+    elif method == "numpy":
+        if kind.lower() is not "linear":
+            print("Warning: Cannot do " + kind + " interpolation with numpy, switching to linear" )
+        print("Linear numpy interpolation")
+        new_spec = np.interp(ref_wl, wl, spec)  # 1-d peicewise linear interpolat
+    else:
+        print("Method was given as " + method)
+        raise("Not correct interpolation method specified")
+    print("Interpolation Time = " + str(time.time() - starttime) + " seconds")
+
+    return new_spec  # test inperpolations 
+
+def slice_spectra(wl, spectrum, low, high):
+    """ Extract a section of a spectrum between wavelength bounds. 
+        """
+    #print("lower bound", low)
+    #print("upper bound", high)
+    map1 = wl > low
+    map2 = wl < high
+    wl_sec = wl[map1*map2]
+    spectrum_sec = spectrum[map1*map2]   
+    return wl_sec, spectrum_sec 
+
+### Fit using lmfit
+
+def h20_residual(params, obs_data, telluric_data):
+    # Parameters 
+    ScaleFactor = params["ScaleFactor"].value
+    R = params["R"].value
+    FWHM_lim = params["FWHM_lim"].value
+    n_jobs = params["n_jobs"].value
+    chip_select = params["chip_select"].value
+    
+    # Data
+    obs_wl = obs_data[0]
+    obs_I = obs_data[1]
+    telluic_wl = telluric_data[0]
+    telluric_I = telluric_data[1]
+    
+    # Telluric scaling T ** x
+    scaled_telluric_I = telluric_data ** ScaleFactor
+    
+    # Convolution
+    convolved_telluric = parallel_convolution(telluric_wl, scaled_telluric_I, str(chip_select), R, FWHM_lim=FWHM_lim, n_jobs=n_jobs)
+    interped_telluric = match_wl(telluic_wl, telluric_I,    obs_wl)
+    print("Convolution inside residual function was done")
+    
+    return 1 - (obs_I / convolved_telluric) 
+
+
+
+
+# Set up parameters 
+params = Parameters()
+params.add('ScaleFactor', value=1)
+params.add('R', value=50000, vary=False)
+params.add('FWHM_lim', value=5, vary=False)
+params.add('n_jobs', value=-1, vary=False)
+params.add('chip_select', value=2, vary=False)
+
+
+#wl2, I2_uncorr
+# wl2, I2_not_h20_corr
+
+# Sliced to wavelength measurement of detector
+tell_data1 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl1), max(wl1))
+tell_data2 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl2), max(wl2))
+tell_data3 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl3), max(wl3))
+tell_data4 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl4), max(wl4))
+
+# Peform minimization
+out = minimize(h20_residual, params, args=([wl2, I2_not_h20_corr], tell_data2)
+outreport = lmfit.fit_report(out)
+print(outreport)
 
 
 

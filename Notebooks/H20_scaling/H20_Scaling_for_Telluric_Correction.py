@@ -12,13 +12,50 @@
 
 # In[1]:
 
--
+### Load modules and Bokeh
+# Imports from __future__ in case we're running Python 2
+from __future__ import division, print_function
+from __future__ import absolute_import, unicode_literals
+
+import numpy as np
+import matplotlib.pyplot as plt
+from astropy.io import fits
+
+# Seaborn, useful for graphics
+import seaborn as sns
+
+# Magic function to make matplotlib inline; other style specs must come AFTER
+get_ipython().magic(u'matplotlib inline')
+
+# Import Bokeh modules for interactive plotting
+import bokeh.io
+import bokeh.mpl
+import bokeh.plotting
+
+# This enables SVG graphics inline.  There is a bug, so uncomment if it works.
+get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
+
+# This enables high resolution PNGs. SVG is preferred, but has problems
+# rendering vertical and horizontal lines
+#%config InlineBackend.figure_formats = {'png', 'retina'}
+
+# JB's favorite Seaborn settings for notebooks
+rc = {'lines.linewidth': 1, 
+      'axes.labelsize': 14, 
+      'axes.titlesize': 16, 
+      'axes.facecolor': 'DFDFE5'}
+sns.set_context('notebook', rc=rc)
+sns.set_style('darkgrid', rc=rc)
+
+# Set up Bokeh for inline viewing
+bokeh.io.output_notebook()
 
 
 # ### Load in Observed Data
 
 # In[2]:
 
+# Need to update these to the vacuum with no berv corrections
 chip1 = "CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.fits"
 chip2 = "CRIRE.2012-04-07T00-08-29.976_2.nod.ms.norm.sum.wavecal.fits"
 chip3 = "CRIRE.2012-04-07T00-08-29.976_3.nod.ms.norm.sum.wavecal.fits"
@@ -57,7 +94,7 @@ print("Data from Detectors is now loaded")
 ## Rough berv correction until input calibrated file is calibrated with non berv tapas 
 
 
-# In[4]:
+# In[3]:
 
 wl1 = wl1-.5   #including rough berv correction
 wl2 = wl2-.54  #including rough berv correction
@@ -67,7 +104,7 @@ wl4 = wl4-.7
 
 # ### Load in the tapas data
 
-# In[5]:
+# In[4]:
 
 import Obtain_Telluric as obt
 tapas_all = "tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
@@ -105,7 +142,7 @@ print("Telluric Resolution Power =", tapas_not_h20_respower)
 # Including the 3 tapas models to show they align well and are consistent.
 # 
 
-# In[6]:
+# In[5]:
 
 plt.plot(wl1, I1_uncorr, 'b') #including rough berv correction
 plt.plot(wl2, I2_uncorr, 'b') #including rough berv correction
@@ -125,15 +162,12 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # (Use telluric removal modules)
 # And plot the result.  
 
-# In[7]:
+# In[6]:
 
 from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
 
 
-# In[8]:
-
-
-
+# In[7]:
 
 def correction(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_airmass, kind="linear", method="scipy"):
     interped_tell = match_wl(wl_tell, spec_tell, wl_obs)
@@ -433,7 +467,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 
-# In[22]:
+# In[10]:
 
 from math import sqrt
 from joblib import Parallel, delayed
@@ -504,7 +538,7 @@ print("function done")
 #  from joblib import Parallel, delayed
 #  Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
 
-# In[23]:
+# In[ ]:
 
 import time
 import datetime
@@ -528,6 +562,9 @@ print("Convolution time = ", elapsed)
 # In[ ]:
 
 # Saving a result for comparison
+
+np.savetxt("Convolved_50000_tapas_wavelength_allchips.txt", parallel_x)
+np.savetxt("Convolved_50000_tapas_transmitance_allchips.txt", parallel_y)
 
 #np.savetxt("Convolved_50000_tapas_wavelength_allchips_dividebynumber.txt", parallel_x)
 #np.savetxt("Convolved_50000_tapas_transmitance_allchips_dividebynumber.txt", parallel_y)
@@ -586,10 +623,120 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # Does each chip need a differnet scaling power?
 # 
 
+# In[29]:
+
+from lmfit import minimize, Parameters
+import lmfit
+
+
 # In[ ]:
 
+from scipy.interpolate import interp1d
+def match_wl(wl, spec, ref_wl, method="scipy", kind="linear"):
+    """Interpolate Wavelengths of spectra to common WL
+    Most likely convert telluric to observed spectra wl after wl mapping performed"""
+    starttime = time.time()
+    if method == "scipy":
+        print(kind + " scipy interpolation")
+        linear_interp = interp1d(wl, spec, kind=kind)
+        new_spec = linear_interp(ref_wl)
+    elif method == "numpy":
+        if kind.lower() is not "linear":
+            print("Warning: Cannot do " + kind + " interpolation with numpy, switching to linear" )
+        print("Linear numpy interpolation")
+        new_spec = np.interp(ref_wl, wl, spec)  # 1-d peicewise linear interpolat
+    else:
+        print("Method was given as " + method)
+        raise("Not correct interpolation method specified")
+    print("Interpolation Time = " + str(time.time() - starttime) + " seconds")
+
+    return new_spec  # test inperpolations 
+
+def slice_spectra(wl, spectrum, low, high):
+    """ Extract a section of a spectrum between wavelength bounds. 
+        """
+    #print("lower bound", low)
+    #print("upper bound", high)
+    map1 = wl > low
+    map2 = wl < high
+    wl_sec = wl[map1*map2]
+    spectrum_sec = spectrum[map1*map2]   
+    return wl_sec, spectrum_sec 
 
 
+
+# In[30]:
+
+### Fit using lmfit
+
+def h20_residual(params, obs_data, telluric_data):
+    # Parameters 
+    ScaleFactor = params["ScaleFactor"].value
+    R = params["R"].value
+    FWHM_lim = params["FWHM_lim"].value
+    n_jobs = params["n_jobs"].value
+    chip_select = params["chip_select"].value
+    
+    # Data
+    obs_wl = obs_data[0]
+    obs_I = obs_data[1]
+    telluic_wl = telluric_data[0]
+    telluric_I = telluric_data[1]
+    
+    # Telluric scaling T ** x
+    scaled_telluric_I = telluric_data ** ScaleFactor
+    
+    # Convolution
+    convolved_telluric = parallel_convolution(telluric_wl, scaled_telluric_I, str(chip_select), R, FWHM_lim=FWHM_lim, n_jobs=n_jobs)
+    interped_telluric = match_wl(telluic_wl, telluric_I,    obs_wl)
+    print("Convolution inside residual function was done")
+    
+    return 1 - (obs_I / convolved_telluric) 
+
+
+
+
+# In[1]:
+
+# Set up parameters 
+params = Parameters()
+params.add('ScaleFactor', value=1)
+params.add('R', value=50000, vary=False)
+params.add('FWHM_lim', value=5, vary=False)
+params.add('n_jobs', value=-1, vary=False)
+params.add('chip_select', value=2, vary=False)
+
+
+# In[ ]:
+
+#wl2, I2_uncorr
+# wl2, I2_not_h20_corr
+
+# Sliced to wavelength measurement of detector
+tell_data1 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl1), max(wl1))
+tell_data2 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl2), max(wl2))
+tell_data3 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl3), max(wl3))
+tell_data4 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl4), max(wl4))
+
+# Peform minimization
+out = minimize(h20_residual, params, args=([wl2, I2_not_h20_corr], tell_data2)
+outreport = lmfit.fit_report(out)
+print(outreport)
+
+               
+               
+
+
+# In[ ]:
+
+## Time difference between my slice spectra and pedros wave selector
+%%time
+wav_selector(tapas_h20_data[0], tapas_h20_data[1], min(wl2), max(wl2))
+
+
+# In[ ]:
+
+get_ipython().run_cell_magic(u'time', u'', u'slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl2), max(wl2))')
 
 
 # ### Apply correction with best scaling power:
