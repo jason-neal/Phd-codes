@@ -2,9 +2,51 @@
 # coding: utf-8
 
 # # Spectral Recovery of HD30501
-# March 2016
+# First try: March 2016
+# Added Bokeh May 2016
 
-# In[7]:
+# In[2]:
+
+### Load modules and Bokeh
+# Imports from __future__ in case we're running Python 2
+from __future__ import division, print_function
+from __future__ import absolute_import, unicode_literals
+
+import numpy as np
+import matplotlib.pyplot as plt
+from astropy.io import fits
+
+# Seaborn, useful for graphics
+import seaborn as sns
+
+# Magic function to make matplotlib inline; other style specs must come AFTER
+get_ipython().magic(u'matplotlib inline')
+
+# Import Bokeh modules for interactive plotting
+import bokeh.io
+import bokeh.mpl
+import bokeh.plotting
+
+# This enables SVG graphics inline.  There is a bug, so uncomment if it works.
+get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
+
+# This enables high resolution PNGs. SVG is preferred, but has problems
+# rendering vertical and horizontal lines
+#%config InlineBackend.figure_formats = {'png', 'retina'}
+
+# JB's favorite Seaborn settings for notebooks
+rc = {'lines.linewidth': 1, 
+      'axes.labelsize': 12, 
+      'axes.titlesize': 14, 
+      'axes.facecolor': 'DFDFE5'}
+sns.set_context('notebook', rc=rc)
+sns.set_style('darkgrid', rc=rc)
+
+# Set up Bokeh for inline viewing
+bokeh.io.output_notebook()
+
+
+# In[3]:
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,20 +57,20 @@ from astropy.io import fits
 # 
 # ##### For now just with the wavecal values 
 
-# In[8]:
+# In[4]:
 
-path = 'C:/Users/Jason/Dropbox/PhD/hd30501-Wavecal-march16/'
-name1 = "CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
-name2 = "CRIRE.2012-08-01T09-17-30.195_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
-name3 = "CRIRE.2012-08-02T08-47-30.843_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
-name4 = "CRIRE.2012-08-06T09-42-07.888_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits" 
+#path = 'C:/Users/Jason/Dropbox/PhD/hd30501-Wavecal-march16/'
+#name1 = "CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
+#name2 = "CRIRE.2012-08-01T09-17-30.195_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
+#name3 = "CRIRE.2012-08-02T08-47-30.843_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
+#name4 = "CRIRE.2012-08-06T09-42-07.888_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits" 
 
-#path="/home/jneal/Phd/data/Hd30501-tellcorrected-test/"
-
-#name1 = "CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
-#name2 = "CRIRE.2012-08-01T09:17:30.195_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
-#name3 = "CRIRE.2012-08-02T08:47:30.843_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
-#name4 = "CRIRE.2012-08-06T09:42:07.888_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits" 
+path="/home/jneal/Phd/data/Hd30501-tellcorrected-test/"
+#2012-08-06T09-42-07.888_3.nod.ms.norm.sum.wavecal
+name1 = "CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
+name2 = "CRIRE.2012-08-01T09:17:30.195_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
+name3 = "CRIRE.2012-08-02T08:47:30.843_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits"
+name4 = "CRIRE.2012-08-06T09:42:07.888_1.nod.ms.norm.sum.wavecal.tellcorr.test.fits" 
 
 # Names for all 4 detectors
 name1_chips = [name1[:30]+str(i)+name1[31:] for i in range(1,5)]
@@ -37,7 +79,7 @@ name3_chips = [name3[:30]+str(i)+name3[31:] for i in range(1,5)]
 name4_chips = [name4[:30]+str(i)+name4[31:] for i in range(1,5)]
 
 
-# In[ ]:
+# In[5]:
 
 detector = 3   # choose which chip to look at
 
@@ -78,35 +120,51 @@ print("Data from Detectors is now loaded")
 # 
 # BERV correction aligns the stellar lines.
 
-# In[ ]:
+# In[11]:
+
+print("Colour code")
+print("blue = HD30501-1")
+print("red = HD30501-2a")
+print("green = HD30501-2b")
+print("black = HD30501-3")
+print("dashed are the tapas models")
+
 
 # Plot detector 
 plt.figure()
-plt.plot(wl1 , I1, label="1")
-plt.plot(wl2 , I2, label="2")
-plt.plot(wl3 , I3, label="3")
-plt.plot(wl4 , I4, label="4")
-plt.legend(loc=0)
-plt.title("All Telluric Corrected observations of HD30501")
-plt.show()
+plt.plot(wl1 , I1,"b" , label="1" )
+plt.plot(wl2 , I2, "r", label="2")
+plt.plot(wl3 , I3, "g", label="3")
+plt.plot(wl4 , I4, "k", label="4")
+#plt.legend(loc=0)
+plt.title("All Telluric Corrected observations of HD30501 detector 1")
+plt.xlabel("Wavelength")
+#plt.show()
+# Make it interactive with Bokeh
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # plt spectra and telluric lines to check that there is good wavelength calibration
 plt.figure()
-plt.plot(wl1 , I1_uncorr, label="1 Obs")
-plt.plot(wl1 , Obs1["Interpolated_Tapas"], label="1 Telluric")
-plt.plot(wl2 , I2_uncorr, label="2 Obs")
-plt.plot(wl2 , Obs2["Interpolated_Tapas"], label="2 Telluric")
-plt.plot(wl3 , I3_uncorr, label="3 Obs")
-plt.plot(wl3 , Obs3["Interpolated_Tapas"], label="3 Telluric")
-plt.plot(wl4 , I4_uncorr, label="4 Obs")
-plt.plot(wl4 , Obs4["Interpolated_Tapas"], label="4 Telluric")
-plt.legend(loc=0)
-plt.show()
+plt.plot(wl1 , I1_uncorr, "b", label="1 Obs")
+plt.plot(wl1 , Obs1["Interpolated_Tapas"], "--b", label="1 Telluric")
+plt.plot(wl2 , I2_uncorr, "r", label="2 Obs")
+plt.plot(wl2 , Obs2["Interpolated_Tapas"], "--r", label="2 Telluric")
+plt.plot(wl3 , I3_uncorr, "g", label="3 Obs")
+plt.plot(wl3 , Obs3["Interpolated_Tapas"], "--g", label="3 Telluric")
+plt.plot(wl4 , I4_uncorr, "k", label="4 Obs")
+plt.plot(wl4 , Obs4["Interpolated_Tapas"], "--k", label="4 Telluric")
+#plt.legend(loc=0)
+plt.ylabel("")
+plt.xlabel("Wavelength")
+plt.title("Uncorrected observations with telluric models to show wl calibration")
+#plt.show()
+# Make it interactive with Bokeh
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # To be able to subtract the spectra from each other they need to be interpolated to the same wavelength scale. For this target 3 of the wavelengths are very close together while the 1st is (0.1 nm) different at each pixel so will interpolate to the 2nd observations wavelength.
 
-# In[ ]:
+# In[13]:
 
 plt.figure()
 plt.plot(wl1, "o-", label="1")
@@ -124,12 +182,14 @@ plt.ylim(ylimits[detector])
 
 ax = plt.gca()
 ax.get_yaxis().get_major_formatter().set_useOffset(False)
-plt.show()
+#plt.show()
+# Make it interactive with Bokeh
+#bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # ### Interpolation to same wavelengths
 
-# In[ ]:
+# In[14]:
 
 from scipy.interpolate import interp1d
 
@@ -147,7 +207,7 @@ I3_interp = interp_3(wl)
 I4_interp = interp_4(wl) 
 
 
-# In[ ]:
+# In[15]:
 
 # Plot detector 1
 plt.figure()
@@ -157,51 +217,56 @@ plt.plot(wl ,I3_interp, label="3")
 plt.plot(wl ,I4_interp, label="4")
 plt.legend(loc=0)
 plt.title("All Telluric Corrected observations of HD30501")
-plt.show()
+#plt.show()
+# Make it interactive with Bokeh
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # ### Subtraction of the different observations
 
-# In[ ]:
+# In[21]:
 
 
 plt.figure()
 plt.suptitle("Subtraction of different observations from detector {}".format(detector), fontsize=16)
 plt.subplot(711)
 plt.plot(wl, I1_interp-I2_interp, label="Obs 1 - Obs 2")
-#plt.title("Observation 1 - Observation 2")
-plt.legend(loc=0)
+plt.title("Observation 1 - Observation 2")
+#plt.legend(loc=0)
 
 plt.subplot(712)
 plt.plot(wl, I1_interp-I3_interp, label="Obs 1 - Obs 3")
-#plt.title("Observation 1 - Observation 3")
-plt.legend(loc=0)
+plt.title("Observation 1 - Observation 3")
+#plt.legend(loc=0)
 
 plt.subplot(713)
 plt.plot(wl, I1_interp-I4_interp, label="Obs 1 - Obs 4")
-#plt.title("Observation 1 - Observation 4")
-plt.legend(loc=0)
+plt.title("Observation 1 - Observation 4")
+#plt.legend(loc=0)
 
 plt.subplot(714)
 plt.plot(wl, I2_interp-I3_interp, label="Obs 2 - Obs 3")
-#plt.title("Observation 2 - Observation 3")
-plt.legend(loc=0)
+plt.title("Observation 2 - Observation 3")
+#plt.legend(loc=0)
 
 plt.subplot(715)
 plt.plot(wl, I2_interp-I4_interp, label="Obs 2 - Obs 4")
-#plt.title("Observation 2 - Observation 4")
-plt.legend(loc=0)
+plt.title("Observation 2 - Observation 4")
+#plt.legend(loc=0)
 
 plt.subplot(716)
 plt.plot(wl, I3_interp-I4_interp, label="Obs 3 - Obs 4")
-plt.legend(loc=0)
+plt.title("Observation 3 - Observation 4")
+#plt.legend(loc=0)
 
 plt.subplot(717)
-plt.plot(wl2, Tell_2, 'r', label="Tapas")
-plt.plot(wl2, I2_uncorr, 'k', label="Exctracted")
-#plt.title("Telluric line locations")
-plt.legend(loc=0)
-plt.show()
+plt.plot(wl2, 1-Tell_2, 'r', label="Tapas")
+plt.plot(wl2, 1-I2_uncorr, 'k', label="Exctracted")
+plt.title("Telluric line locations (minus 1)")
+#plt.legend(loc=0)
+#plt.show()
+# Make it interactive with Bokeh
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # In[ ]:
