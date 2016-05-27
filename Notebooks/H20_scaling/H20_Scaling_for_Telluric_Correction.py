@@ -467,7 +467,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 
-# In[10]:
+# In[43]:
 
 from math import sqrt
 from joblib import Parallel, delayed
@@ -482,7 +482,7 @@ def convolve(wav, R, wav_extended, flux_extended, FWHM_lim):
         unitary_val = np.sum(IP*np.ones_like(flux_2convolve))  # Effect of convolution onUnitary. For changing number of points
         return val/unitary_val
     
-def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, n_jobs=-1):
+def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, n_jobs=-1, parallel_workers=None):
     """Convolution code adapted from pedros code"""
     
     wav_chip, flux_chip = chip_selector(wav, flux, chip)
@@ -522,8 +522,11 @@ def parallel_convolution(wav, flux, chip, R, FWHM_lim=5.0, n_jobs=-1):
     #   flux_2convolve = flux_extended[indexes[0]:indexes[-1]+1]
     #   IP = unitary_Gauss(wav_extended[indexes[0]:indexes[-1]+1], wav, FWHM)
     #   flux_conv_res.append(np.sum(IP*flux_2convolve))
-    
-    parallel_result = Parallel(n_jobs=n_jobs)(delayed(convolve)(wav,R,wav_extended, flux_extended,FWHM_lim) for wav in wav_chip)
+    if parallel_workers:
+        # If given workes to use
+         parallel_result = parallel_workers(delayed(convolve)(wav,R,wav_extended, flux_extended,FWHM_lim) for wav in wav_chip)
+    else:
+        parallel_result = Parallel(n_jobs=n_jobs)(delayed(convolve)(wav,R,wav_extended, flux_extended,FWHM_lim) for wav in wav_chip)
     flux_conv_res = np.array(parallel_result, dtype="float64")
     print("Done.\n")
     
@@ -538,14 +541,14 @@ print("function done")
 #  from joblib import Parallel, delayed
 #  Parallel(n_jobs=2)(delayed(sqrt)(i ** 2) for i in range(10))
 
-# In[ ]:
+# In[45]:
 
 import time
 import datetime
 start = time.time()
 print("start time", datetime.datetime.now().time())
 
-parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "0", 50000, FWHM_lim=5.0, n_jobs=-1)
+parallel_x, parallel_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, n_jobs=-1)
   
 done = time.time()
 print("end time", datetime.datetime.now().time())
@@ -559,12 +562,23 @@ print("Convolution time = ", elapsed)
 #Maybe good idea to find a general rule of thumb for height/depth of lines need to get to 
 
 
-# In[ ]:
+# In[46]:
+
+# Test passing it hte parallel worker
+start = time.time()
+with Parallel(n_jobs=-1, verbose=1) as parallel:
+    par_x, par_y = parallel_convolution(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, n_jobs=-1, parallel_workers=parallel)
+  
+done = time.time()
+print("Convolution time = ", done - start)
+
+
+# In[12]:
 
 # Saving a result for comparison
 
-np.savetxt("Convolved_50000_tapas_wavelength_allchips.txt", parallel_x)
-np.savetxt("Convolved_50000_tapas_transmitance_allchips.txt", parallel_y)
+#np.savetxt("Convolved_50000_tapas_wavelength_allchips.txt", parallel_x)
+#np.savetxt("Convolved_50000_tapas_transmitance_allchips.txt", parallel_y)
 
 #np.savetxt("Convolved_50000_tapas_wavelength_allchips_dividebynumber.txt", parallel_x)
 #np.savetxt("Convolved_50000_tapas_transmitance_allchips_dividebynumber.txt", parallel_y)
@@ -606,7 +620,7 @@ np.savetxt("Convolved_50000_tapas_transmitance_allchips.txt", parallel_y)
 # 
 # My conclusion is that joblib does a great job and increase the convolution speed for this task on linux. Threading is not good for this instance.
 
-# In[26]:
+# In[47]:
 
 plt.plot(tapas_h20_data[0], tapas_h20_data[1], "b")
 #plt.plot(x,y/np.max(y), "r")
@@ -623,13 +637,13 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # Does each chip need a differnet scaling power?
 # 
 
-# In[29]:
+# In[48]:
 
 from lmfit import minimize, Parameters
 import lmfit
 
 
-# In[ ]:
+# In[49]:
 
 from scipy.interpolate import interp1d
 def match_wl(wl, spec, ref_wl, method="scipy", kind="linear"):
@@ -665,7 +679,7 @@ def slice_spectra(wl, spectrum, low, high):
 
 
 
-# In[30]:
+# In[52]:
 
 ### Fit using lmfit
 
@@ -676,19 +690,20 @@ def h20_residual(params, obs_data, telluric_data):
     FWHM_lim = params["FWHM_lim"].value
     n_jobs = params["n_jobs"].value
     chip_select = params["chip_select"].value
+    parallel_workers = params["parallel_workers"].value  # Joblib parallel worker
     
     # Data
     obs_wl = obs_data[0]
     obs_I = obs_data[1]
-    telluic_wl = telluric_data[0]
+    telluric_wl = telluric_data[0]
     telluric_I = telluric_data[1]
     
     # Telluric scaling T ** x
-    scaled_telluric_I = telluric_data ** ScaleFactor
+    scaled_telluric_I = telluric_I ** ScaleFactor
     
     # Convolution
-    convolved_telluric = parallel_convolution(telluric_wl, scaled_telluric_I, str(chip_select), R, FWHM_lim=FWHM_lim, n_jobs=n_jobs)
-    interped_telluric = match_wl(telluic_wl, telluric_I,    obs_wl)
+    convolved_telluric = parallel_convolution(telluric_wl, scaled_telluric_I, str(chip_select), R, FWHM_lim=FWHM_lim, n_jobs=n_jobs, parallel_workers=parallel_workers)
+    interped_telluric = match_wl(telluric_wl, telluric_I,    obs_wl)
     print("Convolution inside residual function was done")
     
     return 1 - (obs_I / convolved_telluric) 
@@ -696,7 +711,7 @@ def h20_residual(params, obs_data, telluric_data):
 
 
 
-# In[1]:
+# In[53]:
 
 # Set up parameters 
 params = Parameters()
@@ -707,37 +722,55 @@ params.add('n_jobs', value=-1, vary=False)
 params.add('chip_select', value=2, vary=False)
 
 
-# In[ ]:
+# In[62]:
 
 #wl2, I2_uncorr
 # wl2, I2_not_h20_corr
 
 # Sliced to wavelength measurement of detector
-tell_data1 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl1), max(wl1))
-tell_data2 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl2), max(wl2))
-tell_data3 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl3), max(wl3))
-tell_data4 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl4), max(wl4))
+tell_data1 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], 0.95*min(wl1), 1.05*max(wl1))
+tell_data2 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], 0.95*min(wl2), 1.05*max(wl2))
+tell_data3 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], 0.95*min(wl3), 1.05*max(wl3))
+tell_data4 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], 0.95*min(wl4), 1.05*max(wl4))
+
+               
+print("Number of values to iterate", len(tell_data2[0]))
+
+
+# In[ ]:
+
+# test outside of fit
+print("Starting test")
+with Parallel(n_jobs=-1, verbose=1) as parallel:
+    params.add('parallel_workers', value=parallel, vary=False)
+    residual = h20_residual(params,[wl2, I2_not_h20_corr], tell_data2)
+
+
+# In[35]:
 
 # Peform minimization
-out = minimize(h20_residual, params, args=([wl2, I2_not_h20_corr], tell_data2)
+with Parallel(n_jobs=-1) as parallel:
+    params.add('parallel_workers', value=parallel, vary=False)
+    out = minimize(h20_residual, params, args=([wl2, I2_not_h20_corr], tell_data2))
 outreport = lmfit.fit_report(out)
 print(outreport)
 
-               
-               
 
+# # Timing test of code
 
-# In[ ]:
+# In[39]:
 
 ## Time difference between my slice spectra and pedros wave selector
-%%time
-wav_selector(tapas_h20_data[0], tapas_h20_data[1], min(wl2), max(wl2))
+get_ipython().magic(u'timeit wav_selector(tapas_h20_data[0], tapas_h20_data[1], min(wl1), max(wl4))')
 
 
-# In[ ]:
+# In[40]:
 
-get_ipython().run_cell_magic(u'time', u'', u'slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl2), max(wl2))')
+get_ipython().magic(u'timeit slice_spectra(tapas_h20_data[0], tapas_h20_data[1], min(wl1), max(wl4))')
 
+
+# Therefore Pedros wav_selector is faster/more efficent than my code. Should adjust my code accordingly.
+# I should probably move this to a different notebook.
 
 # ### Apply correction with best scaling power:
 # 
