@@ -703,7 +703,7 @@ def h20_residual(params, obs_data, telluric_data):
     
     # Convolution
     convolved_telluric = parallel_convolution(telluric_wl, scaled_telluric_I, str(chip_select), R, FWHM_lim=FWHM_lim, n_jobs=n_jobs, parallel_workers=parallel_workers)
-    interped_telluric = match_wl(telluric_wl, telluric_I,    obs_wl)
+    interped_telluric = match_wl(telluric_wl, telluric_I, obs_wl)
     print("Convolution inside residual function was done")
     
     return 1 - (obs_I / convolved_telluric) 
@@ -737,7 +737,7 @@ tell_data4 = slice_spectra(tapas_h20_data[0], tapas_h20_data[1], 0.95*min(wl4), 
 print("Number of values to iterate", len(tell_data2[0]))
 
 
-# In[ ]:
+# In[63]:
 
 # test outside of fit
 print("Starting test")
