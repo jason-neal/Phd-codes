@@ -1,11 +1,9 @@
 
 # coding: utf-8
 
-# In[ ]:
-
-# Relation between Convoled Spectra and not convolved Spectra of H20.
-
-
+# # Relation between Convoled Spectra and not convolved Spectra of H20.
+# 
+# 
 
 # In[1]:
 
@@ -76,7 +74,6 @@ print("Telluric Resolution Power =", tapas_h20_respower)
 
 #conv_wav, conv_flux = np.loadtxt("Convolved_50000_tapas_allchips.txt", delimiter="'",unpack=True)
 
-
 conv_wav = np.loadtxt("Convolved_50000_tapas_wavelength_allchips.txt")
 conv_flux = np.loadtxt("Convolved_50000_tapas_transmitance_allchips.txt")
 
@@ -84,22 +81,12 @@ print(conv_wav)
 print(conv_flux)
 
 
-# In[8]:
-
-#Convolved_50000_tapas_wavelength_allchips_dividebynumber.txt
-# Testing dividing each value by number of points in convolution gaussian
-conv_wav_divide = np.loadtxt("Convolved_50000_tapas_wavelength_allchips_dividebynumber.txt")
-conv_flux_divide = np.loadtxt("Convolved_50000_tapas_transmitance_allchips_dividebynumber.txt")
-
-# Convolution with division by # of values in convolution did not work well. So proably have to divide by a fitted line.
-
-
 # In[6]:
 
 orig_flux = np.array([flux for wav, flux in zip(tapas_h20_data[0], tapas_h20_data[1]) if wav in conv_wav])
 
 plt.plot(orig_flux, conv_flux, "o")
-plt.title("Affect of Convolution R=50000")
+pl t.title("Affect of Convolution R=50000")
 plt.xlabel("Original Flux")
 plt.ylabel("Convolved Flux\nR=50000")
 
@@ -107,37 +94,17 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 
-# In[7]:
-
-plt.plot(orig_flux, conv_flux_divide, "o")
-plt.title("Divided values \n Affect of Convolution R=50000")
-plt.xlabel("Original Flux")
-plt.ylabel("Convolved Flux\nR=50000")
-
-bokeh.plotting.show(bokeh.mpl.to_bokeh())
-
-
-# In[10]:
+# In[12]:
 
 plt.plot(tapas_h20_data[0],tapas_h20_data[1])
 plt.plot(conv_wav, conv_flux)
-plt.xlabel("Wavelenght")
+plt.xlabel("Wavelength")
 plt.ylabel("Flux")
 
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[9]:
-
-plt.plot(tapas_h20_data[0],tapas_h20_data[1])
-plt.plot(conv_wav_divide, conv_flux_divide)
-plt.xlabel("Wavelenght")
-plt.ylabel("Flux with division")
-
-bokeh.plotting.show(bokeh.mpl.to_bokeh())
-
-
-# In[7]:
+# In[13]:
 
 #Wavelenght density
 plt.plot(tapas_h20_data[0][1:],tapas_h20_data[0][1:]-tapas_h20_data[0][:-1])
@@ -147,9 +114,37 @@ plt.title("Distribution of wavelength is not uniform")
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[ ]:
+# ## Testing dividing by number of values in gaussian convolution
+
+# In[14]:
+
+# Convolved_50000_tapas_wavelength_allchips_dividebynumber.txt
+# Testing dividing each value by number of points in convolution gaussian
+conv_wav_divide = np.loadtxt("Convolved_50000_tapas_wavelength_allchips_dividebynumber.txt")
+conv_flux_divide = np.loadtxt("Convolved_50000_tapas_transmitance_allchips_dividebynumber.txt")
+
+# Convolution with division by # of values in convolution did not work well. So proably have to divide by a fitted line.
 
 
+# In[15]:
+
+plt.plot(orig_flux, conv_flux_divide, "o")
+plt.title("Divided values \n Affect of Convolution R=50000")
+plt.xlabel("Original Flux")
+plt.ylabel("Convolved Flux\nR=50000")
+
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
+
+
+# In[16]:
+
+plt.plot(tapas_h20_data[0],tapas_h20_data[1])
+plt.plot(conv_wav_divide, conv_flux_divide)
+plt.plot(conv_wav, conv_flux)
+plt.xlabel("Wavelenght")
+plt.ylabel("Flux with division")
+
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # In[ ]:
