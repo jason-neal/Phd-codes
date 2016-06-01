@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>Efficiency_Testing</title>
+<title>Numpy - Arraying an Array</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -11751,19 +11751,26 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Testing-Python-Efficiency:">Testing Python Efficiency:<a class="anchor-link" href="#Testing-Python-Efficiency:">&#182;</a></h1><p>To determine fasted methods to apply sections of code.</p>
-<p>I.e. test using numpy arrays indexing, broadcasting etc comapred to my written functions and compreshnsion lists.</p>
-<p>Also test overhead of converting to and from lists.</p>
+<h1 id="Isinstance()-before-Numpy-arraying:">Isinstance() before Numpy arraying:<a class="anchor-link" href="#Isinstance()-before-Numpy-arraying:">&#182;</a></h1><p>This is to test if it is more efficient to np.array() things all the time or to first check if they are already np.ndarrays.</p>
+<p>Jason Neal
+31/5/2016</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Make up some random data</span>
+<span class="n">large_test_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+<span class="n">small_test_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+
+<span class="n">large_test_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">large_test_numpy</span><span class="p">)</span>
+<span class="n">small_test_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">small_test_numpy</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11776,95 +11783,27 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Wavelength-selection-codes">Wavelength selection codes<a class="anchor-link" href="#Wavelength-selection-codes">&#182;</a></h2><p>Fastest way to select wavelength and flux from a spectra.</p>
-<p>Experimenting with np array mask for quicker wavelenght selection than mine or pedros codes. Created fast_wav_selector 29/5/2015</p>
+<h3 id="Timing-calls">Timing calls<a class="anchor-link" href="#Timing-calls">&#182;</a></h3><p>From the following cells an isinstance call is around an order of magnitude faster than a np.array call on a small np.ndarray and around 3 orders of magnitude for a large numpy array. A np.array call on a np.ndarray is order of magnitudes faster then a np.array call on a large list.</p>
+<p>Strangely a negative isinstace response is twice as long as a positive response.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">wav_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">wav_min</span><span class="p">,</span> <span class="n">wav_max</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    function that returns wavelength and flux withn a giving range</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">wav_sel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">wav</span> <span class="k">if</span><span class="p">(</span><span class="n">wav_min</span> <span class="o">&lt;</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">wav_max</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    <span class="n">flux_sel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span><span class="n">flux</span><span class="p">)</span> <span class="k">if</span><span class="p">(</span><span class="n">wav_min</span> <span class="o">&lt;</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">wav_max</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="p">[</span><span class="n">wav_sel</span><span class="p">,</span> <span class="n">flux_sel</span><span class="p">]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Time Small lists and arrays</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Positive isinstance call:&quot;</span><span class="p">)</span>
+<span class="o">%</span> <span class="n">timeit</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">small_test_numpy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Negative isinstance call:&quot;</span><span class="p">)</span>
+<span class="o">%</span> <span class="n">timeit</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">small_test_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">slice_spectra</span><span class="p">(</span><span class="n">wl</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Extract a section of a spectrum between wavelength bounds.</span>
-<span class="sd">    This was faster than wav_selector but it only works on numpy arrays.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-    <span class="c1">#print(&quot;lower bound&quot;, low)</span>
-    <span class="c1">#print(&quot;upper bound&quot;, high)</span>
-    <span class="n">map1</span> <span class="o">=</span> <span class="n">wl</span> <span class="o">&gt;</span> <span class="n">low</span>
-    <span class="n">map2</span> <span class="o">=</span> <span class="n">wl</span> <span class="o">&lt;</span> <span class="n">high</span>
-    <span class="n">wl_sec</span> <span class="o">=</span> <span class="n">wl</span><span class="p">[</span><span class="n">map1</span><span class="o">*</span><span class="n">map2</span><span class="p">]</span>
-    <span class="n">spectrum_sec</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">[</span><span class="n">map1</span><span class="o">*</span><span class="n">map2</span><span class="p">]</span>   
-    <span class="k">return</span> <span class="n">wl_sec</span><span class="p">,</span> <span class="n">spectrum_sec</span> 
-
-
-<span class="k">def</span> <span class="nf">fast_wav_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">wav_min</span><span class="p">,</span> <span class="n">wav_max</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Faster Wavelenght selector</span>
-<span class="sd">    </span>
-<span class="sd">    If passed lists it will return lists.</span>
-<span class="sd">    If passed np arrays it will return arrays</span>
-<span class="sd">    </span>
-<span class="sd">    Fastest is using np.ndarrays</span>
-<span class="sd">    fast_wav_selector ~1000-2000 * quicker than wav_selector</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="c1"># if passed lists</span>
-          <span class="n">wav_sel</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">wav</span> <span class="k">if</span><span class="p">(</span><span class="n">wav_min</span> <span class="o">&lt;</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">wav_max</span><span class="p">)]</span>
-          <span class="n">flux_sel</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span><span class="n">flux</span><span class="p">)</span> <span class="k">if</span><span class="p">(</span><span class="n">wav_min</span> <span class="o">&lt;</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">wav_max</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="c1"># Super Fast masking with numpy</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">wav</span> <span class="o">&gt;</span> <span class="n">wav_min</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wav</span> <span class="o">&lt;</span> <span class="n">wav_max</span><span class="p">)</span>
-        <span class="n">wav_sel</span> <span class="o">=</span> <span class="n">wav</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-        <span class="n">flux_sel</span> <span class="o">=</span> <span class="n">flux</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Unsupported input wav type&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">wav_sel</span><span class="p">,</span> <span class="n">flux_sel</span><span class="p">]</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Create some data to test with</span>
-<span class="n">wl</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">30000</span><span class="p">))</span>
-<span class="n">wl_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">30000</span><span class="p">)</span>
-
-<span class="n">flux</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span><span class="mi">5</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">wl</span><span class="p">]</span> 
-<span class="n">flux_np</span> <span class="o">=</span> <span class="n">wl_np</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span><span class="mi">5</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[95]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Make some data as lists</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make list array&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> wl = list(range(2000, 30000))
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make np array&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> wl_np = np.arange(2000, 30000)
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Small numpy array -&gt; numpy array:&quot;</span><span class="p">)</span>
+<span class="o">%</span> <span class="n">timeit</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">small_test_numpy</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span> 
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Small list  -&gt; numpy array:&quot;</span><span class="p">)</span>
+<span class="o">%</span> <span class="n">timeit</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">small_test_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span> 
 </pre></div>
 
 </div>
@@ -11877,10 +11816,20 @@ div#notebook {
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Make list array
-1000 loops, best of 3: 1.78 ms per loop
-Make np array
-10000 loops, best of 3: 66.2 µs per loop
+<pre>Positive isinstance call:
+The slowest run took 11.45 times longer than the fastest. This could mean that an intermediate result is being cached.
+1000000 loops, best of 3: 467 ns per loop
+
+Negative isinstance call:
+The slowest run took 9.04 times longer than the fastest. This could mean that an intermediate result is being cached.
+1000000 loops, best of 3: 789 ns per loop
+
+Small numpy array -&gt; numpy array:
+The slowest run took 4.28 times longer than the fastest. This could mean that an intermediate result is being cached.
+100000 loops, best of 3: 9.9 µs per loop
+
+Small list  -&gt; numpy array:
+100000 loops, best of 3: 16.2 µs per loop
 </pre>
 </div>
 </div>
@@ -11891,14 +11840,19 @@ Make np array
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[98]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">timeit</span> list(wl_np)
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Time larger lsits and arrays</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Positive isinstance call:&quot;</span><span class="p">)</span>
+<span class="o">%</span> <span class="n">timeit</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">large_test_numpy</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Negative isinstance call:&quot;</span><span class="p">)</span>
+<span class="o">%</span> <span class="n">timeit</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">large_test_list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
 
-<span class="o">%</span><span class="k">timeit</span> np.array(wl)
-
-<span class="o">%</span><span class="k">timeit</span> np.array(wl_np)   # very quick as does nothing*
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Large numpy array -&gt; numpy array:&quot;</span><span class="p">)</span>
+<span class="o">%</span> <span class="n">timeit</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">large_test_numpy</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span> 
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Large list  -&gt; numpy array:&quot;</span><span class="p">)</span>
+<span class="o">%</span> <span class="n">timeit</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">large_test_list</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span> 
 </pre></div>
 
 </div>
@@ -11911,9 +11865,19 @@ Make np array
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>100 loops, best of 3: 3.11 ms per loop
-100 loops, best of 3: 6.1 ms per loop
-10000 loops, best of 3: 27.6 µs per loop
+<pre>Positive isinstance call:
+The slowest run took 8.40 times longer than the fastest. This could mean that an intermediate result is being cached.
+1000000 loops, best of 3: 478 ns per loop
+
+Negative isinstance call:
+The slowest run took 12.25 times longer than the fastest. This could mean that an intermediate result is being cached.
+1000000 loops, best of 3: 764 ns per loop
+
+Large numpy array -&gt; numpy array:
+1000 loops, best of 3: 447 µs per loop
+
+Large list  -&gt; numpy array:
+10 loops, best of 3: 24.3 ms per loop
 </pre>
 </div>
 </div>
@@ -11924,75 +11888,12 @@ Make np array
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;list comprehension&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> flux = [x**2 +5 for x in wl] 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;np calculation&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> flux_np = wl_np**2 +5
-<span class="c1"># comprehension list much slower then numpy arrary but want to start with lists</span>
-
-<span class="n">flux</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span><span class="mi">5</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">wl</span><span class="p">]</span> 
-<span class="n">flux_np</span> <span class="o">=</span> <span class="n">wl_np</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span><span class="mi">5</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot; min of list&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> min(wl)
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;np min of list&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> np.min(wl)
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot; min of np array&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> min(wl_np)
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;np min of np array&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> np.min(wl_np)
-<span class="c1"># Timing time to turn list </span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Time to convert between list and array</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;list to array&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> np.array(wl)
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;list to array&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> x = np.array(wl)
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;array to list&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> list(wl_np)
-<span class="o">%</span><span class="k">timeit</span> y = list(wl_np)
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># time to turn an array into and array</span>
-<span class="o">%</span><span class="k">timeit</span> np.array(wl_np)
-<span class="n">wl_np2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wl_np</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">wl_np2</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">timeit</span> 
+if not isinstance(small_test_numpy, np.ndarray):
+    np.array(small_test_numpy, dtype=&quot;float64&quot;) 
 </pre></div>
 
 </div>
@@ -12005,9 +11906,8 @@ Make np array
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>The slowest run took 8.91 times longer than the fastest. This could mean that an intermediate result is being cached.
-10000 loops, best of 3: 24.1 µs per loop
-&lt;class &#39;numpy.ndarray&#39;&gt;
+<pre>The slowest run took 36.78 times longer than the fastest. This could mean that an intermediate result is being cached.
+1000000 loops, best of 3: 412 ns per loop
 </pre>
 </div>
 </div>
@@ -12018,35 +11918,12 @@ Make np array
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Copied from H20 Scaling</span>
-<span class="o">%</span><span class="k">timeit</span> slice_spectra(tapas_h20_data[0], tapas_h20_data[1], np.min(wl2), np.max(wl2))
-<span class="o">%</span><span class="k">timeit</span> wav_selector(tapas_h20_data[0], tapas_h20_data[1], np.min(wl2), np.max(wl2))
-<span class="o">%</span><span class="k">timeit</span> fast_wav_selector(tapas_h20_data[0], tapas_h20_data[1], np.min(wl2), np.max(wl2))
-<span class="c1"># fast_wav_selector ~1000-2000 * quicker</span>
-<span class="c1">#1 loop, best of 3: 1.88 s per loop</span>
-<span class="c1">#1000 loops, best of 3: 1.25 ms per loop</span>
-<span class="c1">#1 loop, best of 3: 1.9 s per loop</span>
-<span class="c1">#1000 loops, best of 3: 831 µs per loop</span>
-<span class="p">(</span><span class="mf">1.88</span><span class="o">*</span><span class="mi">1000</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">1.25</span><span class="p">)</span>  <span class="c1"># </span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Simliar time to split or not split out tuple/list returned</span>
-<span class="o">%</span><span class="k">timeit</span> t1 = fast_wav_selector(wl_np, flux_np, 6000, 24000)
-
-<span class="o">%</span><span class="k">timeit</span> t2, t3 = fast_wav_selector(wl_np, flux_np, 6000, 24000) 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">timeit</span> 
+if not isinstance(large_test_numpy, np.ndarray):
+    np.array(large_test_numpy, dtype=&quot;float64&quot;) 
 </pre></div>
 
 </div>
@@ -12059,8 +11936,8 @@ Make np array
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>1000 loops, best of 3: 339 µs per loop
-1000 loops, best of 3: 344 µs per loop
+<pre>The slowest run took 6.11 times longer than the fastest. This could mean that an intermediate result is being cached.
+1000000 loops, best of 3: 511 ns per loop
 </pre>
 </div>
 </div>
@@ -12071,22 +11948,12 @@ Make np array
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">## Time difference between my slice spectra and pedros wave selector</span>
-<span class="c1">#print(&quot;Slice_spectra with lists&quot;)</span>
-<span class="c1">#%timeit slice_spectra(wl, flux, 6000, 24000)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Wav_selector with lists&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> wav_selector(wl, flux, 6000, 24000)
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;fast Wav_selecor with list&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> fast_wav_selector(wl, flux, 6000, 24000)
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;slice_spectra with array&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> slice_spectra(wl_np, flux_np, 6000, 24000)
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Wav_selecor with array&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> wav_selector(wl_np, flux_np, 6000, 24000)
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;fast Wav_selecor_np with array&quot;</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> fast_wav_selector(wl_np, flux_np, 6000, 24000)
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">timeit</span> 
+if type(small_test_list) is not np.ndarray:
+    np.array(small_test_list, dtype=&quot;float64&quot;) 
 </pre></div>
 
 </div>
@@ -12099,16 +11966,8 @@ Make np array
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Wav_selector with lists
-10 loops, best of 3: 39.3 ms per loop
-fast Wav_selecor with list
-10 loops, best of 3: 24.2 ms per loop
-slice_spectra with array
-1000 loops, best of 3: 351 µs per loop
-Wav_selecor with array
-10 loops, best of 3: 77.5 ms per loop
-fast Wav_selecor_np with array
-1000 loops, best of 3: 346 µs per loop
+<pre>The slowest run took 4.07 times longer than the fastest. This could mean that an intermediate result is being cached.
+100000 loops, best of 3: 10.9 µs per loop
 </pre>
 </div>
 </div>
@@ -12119,150 +11978,12 @@ fast Wav_selecor_np with array
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Testing line profiling</span>
-
-<span class="o">%</span><span class="k">load_ext</span> line_profiler
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[85]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">lprun</span>  -f wav_selector wav_selector(wl_np, flux_np, 6000, 24000)
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">lprun</span>  -f fast_wav_selector fast_wav_selector(wl_np, flux_np, 6000, 24000)
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">lprun</span>  -f fast_wav_selector fast_wav_selector(wl, flux, 6000, 24000)
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">lprun</span>  -f slice_spectra slice_spectra(wl_np, flux_np, 6000, 24000)
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Unitary-Gauss-Fucntion">Unitary Gauss Fucntion<a class="anchor-link" href="#Unitary-Gauss-Fucntion">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">unitary_Gauss</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">FWHM</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gaussian_function of area=1</span>
-<span class="sd">	</span>
-<span class="sd">	p[0] = A;</span>
-<span class="sd">	p[1] = mean;</span>
-<span class="sd">	p[2] = FWHM;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">FWHM</span><span class="p">)</span> <span class="o">/</span><span class="p">(</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="p">);</span>
-    <span class="n">Amp</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
-    <span class="n">tau</span> <span class="o">=</span> <span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">Amp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="n">tau</span> <span class="p">);</span>
-    
-    <span class="k">return</span> <span class="n">result</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Unitatry Gauss function doesn't need speed up as it is all in numpy.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">timeit</span> unitary_Gauss(np.arange(-50,50), 1, 5)
-<span class="c1">#%timeit unitary_Gauss(xlist, 1, 5) # List does not work</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">timeit</span> 
+if type(large_test_list) is not np.ndarray:
+    np.array(large_test_list, dtype=&quot;float64&quot;) 
 </pre></div>
 
 </div>
@@ -12275,938 +11996,7 @@ fast Wav_selecor_np with array
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>The slowest run took 5.48 times longer than the fastest. This could mean that an intermediate result is being cached.
-10000 loops, best of 3: 66.4 µs per loop
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Main convolution loop</span>
-
-<span class="k">def</span> <span class="nf">convolve</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="p">):</span>
-        <span class="c1"># select all values such that they are within the FWHM limits</span>
-        <span class="n">FWHM</span> <span class="o">=</span> <span class="n">wav</span><span class="o">/</span><span class="n">R</span>
-        <span class="n">indexes</span> <span class="o">=</span> <span class="p">[</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wav_extended</span><span class="p">))</span> <span class="k">if</span> <span class="p">((</span><span class="n">wav</span> <span class="o">-</span> <span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">wav_extended</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">wav</span> <span class="o">+</span> <span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM</span><span class="p">))]</span>
-        <span class="n">flux_2convolve</span> <span class="o">=</span> <span class="n">flux_extended</span><span class="p">[</span><span class="n">indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indexes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">IP</span> <span class="o">=</span> <span class="n">unitary_Gauss</span><span class="p">(</span><span class="n">wav_extended</span><span class="p">[</span><span class="n">indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">indexes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">wav</span><span class="p">,</span> <span class="n">FWHM</span><span class="p">)</span>
-        <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">IP</span><span class="o">*</span><span class="n">flux_2convolve</span><span class="p">)</span> 
-        <span class="n">unitary_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">IP</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">flux_2convolve</span><span class="p">))</span>  <span class="c1"># Effect of convolution onUnitary. For changing number of points</span>
-        <span class="k">return</span> <span class="n">val</span><span class="o">/</span><span class="n">unitary_val</span>
-
-<span class="k">def</span> <span class="nf">fast_convolve</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="p">):</span>
-    <span class="n">FWHM</span> <span class="o">=</span> <span class="n">wav</span><span class="o">/</span><span class="n">R</span>
-    
-    <span class="n">index_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">wav_extended</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">wav</span> <span class="o">-</span> <span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM</span><span class="p">))</span> <span class="o">&amp;</span>  <span class="p">(</span><span class="n">wav_extended</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">wav</span> <span class="o">+</span> <span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM</span><span class="p">))</span>
-    
-    <span class="n">flux_2convolve</span> <span class="o">=</span> <span class="n">flux_extended</span><span class="p">[</span><span class="n">index_mask</span><span class="p">]</span>
-    <span class="n">IP</span> <span class="o">=</span> <span class="n">unitary_Gauss</span><span class="p">(</span><span class="n">wav_extended</span><span class="p">[</span><span class="n">index_mask</span><span class="p">],</span> <span class="n">wav</span><span class="p">,</span> <span class="n">FWHM</span><span class="p">)</span>
-    
-    <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">IP</span><span class="o">*</span><span class="n">flux_2convolve</span><span class="p">)</span> 
-    <span class="n">unitary_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">IP</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">flux_2convolve</span><span class="p">))</span>  <span class="c1"># Effect of convolution onUnitary. For changing number of points</span>
-        
-    <span class="k">return</span> <span class="n">val</span><span class="o">/</span><span class="n">unitary_val</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">wav_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">2000</span><span class="p">,</span><span class="mi">2000</span><span class="p">)</span>
-<span class="n">flux_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">wave_extended</span><span class="p">)</span>
-<span class="n">fwhm_lim</span><span class="o">=</span><span class="mi">5</span>
-
-<span class="n">wav</span> <span class="o">=</span> <span class="mi">60</span>
-<span class="n">R</span><span class="o">=</span><span class="mi">50000</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_text output_error">
-<pre>
-<span class="ansi-red-intense-fg ansi-bold">---------------------------------------------------------------------------</span>
-<span class="ansi-red-intense-fg ansi-bold">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-green-intense-fg ansi-bold">&lt;ipython-input-5-ec2ad2e096f1&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-intense-fg ansi-bold">()</span>
-<span class="ansi-green-fg">      1</span> wav_extended <span class="ansi-yellow-intense-fg ansi-bold">=</span> np<span class="ansi-yellow-intense-fg ansi-bold">.</span>arange<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">-</span><span class="ansi-cyan-intense-fg ansi-bold">2000</span><span class="ansi-yellow-intense-fg ansi-bold">,</span><span class="ansi-cyan-intense-fg ansi-bold">2000</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-intense-fg ansi-bold">----&gt; 2</span><span class="ansi-yellow-intense-fg ansi-bold"> </span>flux_extended <span class="ansi-yellow-intense-fg ansi-bold">=</span> np<span class="ansi-yellow-intense-fg ansi-bold">.</span>ones_like<span class="ansi-yellow-intense-fg ansi-bold">(</span>wave_extended<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">      3</span> fwhm_lim<span class="ansi-yellow-intense-fg ansi-bold">=</span><span class="ansi-cyan-intense-fg ansi-bold">5</span>
-<span class="ansi-green-fg">      4</span> 
-<span class="ansi-green-fg">      5</span> wav <span class="ansi-yellow-intense-fg ansi-bold">=</span> <span class="ansi-cyan-intense-fg ansi-bold">60</span>
-
-<span class="ansi-red-intense-fg ansi-bold">NameError</span>: name &#39;wave_extended&#39; is not defined</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">timeit</span> convolve(wav, R, wav_extended, flux_extended, fwhm_lim)
-<span class="o">%</span><span class="k">timeit</span> fast_convolve(wav, R, wav_extended, flux_extended, fwhm_lim)
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_text output_error">
-<pre>
-<span class="ansi-red-intense-fg ansi-bold">---------------------------------------------------------------------------</span>
-<span class="ansi-red-intense-fg ansi-bold">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-green-intense-fg ansi-bold">&lt;ipython-input-6-7bbe3c60ac10&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-intense-fg ansi-bold">()</span>
-<span class="ansi-green-intense-fg ansi-bold">----&gt; 1</span><span class="ansi-yellow-intense-fg ansi-bold"> </span>get_ipython<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">.</span>magic<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-blue-intense-fg ansi-bold">&#39;timeit convolve(wav, R, wav_extended, flux_extended, fwhm_lim)&#39;</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">      2</span> get_ipython<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">.</span>magic<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-blue-intense-fg ansi-bold">&#39;timeit fast_convolve(wav, R, wav_extended, flux_extended, fwhm_lim)&#39;</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
-
-<span class="ansi-green-intense-fg ansi-bold">C:\Users\Jason\Anaconda3\lib\site-packages\IPython\core\interactiveshell.py</span> in <span class="ansi-cyan-fg">magic</span><span class="ansi-blue-intense-fg ansi-bold">(self, arg_s)</span>
-<span class="ansi-green-fg">   2161</span>         magic_name<span class="ansi-yellow-intense-fg ansi-bold">,</span> _<span class="ansi-yellow-intense-fg ansi-bold">,</span> magic_arg_s <span class="ansi-yellow-intense-fg ansi-bold">=</span> arg_s<span class="ansi-yellow-intense-fg ansi-bold">.</span>partition<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-blue-intense-fg ansi-bold">&#39; &#39;</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">   2162</span>         magic_name <span class="ansi-yellow-intense-fg ansi-bold">=</span> magic_name<span class="ansi-yellow-intense-fg ansi-bold">.</span>lstrip<span class="ansi-yellow-intense-fg ansi-bold">(</span>prefilter<span class="ansi-yellow-intense-fg ansi-bold">.</span>ESC_MAGIC<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-intense-fg ansi-bold">-&gt; 2163</span><span class="ansi-yellow-intense-fg ansi-bold">         </span><span class="ansi-green-intense-fg ansi-bold">return</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>run_line_magic<span class="ansi-yellow-intense-fg ansi-bold">(</span>magic_name<span class="ansi-yellow-intense-fg ansi-bold">,</span> magic_arg_s<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">   2164</span> 
-<span class="ansi-green-fg">   2165</span>     <span class="ansi-red-intense-fg ansi-bold">#-------------------------------------------------------------------------</span>
-
-<span class="ansi-green-intense-fg ansi-bold">C:\Users\Jason\Anaconda3\lib\site-packages\IPython\core\interactiveshell.py</span> in <span class="ansi-cyan-fg">run_line_magic</span><span class="ansi-blue-intense-fg ansi-bold">(self, magic_name, line)</span>
-<span class="ansi-green-fg">   2082</span>                 kwargs<span class="ansi-yellow-intense-fg ansi-bold">[</span><span class="ansi-blue-intense-fg ansi-bold">&#39;local_ns&#39;</span><span class="ansi-yellow-intense-fg ansi-bold">]</span> <span class="ansi-yellow-intense-fg ansi-bold">=</span> sys<span class="ansi-yellow-intense-fg ansi-bold">.</span>_getframe<span class="ansi-yellow-intense-fg ansi-bold">(</span>stack_depth<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">.</span>f_locals
-<span class="ansi-green-fg">   2083</span>             <span class="ansi-green-intense-fg ansi-bold">with</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>builtin_trap<span class="ansi-yellow-intense-fg ansi-bold">:</span>
-<span class="ansi-green-intense-fg ansi-bold">-&gt; 2084</span><span class="ansi-yellow-intense-fg ansi-bold">                 </span>result <span class="ansi-yellow-intense-fg ansi-bold">=</span> fn<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">*</span>args<span class="ansi-yellow-intense-fg ansi-bold">,</span><span class="ansi-yellow-intense-fg ansi-bold">**</span>kwargs<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">   2085</span>             <span class="ansi-green-intense-fg ansi-bold">return</span> result
-<span class="ansi-green-fg">   2086</span> 
-
-<span class="ansi-green-intense-fg ansi-bold">&lt;decorator-gen-60&gt;</span> in <span class="ansi-cyan-fg">timeit</span><span class="ansi-blue-intense-fg ansi-bold">(self, line, cell)</span>
-
-<span class="ansi-green-intense-fg ansi-bold">C:\Users\Jason\Anaconda3\lib\site-packages\IPython\core\magic.py</span> in <span class="ansi-cyan-fg">&lt;lambda&gt;</span><span class="ansi-blue-intense-fg ansi-bold">(f, *a, **k)</span>
-<span class="ansi-green-fg">    191</span>     <span class="ansi-red-intense-fg ansi-bold"># but it&#39;s overkill for just that one bit of state.</span>
-<span class="ansi-green-fg">    192</span>     <span class="ansi-green-intense-fg ansi-bold">def</span> magic_deco<span class="ansi-yellow-intense-fg ansi-bold">(</span>arg<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
-<span class="ansi-green-intense-fg ansi-bold">--&gt; 193</span><span class="ansi-yellow-intense-fg ansi-bold">         </span>call <span class="ansi-yellow-intense-fg ansi-bold">=</span> <span class="ansi-green-intense-fg ansi-bold">lambda</span> f<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">*</span>a<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>k<span class="ansi-yellow-intense-fg ansi-bold">:</span> f<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">*</span>a<span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-yellow-intense-fg ansi-bold">**</span>k<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">    194</span> 
-<span class="ansi-green-fg">    195</span>         <span class="ansi-green-intense-fg ansi-bold">if</span> callable<span class="ansi-yellow-intense-fg ansi-bold">(</span>arg<span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
-
-<span class="ansi-green-intense-fg ansi-bold">C:\Users\Jason\Anaconda3\lib\site-packages\IPython\core\magics\execution.py</span> in <span class="ansi-cyan-fg">timeit</span><span class="ansi-blue-intense-fg ansi-bold">(self, line, cell)</span>
-<span class="ansi-green-fg">   1039</span>             number <span class="ansi-yellow-intense-fg ansi-bold">=</span> <span class="ansi-cyan-intense-fg ansi-bold">1</span>
-<span class="ansi-green-fg">   1040</span>             <span class="ansi-green-intense-fg ansi-bold">for</span> _ <span class="ansi-green-intense-fg ansi-bold">in</span> range<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-cyan-intense-fg ansi-bold">1</span><span class="ansi-yellow-intense-fg ansi-bold">,</span> <span class="ansi-cyan-intense-fg ansi-bold">10</span><span class="ansi-yellow-intense-fg ansi-bold">)</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
-<span class="ansi-green-intense-fg ansi-bold">-&gt; 1041</span><span class="ansi-yellow-intense-fg ansi-bold">                 </span>time_number <span class="ansi-yellow-intense-fg ansi-bold">=</span> timer<span class="ansi-yellow-intense-fg ansi-bold">.</span>timeit<span class="ansi-yellow-intense-fg ansi-bold">(</span>number<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">   1042</span>                 worst_tuning <span class="ansi-yellow-intense-fg ansi-bold">=</span> max<span class="ansi-yellow-intense-fg ansi-bold">(</span>worst_tuning<span class="ansi-yellow-intense-fg ansi-bold">,</span> time_number <span class="ansi-yellow-intense-fg ansi-bold">/</span> number<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">   1043</span>                 <span class="ansi-green-intense-fg ansi-bold">if</span> time_number <span class="ansi-yellow-intense-fg ansi-bold">&gt;=</span> <span class="ansi-cyan-intense-fg ansi-bold">0.2</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
-
-<span class="ansi-green-intense-fg ansi-bold">C:\Users\Jason\Anaconda3\lib\site-packages\IPython\core\magics\execution.py</span> in <span class="ansi-cyan-fg">timeit</span><span class="ansi-blue-intense-fg ansi-bold">(self, number)</span>
-<span class="ansi-green-fg">    135</span>         gc<span class="ansi-yellow-intense-fg ansi-bold">.</span>disable<span class="ansi-yellow-intense-fg ansi-bold">(</span><span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">    136</span>         <span class="ansi-green-intense-fg ansi-bold">try</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
-<span class="ansi-green-intense-fg ansi-bold">--&gt; 137</span><span class="ansi-yellow-intense-fg ansi-bold">             </span>timing <span class="ansi-yellow-intense-fg ansi-bold">=</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>inner<span class="ansi-yellow-intense-fg ansi-bold">(</span>it<span class="ansi-yellow-intense-fg ansi-bold">,</span> self<span class="ansi-yellow-intense-fg ansi-bold">.</span>timer<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">    138</span>         <span class="ansi-green-intense-fg ansi-bold">finally</span><span class="ansi-yellow-intense-fg ansi-bold">:</span>
-<span class="ansi-green-fg">    139</span>             <span class="ansi-green-intense-fg ansi-bold">if</span> gcold<span class="ansi-yellow-intense-fg ansi-bold">:</span>
-
-<span class="ansi-green-intense-fg ansi-bold">&lt;magic-timeit&gt;</span> in <span class="ansi-cyan-fg">inner</span><span class="ansi-blue-intense-fg ansi-bold">(_it, _timer)</span>
-
-<span class="ansi-red-intense-fg ansi-bold">NameError</span>: name &#39;wav&#39; is not defined</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="mi">49</span><span class="o">/.</span><span class="mi">2</span>
-<span class="c1"># ~250 x increase</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[7]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>245.0</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span><span class="p">,</span> <span class="n">fwhm_lim</span><span class="p">)</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">fast_convolve</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span><span class="p">,</span> <span class="n">fwhm_lim</span><span class="p">)</span>
-<span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_text output_error">
-<pre>
-<span class="ansi-red-intense-fg ansi-bold">---------------------------------------------------------------------------</span>
-<span class="ansi-red-intense-fg ansi-bold">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-green-intense-fg ansi-bold">&lt;ipython-input-8-478be2be200b&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-intense-fg ansi-bold">()</span>
-<span class="ansi-green-intense-fg ansi-bold">----&gt; 1</span><span class="ansi-yellow-intense-fg ansi-bold"> </span>a <span class="ansi-yellow-intense-fg ansi-bold">=</span> convolve<span class="ansi-yellow-intense-fg ansi-bold">(</span>wav<span class="ansi-yellow-intense-fg ansi-bold">,</span> R<span class="ansi-yellow-intense-fg ansi-bold">,</span> wav_extended<span class="ansi-yellow-intense-fg ansi-bold">,</span> flux_extended<span class="ansi-yellow-intense-fg ansi-bold">,</span> fwhm_lim<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">      2</span> b <span class="ansi-yellow-intense-fg ansi-bold">=</span> fast_convolve<span class="ansi-yellow-intense-fg ansi-bold">(</span>wav<span class="ansi-yellow-intense-fg ansi-bold">,</span> R<span class="ansi-yellow-intense-fg ansi-bold">,</span> wav_extended<span class="ansi-yellow-intense-fg ansi-bold">,</span> flux_extended<span class="ansi-yellow-intense-fg ansi-bold">,</span> fwhm_lim<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-<span class="ansi-green-fg">      3</span> np<span class="ansi-yellow-intense-fg ansi-bold">.</span>isclose<span class="ansi-yellow-intense-fg ansi-bold">(</span>a<span class="ansi-yellow-intense-fg ansi-bold">,</span>b<span class="ansi-yellow-intense-fg ansi-bold">)</span>
-
-<span class="ansi-red-intense-fg ansi-bold">NameError</span>: name &#39;wav&#39; is not defined</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Test-convolution-fix">Test convolution fix<a class="anchor-link" href="#Test-convolution-fix">&#182;</a></h1>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">datetime</span>
-
-<span class="k">def</span> <span class="nf">wav_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">wav_min</span><span class="p">,</span> <span class="n">wav_max</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    function that returns wavelength and flux withn a giving range</span>
-<span class="sd">    &quot;&quot;&quot;</span>    
-    <span class="n">wav_sel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">wav</span> <span class="k">if</span><span class="p">(</span><span class="n">wav_min</span> <span class="o">&lt;</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">wav_max</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    <span class="n">flux_sel</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span><span class="n">flux</span><span class="p">)</span> <span class="k">if</span><span class="p">(</span><span class="n">wav_min</span> <span class="o">&lt;</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">wav_max</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="p">[</span><span class="n">wav_sel</span><span class="p">,</span> <span class="n">flux_sel</span><span class="p">]</span>
-
-
-
-<span class="k">def</span> <span class="nf">unitary_Gauss</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">FWHM</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gaussian_function of area=1</span>
-<span class="sd">	</span>
-<span class="sd">	p[0] = A;</span>
-<span class="sd">	p[1] = mean;</span>
-<span class="sd">	p[2] = FWHM;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">FWHM</span><span class="p">)</span> <span class="o">/</span><span class="p">(</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="p">);</span>
-    <span class="n">Amp</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">))</span>
-    <span class="n">tau</span> <span class="o">=</span> <span class="o">-</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">center</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">sigma</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">Amp</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="n">tau</span> <span class="p">);</span>
-    
-    <span class="k">return</span> <span class="n">result</span>
-
-
-<span class="k">def</span> <span class="nf">chip_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">chip</span><span class="p">):</span>
-    <span class="n">chip</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">chip</span><span class="p">)</span>
-    <span class="k">if</span><span class="p">(</span><span class="n">chip</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ALL&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span><span class="s2">&quot;0&quot;</span><span class="p">]):</span>
-        <span class="n">chipmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN STRT1&quot;</span><span class="p">])</span>  <span class="c1"># Wavelength start on detector [nm]</span>
-        <span class="n">chipmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN END4&quot;</span><span class="p">])</span>   <span class="c1"># Wavelength end on detector [nm]</span>
-        <span class="c1">#return [wav, flux]</span>
-    <span class="k">elif</span><span class="p">(</span><span class="n">chip</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">):</span>
-        <span class="n">chipmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN STRT1&quot;</span><span class="p">])</span>  <span class="c1"># Wavelength start on detector [nm]</span>
-        <span class="n">chipmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN END1&quot;</span><span class="p">])</span>   <span class="c1"># Wavelength end on detector [nm]</span>
-    <span class="k">elif</span><span class="p">(</span><span class="n">chip</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">):</span>
-        <span class="n">chipmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN STRT2&quot;</span><span class="p">])</span>  <span class="c1"># Wavelength start on detector [nm]</span>
-        <span class="n">chipmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN END2&quot;</span><span class="p">])</span>   <span class="c1"># Wavelength end on detector [nm]</span>
-    <span class="k">elif</span><span class="p">(</span><span class="n">chip</span> <span class="o">==</span> <span class="s2">&quot;3&quot;</span><span class="p">):</span>   
-        <span class="n">chipmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN STRT3&quot;</span><span class="p">])</span>  <span class="c1"># Wavelength start on detector [nm]</span>
-        <span class="n">chipmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN END3&quot;</span><span class="p">])</span>   <span class="c1"># Wavelength end on detector [nm]</span>
-    <span class="k">elif</span><span class="p">(</span><span class="n">chip</span> <span class="o">==</span> <span class="s2">&quot;4&quot;</span><span class="p">):</span>   
-        <span class="n">chipmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN STRT4&quot;</span><span class="p">])</span>  <span class="c1"># Wavelength start on detector [nm]</span>
-        <span class="n">chipmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">hdr1</span><span class="p">[</span><span class="s2">&quot;HIERARCH ESO INS WLEN END4&quot;</span><span class="p">])</span>   <span class="c1"># Wavelength end on detector [nm]</span>
-    <span class="k">elif</span><span class="p">(</span><span class="n">chip</span> <span class="o">==</span> <span class="s2">&quot;Joblib_small&quot;</span><span class="p">):</span>   
-        <span class="n">chipmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2118</span><span class="p">)</span>  <span class="c1"># Wavelength start on detector [nm]</span>
-        <span class="n">chipmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2119</span><span class="p">)</span>  <span class="c1"># Wavelength end on detector [nm]</span>
-    <span class="k">elif</span><span class="p">(</span><span class="n">chip</span> <span class="o">==</span> <span class="s2">&quot;Joblib_large&quot;</span><span class="p">):</span>   
-        <span class="n">chipmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2149</span><span class="p">)</span>  <span class="c1"># Wavelength start on detector [nm]</span>
-        <span class="n">chipmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2157</span><span class="p">)</span>  <span class="c1"># Wavelength end on detector [nm]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unrecognized chip tag.&quot;</span><span class="p">)</span>
-        <span class="n">exit</span><span class="p">()</span>
-    
-    <span class="c1">#select values form the chip  </span>
-    <span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_chip</span> <span class="o">=</span> <span class="n">wav_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">chipmin</span><span class="p">,</span> <span class="n">chipmax</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="p">[</span><span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_chip</span><span class="p">]</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fast_convolution</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convolution code adapted from pedros code&quot;&quot;&quot;</span>
-    
-    <span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_chip</span> <span class="o">=</span> <span class="n">chip_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">chip</span><span class="p">)</span>
-    <span class="c1">#we need to calculate the FWHM at this value in order to set the starting point for the convolution</span>
-    
-    <span class="c1">#print(wav_chip)</span>
-    <span class="c1">#print(flux_chip)</span>
-    <span class="n">FWHM_min</span> <span class="o">=</span> <span class="n">wav_chip</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">R</span>    <span class="c1">#FWHM at the extremes of vector</span>
-    <span class="n">FWHM_max</span> <span class="o">=</span> <span class="n">wav_chip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">R</span>       
-    
-    <span class="c1">#wide wavelength bin for the resolution_convolution</span>
-    <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span> <span class="o">=</span> <span class="n">wav_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">wav_chip</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM_min</span><span class="p">,</span> <span class="n">wav_chip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM_max</span><span class="p">)</span> 
-    <span class="n">wav_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wav_extended</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    <span class="n">flux_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">flux_extended</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting the fast Resolution convolution...&quot;</span><span class="p">)</span>
-    <span class="c1"># Pre allocate space</span>
-    <span class="c1">#flux_conv_res = []</span>
-    <span class="n">flux_conv_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span> 
-    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">wav</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">fast_convolve</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="p">)</span>
-        <span class="c1">#print(result)</span>
-        <span class="c1">#if(len(flux_conv_res)%(len(wav_chip)//100 ) == 0):</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">)</span><span class="o">//</span><span class="mi">100</span> <span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">counter</span> <span class="o">=</span> <span class="n">counter</span><span class="o">+</span><span class="mi">1</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Resolution Convolution at </span><span class="si">{}%%</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">counter</span><span class="p">))</span>
-        <span class="n">flux_conv_res</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
-    <span class="n">flux_conv_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    
-
-    <span class="k">return</span> <span class="p">[</span><span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_conv_res</span> <span class="p">]</span>
-
-<span class="k">def</span> <span class="nf">slow_convolution</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">chip</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convolution code adapted from pedros code&quot;&quot;&quot;</span>
-    
-    <span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_chip</span> <span class="o">=</span> <span class="n">chip_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">chip</span><span class="p">)</span>
-    <span class="c1">#we need to calculate the FWHM at this value in order to set the starting point for the convolution</span>
-    
-    <span class="c1">#print(wav_chip)</span>
-    <span class="c1">#print(flux_chip)</span>
-    <span class="n">FWHM_min</span> <span class="o">=</span> <span class="n">wav_chip</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">R</span>    <span class="c1">#FWHM at the extremes of vector</span>
-    <span class="n">FWHM_max</span> <span class="o">=</span> <span class="n">wav_chip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">R</span>       
-    
-    <span class="c1">#wide wavelength bin for the resolution_convolution</span>
-    <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span> <span class="o">=</span> <span class="n">wav_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">wav_chip</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM_min</span><span class="p">,</span> <span class="n">wav_chip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM_max</span><span class="p">)</span> 
-    <span class="n">wav_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wav_extended</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    <span class="n">flux_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">flux_extended</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting the fast Resolution convolution...&quot;</span><span class="p">)</span>
-    <span class="c1"># Pre allocate space</span>
-    <span class="c1">#flux_conv_res = []</span>
-    <span class="n">flux_conv_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span> 
-    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">wav</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="p">)</span>
-        <span class="c1">#print(result)</span>
-        <span class="c1">#if(len(flux_conv_res)%(len(wav_chip)//100 ) == 0):</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">)</span><span class="o">//</span><span class="mi">100</span> <span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="n">counter</span> <span class="o">=</span> <span class="n">counter</span><span class="o">+</span><span class="mi">1</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Resolution Convolution at </span><span class="si">{}%%</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">counter</span><span class="p">))</span>
-        <span class="n">flux_conv_res</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
-    <span class="n">flux_conv_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    
-
-    <span class="k">return</span> <span class="p">[</span><span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_conv_res</span> <span class="p">]</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">### Test h20 convolution</span>
-<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="k">import</span> <span class="n">fits</span>
-<span class="n">chip1</span> <span class="o">=</span> <span class="s2">&quot;H20_scaling/CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.fits&quot;</span>
-
-<span class="n">Obs1</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">getdata</span><span class="p">(</span><span class="n">chip1</span><span class="p">)</span> 
-<span class="n">hdr1</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">getheader</span><span class="p">(</span><span class="n">chip1</span><span class="p">)</span> 
-
-<span class="kn">import</span> <span class="nn">Obtain_Telluric</span> <span class="k">as</span> <span class="nn">obt</span>
-<span class="n">tapas_h20</span> <span class="o">=</span> <span class="s2">&quot;H20_scaling/tapas_2012-04-07T00-24-03_ReqId_12_No_Ifunction_barydone-NO.ipac&quot;</span>
-
-<span class="n">tapas_h20_data</span><span class="p">,</span> <span class="n">tapas_h20_hdr</span> <span class="o">=</span> <span class="n">obt</span><span class="o">.</span><span class="n">load_telluric</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">tapas_h20</span><span class="p">)</span>
-<span class="n">tapas_h20_airmass</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tapas_h20_hdr</span><span class="p">[</span><span class="s2">&quot;airmass&quot;</span><span class="p">])</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Telluric Airmass &quot;</span><span class="p">,</span> <span class="n">tapas_h20_airmass</span><span class="p">)</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">tapas_h20_respower</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">((</span><span class="n">tapas_h20_hdr</span><span class="p">[</span><span class="s2">&quot;respower&quot;</span><span class="p">])))</span>
-<span class="k">except</span><span class="p">:</span>
-    <span class="n">tapas_h20_respower</span> <span class="o">=</span> <span class="s2">&quot;Nan&quot;</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Telluric Resolution Power =&quot;</span><span class="p">,</span> <span class="n">tapas_h20_respower</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Telluric Airmass  1.628051
-Telluric Resolution Power = Nan
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-
-<span class="n">fast_x</span><span class="p">,</span><span class="n">fast_y</span> <span class="o">=</span> <span class="n">fast_convolution</span><span class="p">(</span><span class="n">tapas_h20_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tapas_h20_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="mi">50000</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
-  
-<span class="n">done</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">elapsed</span> <span class="o">=</span> <span class="n">done</span> <span class="o">-</span> <span class="n">start</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Convolution time for fast convolution = &quot;</span><span class="p">,</span> <span class="n">elapsed</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Starting the fast Resolution convolution...
-Resolution Convolution at 1%%...
-Resolution Convolution at 2%%...
-Resolution Convolution at 3%%...
-Resolution Convolution at 4%%...
-Resolution Convolution at 5%%...
-Resolution Convolution at 6%%...
-Resolution Convolution at 7%%...
-Resolution Convolution at 8%%...
-Resolution Convolution at 9%%...
-Resolution Convolution at 10%%...
-Resolution Convolution at 11%%...
-Resolution Convolution at 12%%...
-Resolution Convolution at 13%%...
-Resolution Convolution at 14%%...
-Resolution Convolution at 15%%...
-Resolution Convolution at 16%%...
-Resolution Convolution at 17%%...
-Resolution Convolution at 18%%...
-Resolution Convolution at 19%%...
-Resolution Convolution at 20%%...
-Resolution Convolution at 21%%...
-Resolution Convolution at 22%%...
-Resolution Convolution at 23%%...
-Resolution Convolution at 24%%...
-Resolution Convolution at 25%%...
-Resolution Convolution at 26%%...
-Resolution Convolution at 27%%...
-Resolution Convolution at 28%%...
-Resolution Convolution at 29%%...
-Resolution Convolution at 30%%...
-Resolution Convolution at 31%%...
-Resolution Convolution at 32%%...
-Resolution Convolution at 33%%...
-Resolution Convolution at 34%%...
-Resolution Convolution at 35%%...
-Resolution Convolution at 36%%...
-Resolution Convolution at 37%%...
-Resolution Convolution at 38%%...
-Resolution Convolution at 39%%...
-Resolution Convolution at 40%%...
-Resolution Convolution at 41%%...
-Resolution Convolution at 42%%...
-Resolution Convolution at 43%%...
-Resolution Convolution at 44%%...
-Resolution Convolution at 45%%...
-Resolution Convolution at 46%%...
-Resolution Convolution at 47%%...
-Resolution Convolution at 48%%...
-Resolution Convolution at 49%%...
-Resolution Convolution at 50%%...
-Resolution Convolution at 51%%...
-Resolution Convolution at 52%%...
-Resolution Convolution at 53%%...
-Resolution Convolution at 54%%...
-Resolution Convolution at 55%%...
-Resolution Convolution at 56%%...
-Resolution Convolution at 57%%...
-Resolution Convolution at 58%%...
-Resolution Convolution at 59%%...
-Resolution Convolution at 60%%...
-Resolution Convolution at 61%%...
-Resolution Convolution at 62%%...
-Resolution Convolution at 63%%...
-Resolution Convolution at 64%%...
-Resolution Convolution at 65%%...
-Resolution Convolution at 66%%...
-Resolution Convolution at 67%%...
-Resolution Convolution at 68%%...
-Resolution Convolution at 69%%...
-Resolution Convolution at 70%%...
-Resolution Convolution at 71%%...
-Resolution Convolution at 72%%...
-Resolution Convolution at 73%%...
-Resolution Convolution at 74%%...
-Resolution Convolution at 75%%...
-Resolution Convolution at 76%%...
-Resolution Convolution at 77%%...
-Resolution Convolution at 78%%...
-Resolution Convolution at 79%%...
-Resolution Convolution at 80%%...
-Resolution Convolution at 81%%...
-Resolution Convolution at 82%%...
-Resolution Convolution at 83%%...
-Resolution Convolution at 84%%...
-Resolution Convolution at 85%%...
-Resolution Convolution at 86%%...
-Resolution Convolution at 87%%...
-Resolution Convolution at 88%%...
-Resolution Convolution at 89%%...
-Resolution Convolution at 90%%...
-Resolution Convolution at 91%%...
-Resolution Convolution at 92%%...
-Resolution Convolution at 93%%...
-Resolution Convolution at 94%%...
-Resolution Convolution at 95%%...
-Resolution Convolution at 96%%...
-Resolution Convolution at 97%%...
-Resolution Convolution at 98%%...
-Resolution Convolution at 99%%...
-Resolution Convolution at 100%%...
-Resolution Convolution at 101%%...
-Done.
-
-Convolution time for fast convolution =  8.66349196434021
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-
-<span class="n">slow_x</span><span class="p">,</span> <span class="n">slow_y</span> <span class="o">=</span> <span class="n">slow_convolution</span><span class="p">(</span><span class="n">tapas_h20_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tapas_h20_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="mi">50000</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
-  
-<span class="n">done</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">elapsed</span> <span class="o">=</span> <span class="n">done</span> <span class="o">-</span> <span class="n">start</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Convolution time for fast convolution = &quot;</span><span class="p">,</span> <span class="n">elapsed</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Starting the fast Resolution convolution...
-Resolution Convolution at 1%%...
-Resolution Convolution at 2%%...
-Resolution Convolution at 3%%...
-Resolution Convolution at 4%%...
-Resolution Convolution at 5%%...
-Resolution Convolution at 6%%...
-Resolution Convolution at 7%%...
-Resolution Convolution at 8%%...
-Resolution Convolution at 9%%...
-Resolution Convolution at 10%%...
-Resolution Convolution at 11%%...
-Resolution Convolution at 12%%...
-Resolution Convolution at 13%%...
-Resolution Convolution at 14%%...
-Resolution Convolution at 15%%...
-Resolution Convolution at 16%%...
-Resolution Convolution at 17%%...
-Resolution Convolution at 18%%...
-Resolution Convolution at 19%%...
-Resolution Convolution at 20%%...
-Resolution Convolution at 21%%...
-Resolution Convolution at 22%%...
-Resolution Convolution at 23%%...
-Resolution Convolution at 24%%...
-Resolution Convolution at 25%%...
-Resolution Convolution at 26%%...
-Resolution Convolution at 27%%...
-Resolution Convolution at 28%%...
-Resolution Convolution at 29%%...
-Resolution Convolution at 30%%...
-Resolution Convolution at 31%%...
-Resolution Convolution at 32%%...
-Resolution Convolution at 33%%...
-Resolution Convolution at 34%%...
-Resolution Convolution at 35%%...
-Resolution Convolution at 36%%...
-Resolution Convolution at 37%%...
-Resolution Convolution at 38%%...
-Resolution Convolution at 39%%...
-Resolution Convolution at 40%%...
-Resolution Convolution at 41%%...
-Resolution Convolution at 42%%...
-Resolution Convolution at 43%%...
-Resolution Convolution at 44%%...
-Resolution Convolution at 45%%...
-Resolution Convolution at 46%%...
-Resolution Convolution at 47%%...
-Resolution Convolution at 48%%...
-Resolution Convolution at 49%%...
-Resolution Convolution at 50%%...
-Resolution Convolution at 51%%...
-Resolution Convolution at 52%%...
-Resolution Convolution at 53%%...
-Resolution Convolution at 54%%...
-Resolution Convolution at 55%%...
-Resolution Convolution at 56%%...
-Resolution Convolution at 57%%...
-Resolution Convolution at 58%%...
-Resolution Convolution at 59%%...
-Resolution Convolution at 60%%...
-Resolution Convolution at 61%%...
-Resolution Convolution at 62%%...
-Resolution Convolution at 63%%...
-Resolution Convolution at 64%%...
-Resolution Convolution at 65%%...
-Resolution Convolution at 66%%...
-Resolution Convolution at 67%%...
-Resolution Convolution at 68%%...
-Resolution Convolution at 69%%...
-Resolution Convolution at 70%%...
-Resolution Convolution at 71%%...
-Resolution Convolution at 72%%...
-Resolution Convolution at 73%%...
-Resolution Convolution at 74%%...
-Resolution Convolution at 75%%...
-Resolution Convolution at 76%%...
-Resolution Convolution at 77%%...
-Resolution Convolution at 78%%...
-Resolution Convolution at 79%%...
-Resolution Convolution at 80%%...
-Resolution Convolution at 81%%...
-Resolution Convolution at 82%%...
-Resolution Convolution at 83%%...
-Resolution Convolution at 84%%...
-Resolution Convolution at 85%%...
-Resolution Convolution at 86%%...
-Resolution Convolution at 87%%...
-Resolution Convolution at 88%%...
-Resolution Convolution at 89%%...
-Resolution Convolution at 90%%...
-Resolution Convolution at 91%%...
-Resolution Convolution at 92%%...
-Resolution Convolution at 93%%...
-Resolution Convolution at 94%%...
-Resolution Convolution at 95%%...
-Resolution Convolution at 96%%...
-Resolution Convolution at 97%%...
-Resolution Convolution at 98%%...
-Resolution Convolution at 99%%...
-Resolution Convolution at 100%%...
-Resolution Convolution at 101%%...
-Done.
-
-Convolution time for fast convolution =  937.4873948097229
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="mi">937</span><span class="o">/</span><span class="mi">8</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[21]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>117.125</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#%%timeit</span>
-<span class="c1"># Test affect of list append verse np assignment with enumerate</span>
-<span class="n">list_store</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10000000</span><span class="p">)):</span>
-    <span class="n">list_store</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">list_store</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[63]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>10000000</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">timeit</span>
-np_store = np.empty(10000000)
-for n, i in enumerate(range(10000000)):
-    np_store[n] = i
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>1 loop, best of 3: 3.29 s per loop
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">timeit</span>
-np_store = np.empty_like(list_store)
-for n, i in enumerate(range(10000000)):
-    np_store[n] = i
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>1 loop, best of 3: 6.66 s per loop
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[56]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># np empty is faster than </span>
-<span class="c1"># np empty_like is faster on arrays than lists</span>
-<span class="c1"># np empty_like on an arary is faster than generating a new empty array of same size</span>
-<span class="o">%</span><span class="k">timeit</span> np.empty_like(list_store)
-<span class="o">%</span><span class="k">timeit</span> np.arange(1000000)
-<span class="n">a</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span>
-<span class="o">%</span><span class="k">timeit</span> np.empty_like(a)
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>1 loop, best of 3: 2.28 s per loop
-100 loops, best of 3: 6.43 ms per loop
-The slowest run took 8.02 times longer than the fastest. This could mean that an intermediate result is being cached.
-10000 loops, best of 3: 54.5 µs per loop
-10000 loops, best of 3: 101 µs per loop
-1000 loops, best of 3: 765 µs per loop
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Get length of list verse ndarray</span>
-<span class="o">%</span><span class="k">timeit</span> len(list_store)
-<span class="o">%</span><span class="k">timeit</span> len(a)
-<span class="nb">print</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span>
-<span class="nb">print</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">list_store</span><span class="p">)))</span>
-<span class="o">%</span><span class="k">timeit</span> np.empty(len(a))
-<span class="o">%</span><span class="k">timeit</span> np.empty(len(list_store))
-
-<span class="c1"># For an unknown reason np.empty is 6* slower when given len(list) rather than len(ndarray)? The len() times are similar</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>The slowest run took 7.11 times longer than the fastest. This could mean that an intermediate result is being cached.
-1000000 loops, best of 3: 314 ns per loop
-The slowest run took 14.67 times longer than the fastest. This could mean that an intermediate result is being cached.
-1000000 loops, best of 3: 243 ns per loop
-1000000
-10000000
-10000 loops, best of 3: 101 µs per loop
-1000 loops, best of 3: 753 µs per loop
+<pre>100 loops, best of 3: 19.2 ms per loop
 </pre>
 </div>
 </div>
@@ -13220,74 +12010,11 @@ The slowest run took 14.67 times longer than the fastest. This could mean that a
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In general I think when working with data it is best to transform to ndarrays and compute np functions on them for faster results.</p>
+<h2 id="Conclusion:">Conclusion:<a class="anchor-link" href="#Conclusion:">&#182;</a></h2><p>If want to make sure that you value is a numpy array instead of just calling np.array on the object first do an isinstance call to check that it is not an numpy array already for a slight efficiency gain 10-100 microseconds per instance.</p>
+<h4 id="Note:">Note:<a class="anchor-link" href="#Note:">&#182;</a></h4><p>Not suitable if you are wanting to change the type of numpy array. I.e float32, float64, int. This should probably be done in the begining.</p>
 
 </div>
 </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Insturment-profile-calculaltion">Insturment profile calculaltion<a class="anchor-link" href="#Insturment-profile-calculaltion">&#182;</a></h1><p>cache values?</p>
-<p>calculate in own loop?</p>
-<p>broadcasting of some form?</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
 </div>
     </div>
   </div>
