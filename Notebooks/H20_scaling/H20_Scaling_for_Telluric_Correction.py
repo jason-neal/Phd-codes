@@ -10,7 +10,7 @@
 # Fit to the observed data (Probably with the other lines removed) to fnd the best x to apply for the correction. (Gives flatest result or zero linewidth.) 
 # 
 
-# In[3]:
+# In[ ]:
 
 ### Load modules and Bokeh
 # Imports from __future__ in case we're running Python 2
@@ -51,7 +51,7 @@ sns.set_style('darkgrid', rc=rc)
 bokeh.io.output_notebook()
 
 
-# In[4]:
+# In[ ]:
 
 # Define Faster functions to try
 def fast_wav_selector(wav, flux, wav_min, wav_max, verbose=False):
@@ -83,7 +83,7 @@ def fast_wav_selector(wav, flux, wav_min, wav_max, verbose=False):
 
 # ### Load in Observed Data
 
-# In[5]:
+# In[ ]:
 
 # Need to update these to the vacuum with no berv corrections
 chip1 = "CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.fits"
@@ -119,12 +119,12 @@ obs_airmass = (start_airmass + end_airmass) / 2
 print("Data from Detectors is now loaded")
 
 
-# In[6]:
+# In[ ]:
 
 ## Rough berv correction until input calibrated file is calibrated with non berv tapas 
 
 
-# In[7]:
+# In[ ]:
 
 wl1 = wl1-.5   #including rough berv correction
 wl2 = wl2-.54  #including rough berv correction
@@ -134,7 +134,7 @@ wl4 = wl4-.7
 
 # ### Load in the tapas data
 
-# In[8]:
+# In[ ]:
 
 import Obtain_Telluric as obt
 tapas_all = "tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
@@ -168,7 +168,7 @@ print("Telluric Resolution Power =", tapas_not_h20_respower)
 #print(tapas_all_hdr)
 
 
-# In[8]:
+# In[ ]:
 
 type(tapas_h20_data)
 
@@ -197,7 +197,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # (Use telluric removal modules)
 # And plot the result.  
 
-# In[9]:
+# In[ ]:
 
 from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
 
@@ -424,7 +424,7 @@ def convolution_nir_chip(wav, flux, chip, R, FWHM_lim=5.0, plot=True, verbose=Tr
 # ### Convole instrument profile function:
 # To use inside fit
 
-# In[10]:
+# In[ ]:
 
 ## USEFUL functions from pedros code:
 # This is pedros slow selector
@@ -457,7 +457,7 @@ def unitary_Gauss(x, center, FWHM):
 
 
 
-# In[11]:
+# In[ ]:
 
 def fast_convolve(wav_val, R, wav_extended, flux_extended, FWHM_lim):
     """IP convolution multiplication step for a single wavelength value"""
@@ -529,7 +529,7 @@ print("Done")
 
 # ## Test convolution runtime
 
-# In[14]:
+# In[ ]:
 
 # 10 seconds per loop for chip "1" and plotting   (down from 900s)
 #timeit x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
@@ -572,13 +572,13 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # Does each chip need a differnet scaling power?
 # 
 
-# In[16]:
+# In[ ]:
 
 from lmfit import minimize, Parameters
 import lmfit
 
 
-# In[17]:
+# In[ ]:
 
 from scipy.interpolate import interp1d
 #from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
@@ -604,7 +604,7 @@ def match_wl(wl, spec, ref_wl, method="scipy", kind="linear"):
 
 
 
-# In[18]:
+# In[ ]:
 
 ### Fit using lmfit
 
@@ -649,12 +649,12 @@ def h20_residual(params, obs_data, telluric_data):
 
 
 
-# In[19]:
+# In[ ]:
 
 
 
 
-# In[23]:
+# In[ ]:
 
 # Set up parameters 
 params = Parameters()
@@ -665,7 +665,7 @@ params.add('FWHM_lim', value=5, vary=False)
 #params.add('chip_select', value=2, vary=False)
 
 
-# In[24]:
+# In[ ]:
 
 #wl2, I2_uncorr
 # wl2, I2_not_h20_corr
@@ -685,12 +685,12 @@ print("Input telluic wl- Min ", np.min(tell_data2[0])," Max ", np.max(tell_data2
                
 
 
-# In[25]:
+# In[ ]:
 
 1.002*2137
 
 
-# In[28]:
+# In[ ]:
 
 # Peform minimization
 import time
@@ -704,7 +704,7 @@ print(outreport)
 # 74 seconds for one detector
 
 
-# In[47]:
+# In[ ]:
 
 Best_factor = out.params["ScaleFactor"].value
 print(Best_factor)
@@ -728,14 +728,14 @@ Interped_conv_tell2 = [wl2, match_wl(Conv_Scalled_tell2[0], Conv_Scalled_tell2[1
 Interped_just_conv_tell2 = [wl2, match_wl(Conv_Scalled_tell2[0], Just_convolved_tell2, wl2)]
 
 
-# In[48]:
+# In[ ]:
 
 # Plot scalled telluric and convolved value
 plt.plot(wl2, I2_not_h20_corr, 'k', label="Obs")
 plt.plot(tell_data2[0], tell_data2[1], 'b', label="Original tell")
 plt.plot(Scalled_tell2[0], Scalled_tell2[1], 'g', label="Scaled")
 plt.plot(Interped_conv_tell2[0], Interped_conv_tell2[1], 'r', label="Scaled +convolved")
-plt.plot(Interped_conv_tell2[0], Interped_just_conv_tell2, 'm', label="Just convolved")
+plt.plot(Interped_conv_tell2[0], Interped_just_conv_tell2[1], 'm', label="Just convolved")
 #plt.legend()
 
 # Make it interactive with Bokeh
@@ -1098,7 +1098,7 @@ def h20_residual(params, obs_data, telluric_data):
     return 1 - (obs_I / convolved_telluric) 
 
 
-# In[18]:
+# In[ ]:
 
 # Set up parameters 
 params = Parameters()
@@ -1109,7 +1109,7 @@ params.add('n_jobs', value=-1, vary=False)
 params.add('chip_select', value=2, vary=False)
 
 
-# In[17]:
+# In[ ]:
 
 #wl2, I2_uncorr
 # wl2, I2_not_h20_corr
