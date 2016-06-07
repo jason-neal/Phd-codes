@@ -16,6 +16,7 @@ from astropy.io import fits
 import argparse
 import GaussianFitting as gf
 import Obtain_Telluric as obt
+from SpectralTools import wav_selector
 
 def divide_spectra(spec_a, spec_b):
     """ Assumes that the spectra have been interpolated to same wavelength step"""
@@ -372,7 +373,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     
     wl_lower = np.min(wl/1.0001)
     wl_upper = np.max(wl*1.0001)
-    tell_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
+    tell_data = wav_selector(tell_data[0], tell_data[1], wl_lower, wl_upper)
     
     # Telluric Normalization (use first 50 points below 1.2 as constant continuum)
     I_tell = tell_data[1]
