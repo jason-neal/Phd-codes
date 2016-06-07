@@ -39,6 +39,8 @@ def _parser():
                        help='Stellar Model')
     parser.add_argument('-r', '--ref', default=False,
                        help='Reference Object with different RV') # The other observation to identify shifted lines
+    parser.add_argument('-b', '--berv_corr', default=False,
+                       help='Apply Berv corr to plot limits if using berv corrected tapas')
     #parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
     #parser.add_argument('fname',
     #                    action='store',
@@ -121,7 +123,7 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
            f.write("{} \t {} \t {} \t {} \t {} \t {} \n".format(round(pixel, 4), round(1-obs_depth, 4), round(obs_std, 4), round(wl, 4), round(1-wl_depth, 4), round(wl_std, 4)))
     return None
 
-def main(fname, output=None, telluric=None, model=None, ref=None):
+def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False):
     homedir = os.getcwd()
     print("Input name", fname)
     print("Output name", output)
@@ -165,6 +167,10 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
     #    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
     #    tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
     
+    print("obs data type", type(data), "dtype", data.dtype)
+
+    print("telluric type", type(tell_data[1]), "dtype", tell_data[0].dtype,tell_data[1].dtype)
+
     # Scale telluric lines to airmass
     obs_airmass = (hdr["HIERARCH ESO TEL AIRM START"] + hdr["HIERARCH ESO TEL AIRM END"]) / 2
     
@@ -172,36 +178,35 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
   
     tell_data[1] = airmass_scaling(tell_data[1], tell_airmass, obs_airmass)
     
-    if tell_header["barydone"] == "NO": 
+    if tell_header["barydone"] == "YES" and berv_corr:
+        # Only if berv has been done on tapas and the user asks for it
         ### BERV adjust from tapas the wl_limits to align the plotting
-        print("BERV adjustments")
         old_wl_lower = wl_lower 
         old_wl_upper = wl_upper
-        
         tapas_berv_value = tapas_helcorr(tell_header)
-        print(tapas_berv_value)
         # Doppler shift the detector limits
-        __ , wlprime = pyasl.dopplerShift(np.array([wl_lower, wl_upper]),np.array([1, 1]), -tapas_berv_value[0], edgeHandling=None, fillValue=None)
+        __ , wlprime = pyasl.dopplerShift(np.array([wl_lower, wl_upper]),np.array([1, 1]), tapas_berv_value[0], edgeHandling=None, fillValue=None)
         wl_lower = wlprime[0] 
         wl_upper = wlprime[1]
-
-        print("Old detector limits", [old_wl_lower, old_wl_upper])
-        print("New berv shifted detector limits", [wl_lower, wl_upper])
-
+        #print("Old detector limits", [old_wl_lower, old_wl_upper])
+        print("New Berv shifted detector limits", [wl_lower, wl_upper])
+    elif berv_corr:
+        print("Berv_corr flag given but tapas data was not berv corrected. Not adjusting limits")
 
     ### Air wavelengths 
-    # Convert for air wavelengths 
-        if tell_header["WAVSCALE"] == "air":
-            # vac2air on the crires limits
-            print("Using AIR wavelength scale so changing wl limits")
-            wl_lower_vac = wl_lower
-            wl_upper_vac = wl_upper
-            # the other modes don't work above 1.69 micron   
-            wl_lower = pyasl.vactoair2(wl_lower, mode="edlen53")   
-            wl_upper = pyasl.vactoair2(wl_upper, mode="edlen53")
+    # Convert limits if using air wavelengths 
+    if tell_header["WAVSCALE"] == "air":
+        # vac2air on the crires limits
+        #print("Using AIR wavelength scale so changing wl limits")
+        wl_lower_vac = wl_lower
+        wl_upper_vac = wl_upper
+        # The other modes don't work above 1.69 micron   
+        wl_lower = pyasl.vactoair2(wl_lower, mode="edlen53")   
+        wl_upper = pyasl.vactoair2(wl_upper, mode="edlen53")
+        #print("Vacuum detector limits", [wl_lower_vac, wl_upper_vac])
+        #print("New berv shifted detector limits", [wl_lower, wl_upper])
+    
 
-            print("Vacuum detector limits", [wl_lower_vac, wl_upper_vac])
-            print("New berv shifted detector limits", [wl_lower, wl_upper])
     # Sliced to wavelength measurement of detector
     calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
