@@ -258,18 +258,19 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     rough_x_a = [coord[0] for coord in rough_a]
     rough_x_b = [coord[0] for coord in rough_b]
     if model:
-        good_a, peaks_a, std_a, good_b, peaks_b, std_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+        fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b, model=[w_mod, I_mod])
     elif ref:
-        good_a, peaks_a, std_a, good_b, peaks_b, std_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+        fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b, ref=[w_ref, I_ref])
     else:
-        good_a, peaks_a, std_a, good_b, peaks_b, std_b = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
+        fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1], 
                                        rough_x_a, calib_data[0], calib_data[1],
                                        rough_x_b)
-    
+    good_a, peaks_a, std_a, good_b, peaks_b, std_b = fit_results 
+
     lin_map = gf.wavelength_mapping(good_a, good_b, order=1)
     wl_map = gf.wavelength_mapping(good_a, good_b, order=2)
     cube_map = gf.wavelength_mapping(good_a, good_b, order=3)
