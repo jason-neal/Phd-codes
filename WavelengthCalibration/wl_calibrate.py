@@ -17,6 +17,8 @@ from Gaussian_fit_testing import Get_DRACS
 import Obtain_Telluric as obt
 from TellRemoval import airmass_scaling
 import XCorrWaveCalScript as XCorrWaveCal
+
+from SpectralTools import wav_selector
 #from plot_fits import get_wavelength
 
 from Tapas_Berv_corr import tapas_helcorr
@@ -209,7 +211,8 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     
 
     # Sliced to wavelength measurement of detector
-    calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
+    #calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
+    calib_data = wav_selector(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
     gf.print_fit_instructions()  # Instructions on how to calibrate
     if ref:  # Reference object spectra to possibly identify shifted/blended lines
