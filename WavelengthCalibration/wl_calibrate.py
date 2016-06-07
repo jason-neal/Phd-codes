@@ -138,16 +138,17 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     test5 = ".ms.norm.Apos.fits" in fname
     test6 = ".ms.norm.Bpos.fits" in fname
     if test0:
-        uncalib_combined = data["Combined"]
+        uncalib_combined = np.array(data["Combined"], dtype="float64")
         #uncalib_noda = uncalib_data["Nod A"]
         #uncalib_nodb = uncalib_data["Nod B"]
     elif test1 or test2 or test3 or test4 or test5 or test6:
-        uncalib_combined = data
+        uncalib_combined = np.array(data, dtype="float64")
     else:
         print("Unrecgonized input filename. Can take ouput from sumnormnodcycle8jn.cl, normalizeobsrsum.cl or Combine_nod_spectra.py")
         raise("Spectra_Error", "Unrecgonized input filename type")
     
-    uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
+    #uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
+    uncalib_data = [np.arange(len(uncalib_combined)) + 1, uncalib_combined]
 
     # Get time from header to then get telluric lines
     hdr = fits.getheader(fname)
@@ -167,8 +168,8 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     #    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
     #    tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
     
-    print("obs data type", type(data), "dtype", data.dtype)
-
+    print("obs data 0 type", type(uncalib_data[0]), "dtype", uncalib_data[0].dtype)
+    print("obs data 1 type", type(uncalib_data[1]), "dtype", uncalib_data[1].dtype)
     print("telluric type", type(tell_data[1]), "dtype", tell_data[0].dtype,tell_data[1].dtype)
 
     # Scale telluric lines to airmass
@@ -337,13 +338,13 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
 
         T_now = str(time.gmtime()[0:6])
 
-        hdrkeys = ["Calibration", "CALIBRATION TIME", "Tapas filename", \
+        hdrkeys = ["Calibration", "CALIB TIME", "Tapas ID number", \
                    "Number Fitted",'PIXELMAP PARAM1', "PIXELMAP PARAM2", \
                    "PIXELMAP PARAM3", "Tapas Barycenter Correction", \
                    "Tapas wavelength scale"]
         hdrvals = ["DRACS Wavelength Calibration with Tapas spectrum", \
                    (T_now, "Time of Calibration"), \
-                   (telluric,"Filename of tapas used for calibration"), \
+                   (tell_header["run_id"],"Tapas unique ID number"), \
                    (len(good_a), "Number of points in calibration map"), \
                    (wl_map[0], "Squared term"), (wl_map[1], "Linear term"), \
                    (wl_map[2], "Constant term"), (tell_header["barydone"], \
