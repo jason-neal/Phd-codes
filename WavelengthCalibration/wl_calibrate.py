@@ -188,6 +188,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
         print("Old detector limits", [old_wl_lower, old_wl_upper])
         print("New berv shifted detector limits", [wl_lower, wl_upper])
 
+
     ### Air wavelengths 
     # Convert for air wavelengths 
         if tell_header["WAVSCALE"] == "air":
@@ -330,11 +331,19 @@ def main(fname, output=None, telluric=None, model=None, ref=None):
             Output_filename = fname.replace(".fits", ".wavecal.fits")
 
         T_now = str(time.gmtime()[0:6])
-        hdrkeys = ["Calibration", "CALIBRATION TIME", 'PIXELMAP PARAM1', \
-                  "PIXELMAP PARAM2", "PIXELMAP PARAM3"]
+
+        hdrkeys = ["Calibration", "CALIBRATION TIME", "Tapas filename", \
+                   "Number Fitted",'PIXELMAP PARAM1', "PIXELMAP PARAM2", \
+                   "PIXELMAP PARAM3", "Tapas Barycenter Correction", \
+                   "Tapas wavelength scale"]
         hdrvals = ["DRACS Wavelength Calibration with Tapas spectrum", \
-                   (T_now, "Time of Calibration"), (wl_map[0], "Squared term"),\
-                   (wl_map[1], "Linear term"), (wl_map[2], "Constant term")]
+                   (T_now, "Time of Calibration"), \
+                   (telluric,"Filename of tapas used for calibration"), \
+                   (len(good_a), "Number of points in calibration map"), \
+                   (wl_map[0], "Squared term"), (wl_map[1], "Linear term"), \
+                   (wl_map[2], "Constant term"), (tell_header["barydone"], \
+                    "Barycenter correction done by Tapas"), \
+                   (tell_header["WAVSCALE"], "Either air, vacuum, or wavenumber")]
                 ###### ADD OTHER parameter need to store above - estimated errors of fitting?
         export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], uncalib_data[0], hdr, hdrkeys, hdrvals)
         
