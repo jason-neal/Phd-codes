@@ -28,7 +28,7 @@ import seaborn as sns
 
 
 # Magic function to make matplotlib inline; other style specs must come AFTER
-get_ipython().magic('matplotlib inline')
+get_ipython().magic(u'matplotlib inline')
 
 
 # In[2]:
@@ -39,7 +39,7 @@ import bokeh.mpl
 import bokeh.plotting
 
 # This enables SVG graphics inline.  There is a bug, so uncomment if it works.
-get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
+get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
 
 # This enables high resolution PNGs. SVG is preferred, but has problems
 # rendering vertical and horizontal lines
