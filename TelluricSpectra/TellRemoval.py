@@ -17,7 +17,7 @@ from astropy.io import fits
 import argparse
 import GaussianFitting as gf
 import Obtain_Telluric as obt
-from SpectralTools import wav_selector
+from SpectralTools import wav_selector, wl_interpolation
 
 def divide_spectra(spec_a, spec_b):
     """ Assumes that the spectra have been interpolated to same wavelength step"""
@@ -26,25 +26,7 @@ def divide_spectra(spec_a, spec_b):
     divide = spec_a / spec_b
     return divide
 
-def match_wl(wl, spec, ref_wl, method="scipy", kind="linear"):
-    """Interpolate Wavelengths of spectra to common WL
-    Most likely convert telluric to observed spectra wl after wl mapping performed"""
-    starttime = time.time()
-    if method == "scipy":
-        print(kind + " scipy interpolation")
-        linear_interp = interp1d(wl, spec, kind=kind)
-        new_spec = linear_interp(ref_wl)
-    elif method == "numpy":
-        if kind.lower() is not "linear":
-            print("Warning: Cannot do " + kind + " interpolation with numpy, switching to linear" )
-        print("Linear numpy interpolation")
-        new_spec = np.interp(ref_wl, wl, spec)  # 1-d peicewise linear interpolat
-    else:
-        print("Method was given as " + method)
-        raise("Not correct interpolation method specified")
-    print("Interpolation Time = " + str(time.time() - starttime) + " seconds")
 
-    return new_spec  # test inperpolations 
 
 def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
     """ Do I need to replicate plotting code?
@@ -65,11 +47,12 @@ def airmass_scaling(spectra, spec_airmass, obs_airmass):
 def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_airmass, kind="linear", method="scipy"):
     """Code to contain other functions in this file
 
-     1. Interpolate spectra to same wavelengths with match_wl()
-     2. Divide by Telluric
-     3.   ...
+     1. Interpolate spectra to same wavelengths with wl_interpolation()
+     2. Divide by Telluric (bad correction)
+     3. Scale telluric and divide again (Better correction)
+     4.   ...
     """
-    interped_tell = match_wl(wl_tell, spec_tell, wl_obs, kind=kind, method=method)
+    interped_tell = wl_interpolation(wl_tell, spec_tell, wl_obs, kind=kind, method=method)
     
     """ from Makee: Atmospheric Absorption Correction
     Assuming that the telluric spectra I have is equvilant to the star 
@@ -129,7 +112,6 @@ def _parser():
                         help="Perform separate H20 scaling")
     parser.add_argument("-n", "new_method", action='store_true',
                         help="Use new code method")
-    
     args = parser.parse_args()
     return args
 
