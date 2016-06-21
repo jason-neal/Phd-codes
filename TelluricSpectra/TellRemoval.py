@@ -14,10 +14,12 @@ import scipy as sp
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from astropy.io import fits
+from lmfit import minimize, Parameters
+import lmfit
 import argparse
 import GaussianFitting as gf
 import Obtain_Telluric as obt
-from SpectralTools import wav_selector, wl_interpolation
+from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
 
 def divide_spectra(spec_a, spec_b):
     """ Assumes that the spectra have been interpolated to same wavelength step"""
@@ -157,6 +159,87 @@ def get_observation_averages(homedir):
     print("Observation Nod_time ", Nod_median_time)
     return np.mean(Nod_airmass), Nod_median_time
 
+
+
+def h20_residual(params, obs_data, telluric_data):
+    # Parameters 
+    ScaleFactor = params["ScaleFactor"].value
+    R = params["R"].value
+    FWHM_lim = params["FWHM_lim"].value
+    #n_jobs = params["n_jobs"].value  # parallel implementaiton
+    #chip_select = params["chip_select"].value
+    verbose = params["verbose"].value
+    fit_lines = params["fit_lines"].value # if true only fit areas deeper than 0.995
+    
+    # Data
+    obs_wl = obs_data[0]
+    obs_I = obs_data[1]
+    telluric_wl = telluric_data[0]
+    telluric_I = telluric_data[1]
+    
+    # Telluric scaling T ** x
+    scaled_telluric_I = telluric_I ** ScaleFactor
+    
+    # smallest wl step in telluric wl
+    min_dwl = np.min(telluric_wl[1:]-telluric_wl[:-1])
+    # Make sure atleast 1 telluric value is outside wl range of observation for interpoltion later 
+    chip_limits = [obs_wl[0]-2*min_dwl, obs_wl[-1]+2*min_dwl] 
+    # Convolution
+    #def convolution_nir(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
+    #    return [wav_chip, flux_conv_res]
+    conv_tell_wl, conv_tell_I = instrument_convolution(telluric_wl, scaled_telluric_I, chip_limits,
+                                                R, FWHM_lim=FWHM_lim, plot=False, verbose=verbose)
+    
+    #print("Obs wl- Min ", np.min(obs_wl)," Max ", np.max(obs_wl))
+    #print("Input telluic wl- Min ", np.min(telluric_wl)," Max ", np.max(telluric_wl))
+    #print("conv tell wl- Min ", np.min(conv_tell_wl)," Max ", np.max(conv_tell_wl))
+  
+    
+    interped_conv_tell = match_wl(conv_tell_wl, conv_tell_I, obs_wl)
+    print("Convolution and interpolation inside residual function was done")
+    
+    # Mask fit to peaks in telluric data
+    if fit_lines:
+        #match_wl(telluric_wl, telluric_I, obs_wl)
+        Tell_line_mask = match_wl(telluric_wl, telluric_I, obs_wl) < 0.995
+        return 1 - (obs_I / interped_conv_tell)[Tell_line_mask] 
+    else:
+        return 1 - (obs_I / interped_conv_tell)
+
+
+def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I):
+    params = Parameters()
+    params.add('ScaleFactor', value=1)   # add min and max values ?
+    params.add('R', value=50000, vary=False)
+    params.add('FWHM_lim', value=5, vary=False)
+    params.add('fit_lines', value=True, vary=False)   # only fit the peaks of lines < 0.995
+    params.add("verbose", value=False, vary=False)
+   
+    out = minimize(h20_residual, params, args=([wl, obs_I], [h20_wl, h20_I]))
+    
+    outreport = lmfit.fit_report(out)
+    print(outreport)
+
+    Best_factor = out.params["ScaleFactor"].value
+
+    # Telluric scaling T ** x
+    Scaled_h20_I = h20_I**Best_factor
+
+    Convolved_h20_I = convolution_nir(h20_wl, Scaled_h20_tell, [Scaled_h20_I[0], Scaled_h20_I[-1]],
+                                                    50000, FWHM_lim=5, plot=False, verbose=True)
+
+    # Interpolation to obs positions
+    interp_conv_h20_I =  wl_interpolation(h20_wl, Convolved_h20_I, obs_wl)]
+    
+    h20_corrected_obs = divide_spectra(obs_I, interp_conv_h20_I)
+
+    return h20_corrected_obs, params, outreport
+
+def non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmass):
+    corrected_obs = divide_spectra(obs_I, tell_I)
+
+    return corrected_obs
+
 def _parser():
     """Take care of all the argparse stuff.
 
@@ -216,6 +299,10 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             tell_h20_section = wav_selector(tapas_h20_data[0], tapas_h20_data[1], wl_lower, wl_upper)
             tell_not_h20_section = wav_selector(tapas_not_h20_data[0], tapas_not_h20_data[1], wl_lower, wl_upper)
 
+        #no h20 correction
+        non_h20_correct_I = non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, tapas_not_h20_data[0], tapas_not_h20_data[1], tapas_airmass)
+        # h20 correction and 
+        h20_corrected_obs, params, outreport = h2o_telluric_correction(obs_wl, non_h20_correct_I, tell_h20_section[0], tell_h20_section[1])
 
         else:
             # load combined dataset only
