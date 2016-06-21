@@ -449,22 +449,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         I_corr = Corrections[1]  # using B scaling
         Tell_interp = Correction_tells[1]   
 
-        #print("After telluric_correct")
-        # plt.figure()
-        # plt.plot(wl, I,"k", label="Observed Spectra")
-        # plt.plot(wl, Tell_interp, label="Telluric")
-        # plt.plot(wl, bad_correction, label="Base Correction")
-        # plt.plot(wl, I_corr, label="Corrected B")
-        # plt.plot(wl, tell_Amass_corr, label="Telluric ** B")
-        # plt.plot(wl, I_corr_min, label="Corrected minimized B")
-        # plt.plot(wl, tell_Amass_corr_min, label="Telluric minimized B")
-        # plt.plot(wl, I_corr_minpeaks, label="Corrected minimized peaks B")
-        # plt.plot(wl, new_tell_minpeaks, label="Telluric minimized peaks B")
-        # plt.plot(wl, I_corr_slopes, label="Corrected minimized slopes B")
-        # plt.plot(wl, new_tell_slopes, label="Tell minimized slopes B")
-        # plt.plot(wl, np.ones_like(wl), "--")
-        # plt.legend(loc="best")
-        # plt.show()
+
     ###########################################################   Ends  HERE #################################################################################  
 
     ### SAVING Telluric Corrected Spectra ###
@@ -512,23 +497,4 @@ if __name__ == "__main__":
 
     main(fname, **opts)
 
-
-
-    # """ Some test code for testing functions """
-    # sze = 20
-    # x2 = range(sze)
-    # y2 = np.random.randn(len(x2)) + np.ones_like(x2)
-    # y2 = 0.5 * np.ones_like(x2)
-    # x1 = np.linspace(1, sze-1.5, 9)
-    # y1 = np.random.randn(len(x1)) + np.ones_like(x1)
-    # y1 = np.ones_like(x1)
-    # print(x1)
-    # print(x2)
-    # #print(y1)
-    # #print(y2)
-    # y1_cor = telluric_correct(x1, y1, x2, y2)
-    # print(x1)
-    # print(y1)
-    # print(y1_cor)  
-    
     
