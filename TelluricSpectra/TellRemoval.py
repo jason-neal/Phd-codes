@@ -27,7 +27,6 @@ def divide_spectra(spec_a, spec_b):
     return divide
 
 
-
 def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
     """ Do I need to replicate plotting code?
      Same axis
@@ -89,32 +88,6 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     return Corrections, Correction_tells, Correction_Bs, Correction_labels
 
 
-def _parser():
-    """Take care of all the argparse stuff.
-
-    :returns: the args
-    """
-    parser = argparse.ArgumentParser(description='Telluric Removal')
-    parser.add_argument('fname', help='Input fits file')
-    parser.add_argument('-x', '--export', default=False,
-                        help='Export result to fits file True/False')
-    parser.add_argument('-o', '--output', default=False,
-                        help='Ouput Filename')
-    parser.add_argument('-t', '--tellpath', default=False,
-                        help='Path to find the telluric spectra to use.')
-    parser.add_argument('-k', '--kind', default="linear",
-                        help='Interpolation order, linear, quadratic or cubic')
-    parser.add_argument('-m', '--method', default="scipy",
-                        help='Interpolation method numpy or scipy')
-    parser.add_argument("-s", "--show", default=True, 
-                        help="Show plots") #Does not wokwithout display though for some reason
-    parser.add_argument("-c", "h2o_scaling", action='store_true',
-                        help="Perform separate H20 scaling")
-    parser.add_argument("-n", "new_method", action='store_true',
-                        help="Use new code method")
-    args = parser.parse_args()
-    return args
-
 
 def export_correction_2fits(filename, wavelength, corrected, original, telluric, hdr, hdrkeys, hdrvals, tellhdr):
     """ Write Telluric Corrected spectra to a fits table file"""
@@ -135,12 +108,12 @@ def export_correction_2fits(filename, wavelength, corrected, original, telluric,
 
 # could make new module for fits handlers like this
 def append_hdr(hdr, keys, values ,item=0):
-    ''' Apend/change parameters to fits hdr, 
+    """Apend/change parameters to fits hdr, 
     can take list or tuple as input of keywords 
     and values to change in the header 
     Defaults at changing the header in the 0th item 
     unless the number the index is givien,
-    If a key is not found it adds it to the header'''
+    If a key is not found it adds it to the header"""
     
     if type(keys) == str:           # To handle single value
         hdr[keys] = values
@@ -183,6 +156,32 @@ def get_observation_averages(homedir):
     print("Observation Nod_airmass ", Nod_airmass)
     print("Observation Nod_time ", Nod_median_time)
     return np.mean(Nod_airmass), Nod_median_time
+
+def _parser():
+    """Take care of all the argparse stuff.
+
+    :returns: the args
+    """
+    parser = argparse.ArgumentParser(description='Telluric Removal')
+    parser.add_argument('fname', help='Input fits file')
+    parser.add_argument('-x', '--export', default=False,
+                        help='Export result to fits file True/False')
+    parser.add_argument('-o', '--output', default=False,
+                        help='Ouput Filename')
+    parser.add_argument('-t', '--tellpath', default=False,
+                        help='Path to find the telluric spectra to use.')
+    parser.add_argument('-k', '--kind', default="linear",
+                        help='Interpolation order, linear, quadratic or cubic')
+    parser.add_argument('-m', '--method', default="scipy",
+                        help='Interpolation method numpy or scipy')
+    parser.add_argument("-s", "--show", default=True, 
+                        help="Show plots") #Does not wokwithout display though for some reason
+    parser.add_argument("-c", "--h2o_scaling", action='store_true',
+                        help="Perform separate H20 scaling")
+    parser.add_argument("-n", "--new_method", action='store_true',
+                        help="Use new code method")
+    args = parser.parse_args()
+    return args
 
 def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy", show=False, h2o_scaling=False, new_method=False):
     # Set and test homedir
