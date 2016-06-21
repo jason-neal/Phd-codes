@@ -6,6 +6,7 @@
     can plot result
 
 """
+from __future__ import division, print_function
 import os
 import time
 import numpy as np
@@ -323,34 +324,29 @@ def get_observation_averages(homedir):
     return np.mean(Nod_airmass), Nod_median_time
 
 def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy", show=False, h2o_scaling=False):
+    # Set and test homedir
     homedir = os.getcwd()
+    if homedir[-13:] is not "Combined_Nods":
+        print("Not running telluric removal from Combined_Nods folder \n Crashing")
+    
+    # Load in Crires Spectra
     data = fits.getdata(fname)
     wl = data["Wavelength"] 
     I = data["Extracted_DRACS"]
     hdr = fits.getheader(fname)
-    datetime = hdr["DATE-OBS"]
+    obs_datetime = hdr["DATE-OBS"]
 
     # Get airmass for entire observation
-    airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
-    airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
-    obs_airmass = (airmass_start + airmass_end) / 2
-
-
-    print("1st observation Starting Airmass", airmass_start, "\tEnding Airmass", airmass_end)
-    
-    print("\nWorking directory", homedir)
-    if homedir[-13:] is not "Combined_Nods":
-        print("Not running telluric removal from Combined_Nods folder \n Crashing")
-        
-    # Need airmass for the entire observation not just the first nod!!!!!!
-    Rawdir = homedir[:-13] + "Raw_files/"
+    #airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
+    #airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
+    #obs_airmass = (airmass_start + airmass_end) / 2
     Average_airmass, average_time = get_observation_averages(homedir)
-    """ When using averaged airmass need almost no airmass scalling of model as it is at almost the correct time/airmass"""
+    """ When using averaged airmass need almost no airmass scalling of 
+        model as it is almost the airmass given by tapas"""
     obs_airmass = Average_airmass
-    print("Average_airmass", Average_airmass, "\nAverage_time", average_time)
+    print("From all 8 raw spectra: \nAverage_airmass", Average_airmass, "\nAverage_time", average_time)
 
-
-    obsdate, obstime = datetime.split("T")
+    obsdate, obstime = obs_datetime.split("T")
     obstime, __ = obstime.split(".")
     print("tellpath before", tellpath)
     
