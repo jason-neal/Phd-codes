@@ -139,34 +139,34 @@ def get_observation_averages(homedir):
     Uses the list_spectra.txt that is in this directory to open each file and extract values from the headers.
     *Possibly add extra extensions to the headrer in the future when combining.
     """
-    Raw_path = homedir[:-13] + "Raw_files/"
+    raw_path = homedir[:-13] + "Raw_files/"
     list_name = "list_spectra.txt"
 
-    Nod_airmass = []
-    Nod_median_time = []
+    nod_airmass = []
+    nod_median_time = []
     with open(list_name, "r") as f:
         for line in f:
             fname = line[:-1] + ".fits"
-            hdr = fits.getheader(Raw_path + fname)
+            hdr = fits.getheader(raw_path + fname)
             datetime = hdr["DATE-OBS"]
             time = datetime[11:19]
             airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
             airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
-            Nod_mean_airmass = round((airmass_start + airmass_end) / 2 , 4)
-            Nod_airmass.append(Nod_mean_airmass)
-            Nod_median_time.append(time)
+            nod_mean_airmass = round((airmass_start + airmass_end) / 2 , 4)
+            nod_airmass.append(nod_mean_airmass)
+            nod_median_time.append(time)
     
-    print("Observation Nod_airmass ", Nod_airmass)
-    print("Observation Nod_time ", Nod_median_time)
-    return np.mean(Nod_airmass), Nod_median_time
+    print("Observation Nod_airmass ", nod_airmass)
+    print("Observation Nod_time ", nod_median_time)
+    return np.mean(nod_airmass), nod_median_time
 
 
 
 def h20_residual(params, obs_data, telluric_data):
     # Parameters 
-    ScaleFactor = params["ScaleFactor"].value
+    scale_factor = params["scale_factor"].value
     R = params["R"].value
-    FWHM_lim = params["FWHM_lim"].value
+    fwhm_lim = params["fwhm_lim"].value
     #n_jobs = params["n_jobs"].value  # parallel implementaiton
     #chip_select = params["chip_select"].value
     verbose = params["verbose"].value
@@ -179,17 +179,17 @@ def h20_residual(params, obs_data, telluric_data):
     telluric_I = telluric_data[1]
     
     # Telluric scaling T ** x
-    scaled_telluric_I = telluric_I ** ScaleFactor
+    scaled_telluric_I = telluric_I ** scale_factor
     
     # smallest wl step in telluric wl
     min_dwl = np.min(telluric_wl[1:]-telluric_wl[:-1])
     # Make sure atleast 1 telluric value is outside wl range of observation for interpoltion later 
     chip_limits = [obs_wl[0]-2*min_dwl, obs_wl[-1]+2*min_dwl] 
     # Convolution
-    #def convolution_nir(wav, flux, chip, R, FWHM_lim=5.0, plot=True):
+    #def convolution_nir(wav, flux, chip, R, fwhm_lim=5.0, plot=True):
     #    return [wav_chip, flux_conv_res]
     conv_tell_wl, conv_tell_I = instrument_convolution(telluric_wl, scaled_telluric_I, chip_limits,
-                                                R, FWHM_lim=FWHM_lim, plot=False, verbose=verbose)
+                                                R, fwhm_lim=fwhm_lim, plot=False, verbose=verbose)
     
     #print("Obs wl- Min ", np.min(obs_wl)," Max ", np.max(obs_wl))
     #print("Input telluic wl- Min ", np.min(telluric_wl)," Max ", np.max(telluric_wl))
@@ -216,9 +216,9 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
 
     """
     params = Parameters()
-    params.add('ScaleFactor', value=1)   # add min and max values ?
+    params.add('scale_factor', value=1)   # add min and max values ?
     params.add('R', value=R, vary=False)
-    params.add('FWHM_lim', value=5, vary=False)
+    params.add('fwhm_lim', value=5, vary=False)
     params.add('fit_lines', value=True, vary=False)   # only fit the peaks of lines < 0.995
     params.add("verbose", value=False, vary=False)
    
@@ -228,10 +228,10 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
     print(outreport)
 
     # Telluric scaling T ** x
-    Scaled_h20_I = h20_I ** out.params["ScaleFactor"].value
+    Scaled_h20_I = h20_I ** out.params["scale_factor"].value
 
-    Convolved_h20_I = convolution_nir(h20_wl, Scaled_h20_tell, [Scaled_h20_I[0], Scaled_h20_I[-1]],
-                                                    R, FWHM_lim=5, plot=False, verbose=True)
+    Convolved_h20_I = instrument_convolution(h20_wl, Scaled_h20_tell, [Scaled_h20_I[0], Scaled_h20_I[-1]],
+                                                    R, fwhm_lim=5, plot=False, verbose=True)
 
     # Interpolation to obs positions
     interp_conv_h20_I =  wl_interpolation(h20_wl, Convolved_h20_I, obs_wl)
@@ -274,7 +274,8 @@ def _parser():
     args = parser.parse_args()
     return args
 
-def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy", show=False, h2o_scaling=False, new_method=False):
+def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy", 
+         show=False, h2o_scaling=False, new_method=False):
     # Set and test homedir
     homedir = os.getcwd()
     if homedir[-13:] is not "Combined_Nods":
@@ -292,7 +293,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     wl_upper = np.max(wl)*1.0001
 
 
- #################################################################  NEW METHOD section ##########################################################
+ #################################################  NEW METHOD section ############################
     if new_method:
         # Changing for new telluric line location defaults (inside the Combined_nods)
         if h2o_scaling:
@@ -304,14 +305,18 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             tapas_airmass = float(tapas_h20_hdr["airmass"])
             
             # Select section by wavelength
-            tell_h20_section = wav_selector(tapas_h20_data[0], tapas_h20_data[1], wl_lower, wl_upper)
-            tell_not_h20_section = wav_selector(tapas_not_h20_data[0], tapas_not_h20_data[1], wl_lower, wl_upper)
+            tell_h20_section = wav_selector(tapas_h20_data[0], tapas_h20_data[1], wl_lower,
+                wl_upper)
+            tell_not_h20_section = wav_selector(tapas_not_h20_data[0], tapas_not_h20_data[1], 
+                wl_lower, wl_upper)
 
             #no h20 correction
-            non_h20_correct_I = non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, tapas_not_h20_data[0], tapas_not_h20_data[1], tapas_airmass)
+            non_h20_correct_I = non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, 
+                tapas_not_h20_data[0], tapas_not_h20_data[1], tapas_airmass)
             # h20 correction and 
             ## TO DO caluclate the value for R from header
-            h20_corrected_obs, out, outreport = h2o_telluric_correction(obs_wl, non_h20_correct_I, tell_h20_section[0], tell_h20_section[1], R)
+            h20_corrected_obs, out, outreport = h2o_telluric_correction(obs_wl, non_h20_correct_I,
+                tell_h20_section[0], tell_h20_section[1], R)
 
         else:
             # load combined dataset only
@@ -324,7 +329,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 
             #  values needed for header
             
-    ################################################# REPLACING this / or if still given different location for tapas files#######################
+    ################## REPLACING this / or if still given different location for tapas files#######
     else:   # old method
 
         # Get airmass for entire observation
@@ -335,7 +340,8 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         """ When using averaged airmass need almost no airmass scalling of 
             model as it is almost the airmass given by tapas"""
         obs_airmass = Average_airmass
-        print("From all 8 raw spectra: \nAverage_airmass", Average_airmass, "\nAverage_time", average_time)
+        print("From all 8 raw spectra: \nAverage_airmass", Average_airmass, 
+              "\nAverage_time", average_time)
 
         obs_datetime = hdr["DATE-OBS"]
         obsdate, obstime = obs_datetime.split("T")
@@ -372,7 +378,8 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         print("Telluric normaliztion value", np.median(I_tell[maxes]))
 
 
-        Corrections, Correction_tells, Correction_Bs, Correction_labels = telluric_correct(wl, I, tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
+        Corrections, Correction_tells, Correction_Bs, Correction_labels = telluric_correct(wl, I,
+                           tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
     
         if show:
             plt.figure()  # Tellurics
@@ -402,7 +409,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         Tell_interp = Correction_tells[1]   
 
 
-    ###########################################################   Ends  HERE #################################################################################  
+    #######################################   Ends  HERE ##########################################
 
     ### SAVING Telluric Corrected Spectra ###
     # PROBABALY NEED TO HARDCODE IN THE HEADER LINES...
@@ -410,9 +417,9 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 
     ### TO DO add mutually exclusive flag (with output) to add extra suffixs on end by .tellcorr.
     if output:  
-            Output_filename = output
+            output_filename = output
     else:
-            Output_filename = fname.replace(".fits", ".tellcorr.fits")
+            output_filename = fname.replace(".fits", ".tellcorr.fits")
 
     # Work out values for header
     if new_method:
@@ -446,9 +453,9 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         tellhdr = False   ### need to correctly get this from obtain telluric
     
     if export:
-        export_correction_2fits(Output_filename, wl, I_corr, I, Tell_interp, 
+        export_correction_2fits(output_filename, wl, I_corr, I, Tell_interp, 
                                 hdr, hdrkeys, hdrvals, tellhdr)
-        print("Saved coorected telluric spectra to " + str(Output_filename))
+        print("Saved coorected telluric spectra to " + str(output_filename))
     else:
         print("Skipped Saving coorected telluric spectra ")
 
