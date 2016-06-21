@@ -56,16 +56,6 @@ def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
     plt.show(block=False)
     return None
     
-# def test_plot_interpolation(x1, y1, x2, y2, methodname=None):
-#     """ Plotting code """
-#     plt.plot(x1, y1, label="original values")
-#     plt.plot(x2, y2, label="new points")
-#     plt.title("testing Interpolation: ", methodname)
-#     plt.legend()
-#     plt.xlabel("Wavelength (nm)")
-#     plt.ylabel("Norm Intensity")
-#     plt.show()
-#     return None
 def airmass_scaling(spectra, spec_airmass, obs_airmass):
     """Scale the Telluric spectra to match the airmass of the observation"""
     B = obs_airmass / spec_airmass
@@ -105,7 +95,6 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     B = obs_airmass/tell_airmass
     print("Airmass scaling Ratio B = ", B)
 
-    #new_tell = interped_tell ** B
     new_tell = airmass_scaling(interped_tell, tell_airmass, obs_airmass)
     corr_spec = divide_spectra(spec_obs, new_tell) # Divide by telluric spectra
 
@@ -114,120 +103,7 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     Correction_tells.append(new_tell)
     Correction_labels.append("Header values B Correction")
 
-
-    #Bvals, Blabels = B_minimization(wl_obs, spec_obs, interped_tell, B_init=False)
-    #print("Minimised B values")
-    #for bval, blabel in zip(Bvals,Blabels):
-    #    print(blabel + ", B = {0:.3f}".format(bval))
-       
-    #    b_tell = interped_tell ** bval
-    #    b_correction = divide_spectra(spec_obs, b_tell) # Divide by telluric spectra
-        
-    #    Correction_Bs.append(bval)
-    #    Corrections.append(b_correction)
-    #    Correction_tells.append(b_tell)
-    #    Correction_labels.append(blabel)
-
-    #bmin, bminpeaks, bslopes = B_minimization(wl_obs, spec_obs, interped_tell, B_init=False)
-    #new_tell = interped_tell ** B
-    #corrected_spec = divide_spectra(spec_obs, new_tell) # Divide by telluric spectra
-    #new_tell_min = interped_tell ** bmin
-    #corrected_min_spec = divide_spectra(spec_obs, new_tell_min) # Divide by telluric spectra
-    #new_tell_minpeaks = interped_tell ** bminpeaks
-    #corrected_minpeaks_spec = divide_spectra(spec_obs, new_tell_minpeaks) # Divide by telluric spectra
-    #new_tell_slopes = interped_tell ** bslopes
-    #corrected_slopes_spec = divide_spectra(spec_obs, new_tell_slopes) # Divide by telluric spectra
-
-    # other corrections?
-    
-    #return corrected_spec, interped_tell, bad_correction, new_tell, corrected_min_spec, new_tell_min, corrected_minpeaks_spec, new_tell_minpeaks, corrected_slopes_spec, new_tell_slopes
     return Corrections, Correction_tells, Correction_Bs, Correction_labels
-
-
-def B_minimization(wl, spec_obs, spec_tell, B_init=False, show=True):
-    """
-    Find Optimal B that scales the telluric spectra to best match the
-    intesity of the observed spectra
-
-    """
-    blist = np.linspace(0.10, 1.5, 500)
-    subtracts = []
-    divisions = []
-    peak_subtracts = []
-    peak_divisions = []
-    # Slopediffs = []
-    # peak_slopediffs = []
-    abs_area = []
-    # area = []
-    std = []        # minimize stdeviation
-    std_peaks = []  # minimize std around telluric lines
-    std_30kms = []  # values withing the 30kms telluric exclusion window
-    peaks = spec_tell<0.98
-   # peakslopes = spec_tell>0.95
-
-    obs_peaks = spec_obs[peaks]
-    tell_peaks = spec_tell[peaks]
-
-   # obs_slope_peaks = spec_obs[peaks]
-   # tell_slope_peaks = spec_tell[peaks]
-
-    for bb in blist:
-        subtracts.append(sum(abs(spec_obs - spec_tell**bb)))
-        peak_subtracts.append(sum(abs(obs_peaks - tell_peaks**bb))) 
-        divisions.append(sum(abs(np.ones_like(spec_obs)-(spec_obs / (spec_tell**bb))))) 
-        peak_divisions.append(sum(abs(np.ones_like(obs_peaks)-(obs_peaks/(tell_peaks**bb)))))
-        
-        corr = spec_obs / (spec_tell**bb)
-        peaks_corr = obs_peaks / (tell_peaks**bb)
-        
-    #  slopes = corr[1:]-corr[:-1]
-    #  Slopediffs.append(sum(abs(slopes)))
-
-    #  peak_slopes = peaks_corr[1:]-peaks_corr[:-1]
-    #  peak_slopediffs.append(sum(abs(peak_slopes)))
-
-        # Area around 1    # Sort of measuring the linewidth (should be zero for good correction)
-        d_wl = wl[1:]-wl[:-1]
-        h = ((corr[1:]+corr[:-1]) / 2.0 ) - 1
-        abs_area.append(sum(np.abs(h*d_wl)))
-        #area.append(sum(h*d_wl))
-        
-        std.append(np.std(corr))
-        std_peaks.append(np.std(peaks_corr))
-
-    plt.figure()
-    plt.plot(blist, subtracts/max(subtracts), label="Subtractions")
-    plt.plot(blist, peak_subtracts/max(peak_subtracts), label="peaks subtractions <0.98")
-    plt.plot(blist, divisions/max(divisions), label="Divisions")
-    plt.plot(blist, peak_divisions/max(peak_divisions), label="Peak Divisions")
-    plt.plot(blist, abs_area/max(abs_area), label="absolute area")
-    plt.plot(blist, std/max(std), label="std")
-    plt.plot(blist, std_peaks/max(std_peaks), label="Peak std")
-    #absa = list(np.abs(area))
-    #plt.plot(blist, area/area[absa.index(max(absa))], label="area")
-    plt.xlabel("b values")
-    plt.ylabel("Normalized Scale")
-    plt.title("B minimization testing")
-    plt.legend()
-    if show:
-        plt.show()
-
-    #B = blist[diffs.index(min(diffs))]
-    B_subtracts = blist[subtracts.index(min(subtracts))]
-    B_peak_subtracts = blist[peak_subtracts.index(min(peak_subtracts))]
-    B_divisions = blist[divisions.index(min(divisions))]
-    B_peak_divisions = blist[peak_divisions.index(min(peak_divisions))]
-    B_abs_area = blist[abs_area.index(min(abs_area))]
-    #B_area = blist[area.index(min(area))]
-    B_std = blist[std.index(min(std))]
-    B_std_peaks = blist[std_peaks.index(min(std_peaks))]
-
-    Bvals = (B_subtracts, B_peak_subtracts, B_divisions, B_peak_divisions, B_abs_area, B_std, B_std_peaks)
-    Blabels = ("Min Subtraction", "Min Peak Subtraction", "Min Division", "Min Peak Division", \
-               "Min Absolute Area from 1", "Min std", "min peaks std")
-    #B_area , "Min Area from 1"
-    return Bvals, Blabels
-
 
 
 def _parser():
