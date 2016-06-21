@@ -246,8 +246,10 @@ def _parser():
                         help='Interpolation order, linear, quadratic or cubic')
     parser.add_argument('-m', '--method', default="scipy",
                         help='Interpolation method numpy or scipy')
-    parser.add_argument("-s", "--show", default=True,
+    parser.add_argument("-s", "--show", default=True, 
                         help="Show plots") #Does not wokwithout display though for some reason
+    parser.add_argument("-c", "h2o_scaling", action='store_true',
+                        help="Perform separate H20 scaling")
     args = parser.parse_args()
     return args
 
@@ -320,7 +322,7 @@ def get_observation_averages(homedir):
     print("Observation Nod_time ", Nod_median_time)
     return np.mean(Nod_airmass), Nod_median_time
 
-def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy", show=True):
+def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy", show=False, h2o_scaling=False):
     homedir = os.getcwd()
     data = fits.getdata(fname)
     wl = data["Wavelength"] 
@@ -390,8 +392,12 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 
     # Loaded in the data
     # Now perform the telluric removal
+    if h2o_scaling:
+        pass
+    else:
+        Corrections, Correction_tells, Correction_Bs, Correction_labels = telluric_correct(wl, I, tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
+    
 
-    Corrections, Correction_tells, Correction_Bs, Correction_labels = telluric_correct(wl, I, tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
     if show:
         plt.figure()  # Tellurics
         plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
