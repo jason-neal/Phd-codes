@@ -9,25 +9,26 @@
 from __future__ import division, print_function
 import os
 import time
+import argparse
 import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
+#import scipy as sp
 from scipy.interpolate import interp1d
+import matplotlib.pyplot as plt
 from astropy.io import fits
 from lmfit import minimize, Parameters
 import lmfit
-import argparse
-import GaussianFitting as gf
+#import GaussianFitting as gf
 import Obtain_Telluric as obt
 from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
 
 def divide_spectra(spec_a, spec_b):
-    """ Assumes that the spectra have been interpolated to same wavelength step"""
-    """ Divide two spectra"""
+    """ Assumes that the spectra have been interpolated to same wavelength step
+    
+    Divide two spectra
+    """
     assert(len(spec_a) == len(spec_b)), "Not the same length"
     divide = spec_a / spec_b
     return divide
-
 
 def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
     """ Do I need to replicate plotting code?
@@ -207,38 +208,42 @@ def h20_residual(params, obs_data, telluric_data):
         return 1 - (obs_I / interped_conv_tell)
 
 
-def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I):
+def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
+    """ H20 Telluric correction
+    Performs nonlinear least squares fitting to fit the scale factor 
+    Uses the scale factor
+    Then Convolves by the instrument resolution 
+
+    """
     params = Parameters()
     params.add('ScaleFactor', value=1)   # add min and max values ?
-    params.add('R', value=50000, vary=False)
+    params.add('R', value=R, vary=False)
     params.add('FWHM_lim', value=5, vary=False)
     params.add('fit_lines', value=True, vary=False)   # only fit the peaks of lines < 0.995
     params.add("verbose", value=False, vary=False)
    
-    out = minimize(h20_residual, params, args=([wl, obs_I], [h20_wl, h20_I]))
+    out = minimize(h20_residual, params, args=([obs_wl, obs_I], [h20_wl, h20_I]))
     
     outreport = lmfit.fit_report(out)
     print(outreport)
 
-    Best_factor = out.params["ScaleFactor"].value
-
     # Telluric scaling T ** x
-    Scaled_h20_I = h20_I**Best_factor
+    Scaled_h20_I = h20_I ** out.params["ScaleFactor"].value
 
     Convolved_h20_I = convolution_nir(h20_wl, Scaled_h20_tell, [Scaled_h20_I[0], Scaled_h20_I[-1]],
-                                                    50000, FWHM_lim=5, plot=False, verbose=True)
+                                                    R, FWHM_lim=5, plot=False, verbose=True)
 
     # Interpolation to obs positions
-    interp_conv_h20_I =  wl_interpolation(h20_wl, Convolved_h20_I, obs_wl)]
+    interp_conv_h20_I =  wl_interpolation(h20_wl, Convolved_h20_I, obs_wl)
     
     h20_corrected_obs = divide_spectra(obs_I, interp_conv_h20_I)
 
-    return h20_corrected_obs, params, outreport
+    return h20_corrected_obs, out, outreport
 
 def non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmass):
     """ Set obs_airmas and spec_airmass equal to achieve a scaling factor of 1 = No scaling"""
     tell_I = airmass_scaling(tell_I, spec_airmass, obs_airmass)
-    interp_tell_I =  wl_interpolation(tell_wl, tell_I, obs_wl)]
+    interp_tell_I =  wl_interpolation(tell_wl, tell_I, obs_wl)
     corrected_obs = divide_spectra(obs_I, tell_I)
 
     return corrected_obs
@@ -302,10 +307,11 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             tell_h20_section = wav_selector(tapas_h20_data[0], tapas_h20_data[1], wl_lower, wl_upper)
             tell_not_h20_section = wav_selector(tapas_not_h20_data[0], tapas_not_h20_data[1], wl_lower, wl_upper)
 
-        #no h20 correction
-        non_h20_correct_I = non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, tapas_not_h20_data[0], tapas_not_h20_data[1], tapas_airmass)
-        # h20 correction and 
-        h20_corrected_obs, params, outreport = h2o_telluric_correction(obs_wl, non_h20_correct_I, tell_h20_section[0], tell_h20_section[1])
+            #no h20 correction
+            non_h20_correct_I = non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, tapas_not_h20_data[0], tapas_not_h20_data[1], tapas_airmass)
+            # h20 correction and 
+            ## TO DO caluclate the value for R from header
+            h20_corrected_obs, out, outreport = h2o_telluric_correction(obs_wl, non_h20_correct_I, tell_h20_section[0], tell_h20_section[1], R)
 
         else:
             # load combined dataset only
@@ -317,8 +323,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             tell_all_section = wav_selector(tell_all_data[0], tell_all_data[1], wl_lower, wl_upper)
 
             #  values needed for header
-            #H20_scaling_val = None
-            #resolution_val = None
+            
     ################################################# REPLACING this / or if still given different location for tapas files#######################
     else:   # old method
 
@@ -412,26 +417,37 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     # Work out values for header
     if new_method:
         if h2o_scaling:
-        
-            # To be updated when implemented
-            H20_scaling_val = None
-            resolution_val = None
+            h2o_scaling_val = out.params["scaleFactor"]
+            resolution_val = R
         else:
-            H20_scale_val = None
+            h2o_scale_val = None
             resolution_val = None
 
         # Keys and values for Fits header file        
-        hdrkeys = ["Correction", "Tapas Interpolation method", "Interpolation kind", "Correction Params A, B", "H20 Scaling", "H20 Scaling Value", "Convolution R"]
-        hdrvals = [("Tapas division" ,"Spectral Correction"), (method, "numpy or scipy"), (kind, "linear,slinear,quadratic,cubic"), (h2o_scaling, "Was separate H20 scaling 1 = Yes"), ( H20_scale_val, "H20 scale value used"), (resolution_val , "Resolution used for H20 Convolution")]
+        hdrkeys = ["Correction", "Tapas Interpolation method", 
+                   "Interpolation kind", "Correction Params A, B", 
+                   "H20 Scaling", "H20 Scaling Value", "Convolution R"]
+        hdrvals = [("Tapas division", "Spectral Correction"), 
+                   (method, "numpy or scipy"), 
+                   (kind, "linear,slinear,quadratic,cubic"), 
+                   (h2o_scaling, "Was separate H20 scaling 1 = Yes"), 
+                   (h2o_scale_val, "H20 scale value used"), 
+                   (resolution_val, "Resolution used for H20 Convolution")]
         tellhdr = False   ### need to correctly get this from obtain telluric
     else:   # Old method 
         # Keys and values for Fits header file        
-        hdrkeys = ["Correction", "Tapas Interpolation method", "Interpolation kind", "Correction Params A, B", "H20 Scaling"]
-        hdrvals = [("Tapas division" ,"Spectral Correction"), (method, "numpy or scipy"), (kind, "linear,slinear,quadratic,cubic"), (h2o_scaling, "Was separate H20 scaling Done 1 = Yes")]
+        hdrkeys = ["Correction", "Tapas Interpolation method", 
+                   "Interpolation kind", "Correction Params A, B", 
+                   "H20 Scaling"]
+        hdrvals = [("Tapas division", "Spectral Correction"), 
+                   (method, "numpy or scipy"), 
+                   (kind, "linear,slinear,quadratic,cubic"), 
+                   (h2o_scaling, "Was separate H20 scaling Done 1 = Yes")]
         tellhdr = False   ### need to correctly get this from obtain telluric
     
     if export:
-        export_correction_2fits(Output_filename, wl, I_corr, I, Tell_interp, hdr, hdrkeys, hdrvals, tellhdr)
+        export_correction_2fits(Output_filename, wl, I_corr, I, Tell_interp, 
+                                hdr, hdrkeys, hdrvals, tellhdr)
         print("Saved coorected telluric spectra to " + str(Output_filename))
     else:
         print("Skipped Saving coorected telluric spectra ")
