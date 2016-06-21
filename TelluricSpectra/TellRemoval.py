@@ -242,7 +242,8 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
 
 def non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmass):
     """ Set obs_airmas and spec_airmass equal to achieve a scaling factor of 1 = No scaling"""
-    tell_I = airmass_scaling(tell_I, spec_airmass, obs_airmass)
+    #tell_I = airmass_scaling(tell_I, spec_airmass, obs_airmass)
+    tell_I = tell_I ** (obs_airmass / spec_airmass)   # Airmass scaling
     interp_tell_I =  wl_interpolation(tell_wl, tell_I, obs_wl)
     corrected_obs = divide_spectra(obs_I, tell_I)
 
