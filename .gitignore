@@ -1,3 +1,4 @@
 # Ignore python generate .pyc files
 
 *.pyc
+.ipynb_checkpoints

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
 ## Module that has a function that can obtain the telluric spectra relevant to the observations we have
@@ -14,21 +14,30 @@ def get_telluric_name(path, date, time, ext="*"):
     """ Tapas produces error of 1 hour in timing of observation so need to add +1 to the hour"""
     
     # ext can be specificed .ipac or .fits or left as * for either
-    tapas_time = str(int(time[0:2]) + 1) #+ time[2:]
-    print(tapas_time)
-    #print("date :",date)
-    str1 = "tapas_" + date + "*"
+    #tapas_time = str(int(time[0:2])+1)  # including offset
+    tapas_time = str(int(time[0:2]))  # no time offset
+    print("Hour of observation,", tapas_time)
+    str1 = "tapas_*" + date + "*"
     if int(tapas_time) > 9:
         str2 = "*" + tapas_time + ":*:*"
     else:
         str2 = "*T0" + tapas_time + ":*:*" + ext
-    print(" finding files which match conditions- ", str1, str2)
+    print("Match Filenames to", str1, "and", str2)
     match = get_filenames(path, str1 , str2)
+    if not match and int(time[3:5]) > 40:   # Check without an hour specification
+        
+        tapas_time = str(int(tapas_time)+1) 
+        if int(tapas_time) > 9:
+            str2 = "*" + tapas_time + ":*:*"
+        else:
+            str2 = "*T0" + tapas_time + ":*:*" + ext
+        print("Match Filenames to", str1, "and", str2)
+        match = get_filenames(path, str1 , str2)
     return match 
 
 def get_telluric_from_obs(path, obs_name):
        """ Load average time list for name then load from there"""
-       # Load ObsAverageTimes.txt
+       #Load ObsAverageTimes.txt
        avg_obs_time = "2012-04-07T00:20:00"
        date = avg_obs_time[0:11]
        time = avg_obs_time[12:20]
@@ -41,25 +50,46 @@ def list_telluric(path):
     return match
 
 def load_telluric(tapas_path, filename):
+    """Returns telluric data and header
+    if just want the data then call as load_telluric()[0]
+    or data, __ = load_telluric() 
+
+    likewise just the header as hdr = load_telluric()[1]"""
     ext = filename[-4:] 
     file_ = tapas_path + filename
     if ext == "ipac":
+        tell_hdr = fits.Header()
         with open(file_) as f:
             col1 = []
             col2 = []
             for line in f:
-                firstchar = line[0]
-            #print("first char =", firstchar)
-                if line[0] == "\\" or line[0] == "|":
-                    pass #print("Match a header line")
+                #firstchar = line[0]
+                #print("first char =", firstchar)
+                if line.startswith("\\"):
+                    # Get the Tapas Header
+                    line = line[1:] # remove the leading \
+                    line = line.strip()
+                    items = line.split("=")
+
+                    tell_hdr[items[0]] = items[1] # Add to header
+
+                elif line.startswith("|"):
+                    # Obtian wavelength scale from piped lines
+                    if "in air" in line:
+                        tell_hdr["WAVSCALE"] = "air"
+                    elif "nm|" in line:
+                        tell_hdr["WAVSCALE"] = "vacuum"
+                    # Need extra condition to deal with wavenumber
                 else:
-                    line.strip()
+                    line = line.strip()
                     val1, val2 = line.split()
                     col1.append(float(val1))
                     col2.append(float(val2))
-    
+
     elif ext == "fits":
-        i_tell = (fits.getdata(file_,0))
+        i_tell = fits.getdata(file_, 1)
+        tell_hdr = fits.getheader(file_, 1)
+        # TODO ... Need to get wavelenght scale (air/wavelenght) from fits file somehow... 
         col1 = i_tell["wavelength"]
         col2 = i_tell["transmittance"]
 
@@ -69,12 +99,11 @@ def load_telluric(tapas_path, filename):
         
         # put in ascending order
     if col1[-1]-col1[0] < 0:  # wl is backwards
-        col1.reverse()
-        col2.reverse()            
+            col1 = col1[::-1]
+            col2 = col2[::-1]                
+    tell_data = np.array([col1, col2], dtype="float64")
 
-    tell = np.array([col1,col2], dtype="float64")
-
-    return tell    
+    return tell_data, tell_hdr  
     
 def plot_telluric(data, name, labels=True, show=False):
     plt.plot(data[0], data[1], label=name)
@@ -121,4 +150,4 @@ if __name__== "__main__" :
         plot_telluric(data, filename)
     plt.show()
 
-    do_all_telluric()
+    #do_all_telluric()
