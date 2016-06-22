@@ -296,6 +296,16 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     wl_lower = np.min(wl)/1.0001
     wl_upper = np.max(wl)*1.0001
 
+    # Get airmass for entire observation
+    #airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
+    #airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
+    #obs_airmass = (airmass_start + airmass_end) / 2
+    Average_airmass, average_time = get_observation_averages(homedir)
+    """ When using averaged airmass need almost no airmass scalling of 
+            model as it is almost the airmass given by tapas """
+    obs_airmass = Average_airmass
+    print("From all 8 raw spectra: \nAverage_airmass", Average_airmass, 
+          "\nAverage_time", average_time)
 
  #################################################  NEW METHOD section ############################
     if new_method:
@@ -322,11 +332,11 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
                 wl_lower, wl_upper)
 
             #no h20 correction
-            non_h20_correct_I = non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, 
+            non_h20_correct_I = non_h2o_telluric_correction(wl, I, obs_airmass, 
                 tapas_not_h20_data[0], tapas_not_h20_data[1], tapas_airmass)
             # h20 correction and 
             ## TO DO caluclate the value for R from header
-            h20_corrected_obs, out, outreport = h2o_telluric_correction(obs_wl, non_h20_correct_I,
+            h20_corrected_obs, out, outreport = h2o_telluric_correction(wl, non_h20_correct_I,
                 tell_h20_section[0], tell_h20_section[1], R)
 
         else:
@@ -345,17 +355,6 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             
     ################## REPLACING this / or if still given different location for tapas files#######
     else:   # old method
-
-        # Get airmass for entire observation
-        #airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
-        #airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
-        #obs_airmass = (airmass_start + airmass_end) / 2
-        Average_airmass, average_time = get_observation_averages(homedir)
-        """ When using averaged airmass need almost no airmass scalling of 
-            model as it is almost the airmass given by tapas"""
-        obs_airmass = Average_airmass
-        print("From all 8 raw spectra: \nAverage_airmass", Average_airmass, 
-              "\nAverage_time", average_time)
 
         obs_datetime = hdr["DATE-OBS"]
         obsdate, obstime = obs_datetime.split("T")
