@@ -241,12 +241,12 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
 
     return h20_corrected_obs, out, outreport
 
-def non_h2o_telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmass):
+def telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmass):
     """ Set obs_airmas and spec_airmass equal to achieve a scaling factor of 1 = No scaling"""
     #tell_I = airmass_scaling(tell_I, spec_airmass, obs_airmass)
     tell_I = tell_I ** (obs_airmass / spec_airmass)   # Airmass scaling
     interp_tell_I =  wl_interpolation(tell_wl, tell_I, obs_wl)
-    corrected_obs = divide_spectra(obs_I, tell_I)
+    corrected_obs = divide_spectra(obs_I, interp_tell_I)
 
     return corrected_obs
 
@@ -332,7 +332,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
                 wl_lower, wl_upper)
 
             #no h20 correction
-            non_h20_correct_I = non_h2o_telluric_correction(wl, I, obs_airmass, 
+            non_h20_correct_I = telluric_correction(wl, I, obs_airmass, 
                 tapas_not_h20_data[0], tapas_not_h20_data[1], tapas_airmass)
             # h20 correction and 
             ## TO DO caluclate the value for R from header
@@ -351,7 +351,8 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             # Select section by wavelength
             tapas_all_section = wav_selector(tapas_all_data[0], tapas_all_data[1], wl_lower, wl_upper)
 
-            
+            I_corrected = telluric_correction(wl, I, obs_airmass, 
+                tapas_all_data[0], tapas_all_data[1], tapas_airmass) 
             
     ################## REPLACING this / or if still given different location for tapas files#######
     else:   # old method
