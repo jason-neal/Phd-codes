@@ -304,11 +304,11 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             # load separated H20 tapas datasets
 
             tapas_h20 = get_filenames("./","tapas_*","*_ReqId_12_No_Ifunction*")
-            if len(tapas_h20) >1: print("Warning Too many h20 tapas files returned")
+            if len(tapas_h20) >1: 
+                print("Warning Too many h20 tapas files returned")
             tapas_not_h20 = get_filenames("./","tapas_*","*_ReqId_18_R-*")
-            if len(tapas_not_h20) >1: print("Warning Too many h20 tapas files returned")
-            print("Tapas_h20", tapas_h20)
-            print("Tapas_not_h20", tapas_not_h20)
+            if len(tapas_not_h20) >1: 
+                print("Warning Too many h20 tapas files returned")
             #tapas_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_12_No_Ifunction_barydone-NO.ipac"
             #tapas_not_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_18_R-50000_sratio-10_barydone-NO.ipac"
             tapas_h20_data, tapas_h20_hdr = obt.load_telluric("", tapas_h20[0])
@@ -332,16 +332,16 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         else:
             # load combined dataset only
             tapas_all = get_filenames("./","tapas_*","*_ReqId_10_R-*")
-            print("Tapas_all", tapas_all)
-            if len(tapas_all) >1: print("Warning Too many h20 tapas files returned")
+            if len(tapas_all) >1: 
+                print("Warning Too many h20 tapas files returned")
             #tapas_all = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
             tapas_all_data, tapas_all_hdr = obt.load_telluric("", tapas_all[0])
             tapas_airmass = float(tapas_all_hdr["airmass"])
 
             # Select section by wavelength
-            tell_all_section = wav_selector(tell_all_data[0], tell_all_data[1], wl_lower, wl_upper)
+            tapas_all_section = wav_selector(tapas_all_data[0], tapas_all_data[1], wl_lower, wl_upper)
 
-            #  values needed for header
+            
             
     ################## REPLACING this / or if still given different location for tapas files#######
     else:   # old method
@@ -438,7 +438,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     # Work out values for header
     if new_method:
         if h2o_scaling:
-            h2o_scaling_val = out.params["scaleFactor"]
+            h2o_scaling_val = out.params["scale_factor"]
             resolution_val = R
         else:
             h2o_scale_val = None
@@ -469,9 +469,9 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     if export:
         export_correction_2fits(output_filename, wl, I_corr, I, Tell_interp, 
                                 hdr, hdrkeys, hdrvals, tellhdr)
-        print("Saved coorected telluric spectra to " + str(output_filename))
+        print("Saved corected telluric spectra to " + str(output_filename))
     else:
-        print("Skipped Saving coorected telluric spectra ")
+        print("Skipped Saving corected telluric spectra ")
 
 
 if __name__ == "__main__":
