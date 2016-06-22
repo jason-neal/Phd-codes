@@ -19,7 +19,8 @@ from lmfit import minimize, Parameters
 import lmfit
 #import GaussianFitting as gf
 import Obtain_Telluric as obt
-from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
+from Get_filenames import get_filenames
+from SpectralTools import wav_selector#, wl_interpolation , instrument_convolution
 
 def divide_spectra(spec_a, spec_b):
     """ Assumes that the spectra have been interpolated to same wavelength step
@@ -279,8 +280,10 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
          show=False, h2o_scaling=False, new_method=False):
     # Set and test homedir
     homedir = os.getcwd()
-    if homedir[-13:] is not "Combined_Nods":
+    if homedir[-13:] != "Combined_Nods":
         print("Not running telluric removal from Combined_Nods folder \n Crashing")
+        print("Actual directory currently in is", homedir)
+        raise ValueError("Not correct path")
     
     # Load in Crires Spectra
     data = fits.getdata(fname)
@@ -299,10 +302,17 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         # Changing for new telluric line location defaults (inside the Combined_nods)
         if h2o_scaling:
             # load separated H20 tapas datasets
-            tapas_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_12_No_Ifunction_barydone-NO.ipac"
-            tapas_not_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_18_R-50000_sratio-10_barydone-NO.ipac"
-            tapas_h20_data, tapas_h20_hdr = obt.load_telluric("", tapas_h20)
-            tapas_not_h20_data, tapas_not_h20_hdr = obt.load_telluric("", tapas_not_h20)
+
+            tapas_h20 = get_filenames("./","tapas_*","*_ReqId_12_No_Ifunction*")
+            if len(tapas_h20) >1: print("Warning Too many h20 tapas files returned")
+            tapas_not_h20 = get_filenames("./","tapas_*","*_ReqId_18_R-*")
+            if len(tapas_not_h20) >1: print("Warning Too many h20 tapas files returned")
+            print("Tapas_h20", tapas_h20)
+            print("Tapas_not_h20", tapas_not_h20)
+            #tapas_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_12_No_Ifunction_barydone-NO.ipac"
+            #tapas_not_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_18_R-50000_sratio-10_barydone-NO.ipac"
+            tapas_h20_data, tapas_h20_hdr = obt.load_telluric("", tapas_h20[0])
+            tapas_not_h20_data, tapas_not_h20_hdr = obt.load_telluric("", tapas_not_h20[0])
             tapas_airmass = float(tapas_h20_hdr["airmass"])
             
             # Select section by wavelength
@@ -321,8 +331,11 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 
         else:
             # load combined dataset only
-            tapas_all = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
-            tapas_all_data, tapas_all_hdr = obt.load_telluric("", tapas_all)
+            tapas_all = get_filenames("./","tapas_*","*_ReqId_10_R-*")
+            print("Tapas_all", tapas_all)
+            if len(tapas_all) >1: print("Warning Too many h20 tapas files returned")
+            #tapas_all = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
+            tapas_all_data, tapas_all_hdr = obt.load_telluric("", tapas_all[0])
             tapas_airmass = float(tapas_all_hdr["airmass"])
 
             # Select section by wavelength
