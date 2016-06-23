@@ -197,13 +197,13 @@ def h20_residual(params, obs_data, telluric_data):
     #print("conv tell wl- Min ", np.min(conv_tell_wl)," Max ", np.max(conv_tell_wl))
   
     
-    interped_conv_tell = match_wl(conv_tell_wl, conv_tell_I, obs_wl)
+    interped_conv_tell = wl_interpolation(conv_tell_wl, conv_tell_I, obs_wl)
     print("Convolution and interpolation inside residual function was done")
     
     # Mask fit to peaks in telluric data
     if fit_lines:
-        #match_wl(telluric_wl, telluric_I, obs_wl)
-        Tell_line_mask = match_wl(telluric_wl, telluric_I, obs_wl) < 0.995
+        #wl_interpolation(telluric_wl, telluric_I, obs_wl)
+        Tell_line_mask = wl_interpolation(telluric_wl, telluric_I, obs_wl) < 0.995
         return 1 - (obs_I / interped_conv_tell)[Tell_line_mask] 
     else:
         return 1 - (obs_I / interped_conv_tell)
@@ -231,15 +231,15 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
     # Telluric scaling T ** x
     Scaled_h20_I = h20_I ** out.params["scale_factor"].value
 
-    Convolved_h20_I = instrument_convolution(h20_wl, Scaled_h20_tell, [Scaled_h20_I[0], Scaled_h20_I[-1]],
+    Convolved_h20_wl, Convolved_h20_I = instrument_convolution(h20_wl, Scaled_h20_I, [h20_wl[0], h20_wl[-1]],
                                                     R, fwhm_lim=5, plot=False, verbose=True)
 
     # Interpolation to obs positions
-    interp_conv_h20_I =  wl_interpolation(h20_wl, Convolved_h20_I, obs_wl)
+    interp_conv_h20_I =  wl_interpolation(Convolved_h20_wl, Convolved_h20_I, obs_wl)
     
     h20_corrected_obs = divide_spectra(obs_I, interp_conv_h20_I)
 
-    return h20_corrected_obs, out, outreport
+    return h20_corrected_obs, interp_conv_h20_I, out, outreport
 
 def telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmass):
     """ Set obs_airmas and spec_airmass equal to achieve a scaling factor of 1 = No scaling"""
@@ -248,7 +248,7 @@ def telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmas
     interp_tell_I =  wl_interpolation(tell_wl, tell_I, obs_wl)
     corrected_obs = divide_spectra(obs_I, interp_tell_I)
 
-    return corrected_obs
+    return corrected_obs, interp_tell_I, obs_airmass/spec_airmass
 
 def _parser():
     """Take care of all the argparse stuff.
@@ -307,6 +307,20 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     print("From all 8 raw spectra: \nAverage_airmass", Average_airmass, 
           "\nAverage_time", average_time)
 
+    # Calculate Resolving Power.
+    # Using the rule of thumb equation from the CRIRES manual. 
+    # Check for adaptive optics use.
+    horder_loop = hdr["HIERARCH ESO AOS RTC LOOP HORDER"]   # High order loop on or off
+    lgs_loop = hdr["HIERARCH ESO AOS RTC LOOP LGS"]         # LGS jitter loop on or off
+    loopstate = hdr["HIERARCH ESO AOS RTC LOOP STATE"]      # Loop state, open or closed
+    tiptilt_loop = hdr["HIERARCH ESO AOS RTC LOOP TIPTILT"] # Tip Tilt loop on or off
+    slit_width = hdr["HIERARCH ESO INS SLIT1 WID"]          # Slit width
+    
+    if any([horder_loop, loopstate,tiptilt_loop]) and (loopstate != "OPEN"):
+        print("Adaptive optics was used - Rule of thumb for Resolution is not good enough")
+    else:
+        R = int(100000*0.2 / slit_width)
+
  #################################################  NEW METHOD section ############################
     if new_method:
         # Changing for new telluric line location defaults (inside the Combined_nods)
@@ -326,35 +340,21 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             tapas_airmass = float(tapas_h20_hdr["airmass"])
             
             # Select section by wavelength
-            tell_h20_section = wav_selector(tapas_h20_data[0], tapas_h20_data[1], wl_lower,
+            tapas_h20_section = wav_selector(tapas_h20_data[0], tapas_h20_data[1], wl_lower,
                 wl_upper)
-            tell_not_h20_section = wav_selector(tapas_not_h20_data[0], tapas_not_h20_data[1], 
+            tapas_not_h20_section = wav_selector(tapas_not_h20_data[0], tapas_not_h20_data[1], 
                 wl_lower, wl_upper)
 
             #no h20 correction
-            non_h20_correct_I = telluric_correction(wl, I, obs_airmass, 
-                tapas_not_h20_data[0], tapas_not_h20_data[1], tapas_airmass)
+            non_h20_correct_I, tell_used, b_used = telluric_correction(wl, I, obs_airmass, 
+                tapas_not_h20_section[0], tapas_not_h20_section[1], tapas_airmass)
             # h20 correction and 
-            
-            #"Resolving Power. Using the rule of thumb equation from the CRIRES manual. 
-            # Check for adaptive optics use.
-            horder_loop = hdr["HIERARCH ESO AOS RTC LOOP HORDER"]   # High order loop on or off
-            lgs_loop = hdr["HIERARCH ESO AOS RTC LOOP LGS"]         # LGS jitter loop on or off
-            loopstate = hdr["HIERARCH ESO AOS RTC LOOP STATE"]      # Loop state, open or closed
-            tiptilt_loop = hdr["HIERARCH ESO AOS RTC LOOP TIPTILT"] # Tip Tilt loop on or off
-            slit_width = hdr["HIERARCH ESO INS SLIT1 WID"]          # Slit width
-            print(loopstate)
-            print(tiptilt_loop)
-            print(type(tiptilt_loop))
-            if any([horder_loop, loopstate,tiptilt_loop]) and loopstate != "OPEN" :
-                print("Adaptive optics was used - Rule of thumb for Resolution is not good enough")
-            else:
-                R = int(100000*0.2 / slit_width)
-            
-            h20_corrected_obs, out, outreport = h2o_telluric_correction(wl, non_h20_correct_I,
-                tell_h20_section[0], tell_h20_section[1], R)
+                        
+            h20_corrected_obs, h20tell_used, out, outreport = h2o_telluric_correction(wl, non_h20_correct_I,
+                tapas_h20_section[0], tapas_h20_section[1], R)
             
             I_corr = h20_corrected_obs
+            correction_used = tell_used * h20tell_used   # Combined corrections
 
         else:
             # load combined dataset only
@@ -368,7 +368,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             # Select section by wavelength
             tapas_all_section = wav_selector(tapas_all_data[0], tapas_all_data[1], wl_lower, wl_upper)
 
-            I_corr = telluric_correction(wl, I, obs_airmass, 
+            I_corr, tell_used, b_used = telluric_correction(wl, I, obs_airmass, 
                 tapas_all_data[0], tapas_all_data[1], tapas_airmass) 
         
         if show:
@@ -376,7 +376,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
             plt.plot(wl, I_corr, linewidth=2, label=("Corrected spectra"))
                 #plt.plot(wl, tell, label=("Telluric " + label + ", B = {0:.2f}".format(B)))
-            plt.hlines(1, wl[0], wl[-1], "-.")
+            plt.hlines(1, wl[0], wl[-1], color="grey", linestyles='dashed')
             plt.legend(loc="best")
             plt.title("Telluric Corrections")
 
@@ -448,8 +448,8 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         print(Correction_labels)
         print(Corrections)
         I_corr = Corrections[1]  # using B scaling
-        Tell_interp = Correction_tells[1]   
-
+        tell_used = Correction_tells[1]   
+        b_used = Correction_Bs[1] 
 
     #######################################   Ends  HERE ##########################################
 
@@ -461,41 +461,47 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     if output:  
             output_filename = output
     else:
-            output_filename = fname.replace(".fits", ".tellcorr.fits")
+        if h2o_scaling:
+            output_filename = fname.replace(".fits", ".h2otellcorr.fits")
+        else:
+           output_filename = fname.replace(".fits", ".tellcorr.fits")
 
-    # Work out values for header
+    # Work out values for FITS header
+    b_used = round(b_used, 4)
     if new_method:
         if h2o_scaling:
-            h2o_scaling_val = out.params["scale_factor"]
-            resolution_val = R
+            h2o_scale_val = out.params["scale_factor"].value
         else:
             h2o_scale_val = None
-            resolution_val = None
+            
 
         # Keys and values for Fits header file        
         hdrkeys = ["Correction", "Tapas Interpolation method", 
-                   "Interpolation kind", "Correction Params A, B", 
-                   "H20 Scaling", "H20 Scaling Value", "Convolution R"]
+                   "Interpolation kind", "B PARAM", 
+                   "H20 Scaling", "H20 Scaling Value", "Calculated R"]
         hdrvals = [("Tapas division", "Spectral Correction"), 
                    (method, "numpy or scipy"), 
                    (kind, "linear,slinear,quadratic,cubic"), 
+                   (b_used, "Airmass scaling parameter"),
                    (h2o_scaling, "Was separate H20 scaling 1 = Yes"), 
                    (h2o_scale_val, "H20 scale value used"), 
-                   (resolution_val, "Resolution used for H20 Convolution")]
+                   (R, "Observation resolution calculated by rule of thumb")]
         tellhdr = False   ### need to correctly get this from obtain telluric
     else:   # Old method 
         # Keys and values for Fits header file        
         hdrkeys = ["Correction", "Tapas Interpolation method", 
-                   "Interpolation kind", "Correction Params A, B", 
-                   "H20 Scaling"]
+                   "Interpolation kind", "B PARAM", 
+                   "H20 Scaling", "Calculated R"]
         hdrvals = [("Tapas division", "Spectral Correction"), 
                    (method, "numpy or scipy"), 
                    (kind, "linear,slinear,quadratic,cubic"), 
-                   (h2o_scaling, "Was separate H20 scaling Done 1 = Yes")]
+                   (b_used, "Airmass scaling parameter"),
+                   (h2o_scaling, "Was separate H20 scaling Done 1 = Yes"), 
+                   (R, "Observation resolution calculated by rule of thumb")]
         tellhdr = False   ### need to correctly get this from obtain telluric
     
     if export:
-        export_correction_2fits(output_filename, wl, I_corr, I, Tell_interp, 
+        export_correction_2fits(output_filename, wl, I_corr, I, tell_used, 
                                 hdr, hdrkeys, hdrvals, tellhdr)
         print("Saved corected telluric spectra to " + str(output_filename))
     else:
