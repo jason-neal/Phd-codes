@@ -20,7 +20,7 @@ import lmfit
 #import GaussianFitting as gf
 import Obtain_Telluric as obt
 from Get_filenames import get_filenames
-from SpectralTools import wav_selector#, wl_interpolation , instrument_convolution
+from SpectralTools import wav_selector, wl_interpolation , instrument_convolution
 
 def divide_spectra(spec_a, spec_b):
     """ Assumes that the spectra have been interpolated to same wavelength step
@@ -257,8 +257,8 @@ def _parser():
     """
     parser = argparse.ArgumentParser(description='Telluric Removal')
     parser.add_argument('fname', help='Input fits file')
-    parser.add_argument('-x', '--export', default=False,
-                        help='Export result to fits file True/False')
+    parser.add_argument('-e', '--export', action='store_true',
+                        help='Export/save results to fits file')
     parser.add_argument('-o', '--output', default=False,
                         help='Ouput Filename')
     parser.add_argument('-t', '--tellpath', default=False,
@@ -267,8 +267,8 @@ def _parser():
                         help='Interpolation order, linear, quadratic or cubic')
     parser.add_argument('-m', '--method', default="scipy",
                         help='Interpolation method numpy or scipy')
-    parser.add_argument("-s", "--show", default=True, 
-                        help="Show plots") #Does not wokwithout display though for some reason
+    parser.add_argument("-s", "--show", action='store_true', 
+                        help="Show plots") # Does not work without a display
     parser.add_argument("-c", "--h2o_scaling", action='store_true',
                         help="Perform separate H20 scaling")
     parser.add_argument("-n", "--new_method", action='store_true',
