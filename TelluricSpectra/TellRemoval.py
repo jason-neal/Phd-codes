@@ -335,9 +335,26 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             non_h20_correct_I = telluric_correction(wl, I, obs_airmass, 
                 tapas_not_h20_data[0], tapas_not_h20_data[1], tapas_airmass)
             # h20 correction and 
-            ## TO DO caluclate the value for R from header
+            
+            #"Resolving Power. Using the rule of thumb equation from the CRIRES manual. 
+            # Check for adaptive optics use.
+            horder_loop = hdr["HIERARCH ESO AOS RTC LOOP HORDER"]   # High order loop on or off
+            lgs_loop = hdr["HIERARCH ESO AOS RTC LOOP LGS"]         # LGS jitter loop on or off
+            loopstate = hdr["HIERARCH ESO AOS RTC LOOP STATE"]      # Loop state, open or closed
+            tiptilt_loop = hdr["HIERARCH ESO AOS RTC LOOP TIPTILT"] # Tip Tilt loop on or off
+            slit_width = hdr["HIERARCH ESO INS SLIT1 WID"]          # Slit width
+            print(loopstate)
+            print(tiptilt_loop)
+            print(type(tiptilt_loop))
+            if any([horder_loop, loopstate,tiptilt_loop]) and loopstate != "OPEN" :
+                print("Adaptive optics was used - Rule of thumb for Resolution is not good enough")
+            else:
+                R = int(100000*0.2 / slit_width)
+            
             h20_corrected_obs, out, outreport = h2o_telluric_correction(wl, non_h20_correct_I,
                 tell_h20_section[0], tell_h20_section[1], R)
+            
+            I_corr = h20_corrected_obs
 
         else:
             # load combined dataset only
@@ -351,9 +368,20 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             # Select section by wavelength
             tapas_all_section = wav_selector(tapas_all_data[0], tapas_all_data[1], wl_lower, wl_upper)
 
-            I_corrected = telluric_correction(wl, I, obs_airmass, 
+            I_corr = telluric_correction(wl, I, obs_airmass, 
                 tapas_all_data[0], tapas_all_data[1], tapas_airmass) 
-            
+        
+        if show:
+            plt.figure() # Corrections
+            plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
+            plt.plot(wl, I_corr, linewidth=2, label=("Corrected spectra"))
+                #plt.plot(wl, tell, label=("Telluric " + label + ", B = {0:.2f}".format(B)))
+            plt.hlines(1, wl[0], wl[-1], "-.")
+            plt.legend(loc="best")
+            plt.title("Telluric Corrections")
+
+            plt.show()
+
     ################## REPLACING this / or if still given different location for tapas files#######
     else:   # old method
 
