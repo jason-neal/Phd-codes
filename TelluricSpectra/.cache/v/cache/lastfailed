@@ -1,0 +1,5 @@
+{
+  "Test_Atmospheric_models.py": true,
+  "Test_BERV_correction_on_tapas.py": true,
+  "test/test_TelluricRemoval.py::test_divide_spectra": true
+}
