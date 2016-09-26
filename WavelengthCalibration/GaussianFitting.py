@@ -156,7 +156,9 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
 
     """
     #print("Params before fit", init_params, type(init_params))
-    if stel is not None:
+    if (stel is not None) & (tell is not None):
+        raise NotImplemented("Need to finish adding this")
+    elif stel is not None:
         #use lambda instead here
         #__ is junk parameter to take the covar returned by curve_fit
         print("init params", init_params, "stellar params", stel)
@@ -265,9 +267,18 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                                                     text="Select Stellar lines to multiply")
                     num_stellar = len(stellar_lines)
                     stellar_params = coords2gaussian_params(stellar_lines, delta_a)
+                # ADD telluric lines to stellar line fit
+                    extra_telluric_lines = get_coords(wl_a_sec, sect_a, wl_b_sec, sect_b, 
+                                                    title="Select Spectral Lines", 
+                                                    points_a=a_coords, 
+                                                    points_b=b_coords, 
+                                                    textloc=(np.median(wl_a_sec), np.max(np.min(sect_a), 0.5)), 
+                                                    text="Select extra telluric lines to add")
+                    num_extra= len(extra_telluric_lines)
+                    extra_telluric_params = coords2gaussian_params(extra_telluric_lines, delta_a)
                 # perform the stellar line fitting version
                     fit_params_a = do_fit(wl_a_sec, sect_a, init_params_a, 
-                                          stel=stellar_params)
+                                          stel=stellar_params, tell=extra_telluric_params)
                 else: # Perform the normal fit
                     num_stellar = 0
                     fit_params_a = do_fit(wl_a_sec, sect_a, init_params_a)
