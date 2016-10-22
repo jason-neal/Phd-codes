@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf8 -*-
 """ Codes for Telluric contamination removal 
     Interpolates telluric spectra to the observed spectra.
@@ -16,6 +16,7 @@ from astropy.io import fits
 import argparse
 import GaussianFitting as gf
 import Obtain_Telluric as obt
+from SpectralTools import wav_selector
 
 def divide_spectra(spec_a, spec_b):
     """ Assumes that the spectra have been interpolated to same wavelength step"""
@@ -66,7 +67,7 @@ def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
 #     return None
 def airmass_scaling(spectra, spec_airmass, obs_airmass):
     """Scale the Telluric spectra to match the airmass of the observation"""
-    B = obs_airmass/spec_airmass
+    B = obs_airmass / spec_airmass
     new_spec = spectra ** B
     return new_spec 
 
@@ -99,11 +100,12 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     Correction_Bs.append(1)
     Correction_tells.append(interped_tell)
     Correction_labels.append("No Airmass B Correction")
-
+ 
     B = obs_airmass/tell_airmass
-    print("Airmass Ratio B = ", B)
+    print("Airmass scaling Ratio B = ", B)
 
-    new_tell = interped_tell ** B
+    #new_tell = interped_tell ** B
+    new_tell = airmass_scaling(interped_tell, tell_airmass, obs_airmass)
     corr_spec = divide_spectra(spec_obs, new_tell) # Divide by telluric spectra
 
     Corrections.append(corr_spec)
@@ -112,18 +114,18 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     Correction_labels.append("Header values B Correction")
 
 
-    Bvals, Blabels = B_minimization(wl_obs, spec_obs, interped_tell, B_init=False)
-    print("Minimised B values")
-    for bval, blabel in zip(Bvals,Blabels):
-        print(blabel + ", B = {0:.3f}".format(bval))
+    #Bvals, Blabels = B_minimization(wl_obs, spec_obs, interped_tell, B_init=False)
+    #print("Minimised B values")
+    #for bval, blabel in zip(Bvals,Blabels):
+    #    print(blabel + ", B = {0:.3f}".format(bval))
        
-        b_tell = interped_tell ** bval
-        b_correction = divide_spectra(spec_obs, b_tell) # Divide by telluric spectra
+    #    b_tell = interped_tell ** bval
+    #    b_correction = divide_spectra(spec_obs, b_tell) # Divide by telluric spectra
         
-        Correction_Bs.append(bval)
-        Corrections.append(b_correction)
-        Correction_tells.append(b_tell)
-        Correction_labels.append(blabel)
+    #    Correction_Bs.append(bval)
+    #    Corrections.append(b_correction)
+    #    Correction_tells.append(b_tell)
+    #    Correction_labels.append(blabel)
 
     #bmin, bminpeaks, bslopes = B_minimization(wl_obs, spec_obs, interped_tell, B_init=False)
     #new_tell = interped_tell ** B
@@ -141,20 +143,21 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     return Corrections, Correction_tells, Correction_Bs, Correction_labels
 
 
-def B_minimization(wl, spec_obs, spec_tell, B_init=False):
+def B_minimization(wl, spec_obs, spec_tell, B_init=False, show=True):
     """
     Find Optimal B that scales the telluric spectra to best match the
     intesity of the observed spectra
+
     """
     blist = np.linspace(0.10, 1.5, 500)
     subtracts = []
     divisions = []
     peak_subtracts = []
     peak_divisions = []
- # Slopediffs = []
-   # peak_slopediffs = []
+    # Slopediffs = []
+    # peak_slopediffs = []
     abs_area = []
-   # area = []
+    # area = []
     std = []        # minimize stdeviation
     std_peaks = []  # minimize std around telluric lines
     std_30kms = []  # values withing the 30kms telluric exclusion window
@@ -176,13 +179,13 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
         corr = spec_obs / (spec_tell**bb)
         peaks_corr = obs_peaks / (tell_peaks**bb)
         
-      #  slopes = corr[1:]-corr[:-1]
-      #  Slopediffs.append(sum(abs(slopes)))
+    #  slopes = corr[1:]-corr[:-1]
+    #  Slopediffs.append(sum(abs(slopes)))
 
-      #  peak_slopes = peaks_corr[1:]-peaks_corr[:-1]
-      #  peak_slopediffs.append(sum(abs(peak_slopes)))
+    #  peak_slopes = peaks_corr[1:]-peaks_corr[:-1]
+    #  peak_slopediffs.append(sum(abs(peak_slopes)))
 
-        # Area around 1
+        # Area around 1    # Sort of measuring the linewidth (should be zero for good correction)
         d_wl = wl[1:]-wl[:-1]
         h = ((corr[1:]+corr[:-1]) / 2.0 ) - 1
         abs_area.append(sum(np.abs(h*d_wl)))
@@ -205,7 +208,8 @@ def B_minimization(wl, spec_obs, spec_tell, B_init=False):
     plt.ylabel("Normalized Scale")
     plt.title("B minimization testing")
     plt.legend()
-    plt.show()
+    if show:
+        plt.show()
 
     #B = blist[diffs.index(min(diffs))]
     B_subtracts = blist[subtracts.index(min(subtracts))]
@@ -236,10 +240,14 @@ def _parser():
                         help='Export result to fits file True/False')
     parser.add_argument('-o', '--output', default=False,
                         help='Ouput Filename')
+    parser.add_argument('-t', '--tellpath', default=False,
+                        help='Path to find the telluric spectra to use.')
     parser.add_argument('-k', '--kind', default="linear",
                         help='Interpolation order, linear, quadratic or cubic')
     parser.add_argument('-m', '--method', default="scipy",
                         help='Interpolation method numpy or scipy')
+    parser.add_argument("-s", "--show", default=True,
+                        help="Show plots") #Does not wokwithout display though for some reason
     args = parser.parse_args()
     return args
 
@@ -279,30 +287,93 @@ def append_hdr(hdr, keys, values ,item=0):
             print(repr(hdr[-2:10]))
     return hdr
 
+def get_observation_averages(homedir):
+    """ Based on arrangement of the Organise IRAF script I have to 
+    clean up IRAF output files mess
+    
+    homedir is the path where the function is being called from where the file is.
+    output:
+        average obs airmass value
+        average obs time value
 
-def main(fname, export=False, output=False, kind="linear", method="scipy"):
+    Uses the list_spectra.txt that is in this directory to open each file and extract values from the headers.
+    *Possibly add extra extensions to the headrer in the future when combining.
+    """
+    Raw_path = homedir[:-13] + "Raw_files/"
+    list_name = "list_spectra.txt"
+
+    Nod_airmass = []
+    Nod_median_time = []
+    with open(list_name, "r") as f:
+        for line in f:
+            fname = line[:-1] + ".fits"
+            hdr = fits.getheader(Raw_path + fname)
+            datetime = hdr["DATE-OBS"]
+            time = datetime[11:19]
+            airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
+            airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
+            Nod_mean_airmass = round((airmass_start + airmass_end) / 2 , 4)
+            Nod_airmass.append(Nod_mean_airmass)
+            Nod_median_time.append(time)
+    
+    print("Observation Nod_airmass ", Nod_airmass)
+    print("Observation Nod_time ", Nod_median_time)
+    return np.mean(Nod_airmass), Nod_median_time
+
+def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy", show=True):
     homedir = os.getcwd()
     data = fits.getdata(fname)
     wl = data["Wavelength"] 
     I = data["Extracted_DRACS"]
     hdr = fits.getheader(fname)
     datetime = hdr["DATE-OBS"]
+
+    # Get airmass for entire observation
     airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
     airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
-    obs_airmass = (airmass_start + airmass_end)/2
-    print("Starting Airmass", airmass_start, "Ending Airmass", airmass_end)
+    obs_airmass = (airmass_start + airmass_end) / 2
+
+
+    print("1st observation Starting Airmass", airmass_start, "\tEnding Airmass", airmass_end)
+    
+    print("\nWorking directory", homedir)
+    if homedir[-13:] is not "Combined_Nods":
+        print("Not running telluric removal from Combined_Nods folder \n Crashing")
+        
+    # Need airmass for the entire observation not just the first nod!!!!!!
+    Rawdir = homedir[:-13] + "Raw_files/"
+    Average_airmass, average_time = get_observation_averages(homedir)
+    """ When using averaged airmass need almost no airmass scalling of model as it is at almost the correct time/airmass"""
+    obs_airmass = Average_airmass
+    print("Average_airmass", Average_airmass, "\nAverage_time", average_time)
+
+
     obsdate, obstime = datetime.split("T")
     obstime, __ = obstime.split(".")
-    tellpath = "/home/jneal/Phd/data/Tapas/"
-    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) 
-    print("tell name", tellname)
+    print("tellpath before", tellpath)
     
+    if tellpath:
+        tellname = obt.get_telluric_name(tellpath, obsdate, obstime) 
+    else:
+        tellpath = "/home/jneal/Phd/data/Tapas/"
+        tellname = obt.get_telluric_name(tellpath, obsdate, obstime) 
+    print("Returned Mathching filenames", tellname)
+    
+    print("tellpath after", tellpath)
+    assert len(tellname) < 2, "Multiple tapas filenames match"
+
+
     tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
+    #print("Telluric Header ", tell_hdr)
     tell_airmass = float(tell_hdr["airmass"])
+    print("Observation Airmass ", obs_airmass)
     print("Telluric Airmass ", tell_airmass)
+    tell_respower = int(float((tell_hdr["respower"])))
+    print("Telluric Resolution Power =", tell_respower)
+    
     wl_lower = np.min(wl/1.0001)
     wl_upper = np.max(wl*1.0001)
-    tell_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
+    tell_data = wav_selector(tell_data[0], tell_data[1], wl_lower, wl_upper)
     
     # Telluric Normalization (use first 50 points below 1.2 as constant continuum)
     I_tell = tell_data[1]
@@ -321,24 +392,33 @@ def main(fname, export=False, output=False, kind="linear", method="scipy"):
     # Now perform the telluric removal
 
     Corrections, Correction_tells, Correction_Bs, Correction_labels = telluric_correct(wl, I, tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
-    plt.figure()  # Tellurics
-    plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
-    for corr, tell, B, label in zip(Corrections, Correction_tells, Correction_Bs, Correction_labels):
-        #plt.plot(wl, corr, "--", label=(label + ", B = {0:.2f}".format(B)))
-        plt.plot(wl, tell, linewidth=2, label=("Telluric " + label + ", B = {0:.3f}".format(B)))
-        plt.plot(wl, np.ones_like(wl), "-.")
-        plt.legend(loc="best")
+    if show:
+        plt.figure()  # Tellurics
+        plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
+        for corr, tell, B, label in zip(Corrections, Correction_tells, Correction_Bs, Correction_labels):
+            #plt.plot(wl, corr, "--", label=(label + ", B = {0:.2f}".format(B)))
+            plt.plot(wl, tell, linewidth=2, label=("Telluric " + label + ", B = {0:.3f}".format(B)))
+            plt.plot(wl, np.ones_like(wl), "-.")
+            plt.legend(loc="best")
+            plt.title("Telluric Scaling with Tapas Resolution power = {}".format(tell_respower))
 
-    plt.figure() # Corrections
-    plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
-    for corr, tell, B, label in zip(Corrections, Correction_tells, Correction_Bs, Correction_labels):
-        plt.plot(wl, corr, linewidth=2, label=(label + ", B = {0:.3f}".format(B)))
-        #plt.plot(wl, tell, label=("Telluric " + label + ", B = {0:.2f}".format(B)))
-        plt.plot(wl, np.ones_like(wl), "-.")
-        plt.legend(loc="best")
+        plt.figure() # Corrections
+        plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
+        for corr, tell, B, label in zip(Corrections, Correction_tells, Correction_Bs, Correction_labels):
+            plt.plot(wl, corr, linewidth=2, label=(label + ", B = {0:.3f}".format(B)))
+            #plt.plot(wl, tell, label=("Telluric " + label + ", B = {0:.2f}".format(B)))
+            plt.plot(wl, np.ones_like(wl), "-.")
+            plt.legend(loc="best")
+            plt.title("Telluric Corrections with tapas Resolution power = {}".format(tell_respower))
 
+        plt.show()
 
-    plt.show()
+    # B corr is almost not needed but include here for now 31/3/16 to make a correction 
+    print(Correction_labels)
+    print(Corrections)
+    I_corr = Corrections[1]  # using B scaling
+    Tell_interp = Correction_tells[1]   
+
     #print("After telluric_correct")
     # plt.figure()
     # plt.plot(wl, I,"k", label="Observed Spectra")
