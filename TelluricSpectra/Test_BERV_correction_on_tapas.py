@@ -3,8 +3,9 @@
 """ This code shows that the tapas correction is equavalent
  to using Pyastronomy helcorr correction and doppler shift functions"""
 import os
-import time
-import datetime
+# import time
+import ephem
+# import datetime
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ from PyAstronomy import pyasl
 
 def ra2deg(ra):
     split = ra.split(":")
-    deg = float(split[0])*15.0 + float(split[1])/4.0 + float(split[2])/240.0 
+    deg = float(split[0])*15.0 + float(split[1])/4.0 + float(split[2])/240.0
     return deg
 
 def dec2deg(dec):
@@ -28,9 +29,9 @@ def dec2deg(dec):
     print(split)
     if float(split[0]) < 0:
         deg = abs(float(split[0])) + (float(split[1]) + (float(split[2])/60) )/60
-        deg *= -1 
+        deg *= -1
     else:
-        deg = float(split[0]) + (float(split[1]) + (float(split[2])/60) )/60 
+        deg = float(split[0]) + (float(split[1]) + (float(split[2])/60) )/60
     return deg
 
 ####### LOAD IN TELLURIC DATA ######
@@ -67,12 +68,9 @@ print("dec decimal", dec_deg)
 
 Time =  NoBervHdr["DATE-OBS"]
 
-Time_time = time.strptime(Time, "%Y/%m/%d %H:%M:%S")
-dt = datetime.datetime(*Time_time[:6])
-jd  = pyasl.asl.astroTimeLegacy.jdcnv(dt)
-jd_red = pyasl.asl.astroTimeLegacy.juldate(dt)
+jd =  ephem.julian_date(Time)
 print("jd tapas", jd)
-print("jd tapas reduced ", jd_red)
+
 # From My book
 obs_alt_manual = 2635
 obs_lat_manual = -24.6275
@@ -90,12 +88,9 @@ print("dec decimal", dec_deg_manual)
 Time_manual = "2012-04-07 00:20:00"
 print("Time_manual", Time_manual)
 
-Time_manual_time = time.strptime(Time_manual, "%Y-%m-%d %H:%M:%S")
-dt_manual = datetime.datetime(*Time_manual_time[:6])
-jd_manual = pyasl.asl.astroTimeLegacy.jdcnv(dt_manual)
-jd_manual_red = pyasl.asl.astroTimeLegacy.juldate(dt_manual)
-print("jd manual", jd_manual)
-print("jd manual", jd_manual_red)
+jd_manual = ephem.julian_date(Time_manual)
+print("JD manual", jd_manual)
+
 
 # Apply corrections
 tapas_barycorr = pyasl.baryCorr(jd, ra_deg, dec_deg, deq=0.0)
@@ -162,6 +157,3 @@ ax = plt.gca()
 ax.get_xaxis().get_major_formatter().set_useOffset(False)
 plt.legend(loc=0)
 plt.show()
-
-
-
