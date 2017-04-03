@@ -5,6 +5,7 @@
 
 import os
 import time
+import pickle
 import logging
 import argparse
 import numpy as np
@@ -50,6 +51,8 @@ def _parser():
                        help='Reference Object with different RV') # The other observation to identify shifted lines
     parser.add_argument('-b', '--berv_corr', default=False,
                        help='Apply Berv corr to plot limits if using berv corrected tapas')
+    parser.add_argument('-r', '--rough', default=True, action="store_false"
+                                          help=" Get rough coordinates from stored pickle file, (if present).")
     # parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
     # parser.add_argument('fname',
     #                    action='store',
@@ -137,7 +140,7 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
     return None
 
 
-def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False):
+def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, rough=True):
     homedir = os.getcwd()
     print("Input name", fname)
     print("Output name", output)
@@ -273,7 +276,13 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
             print('Warning: Model spectrum not available in wavelength range.')
             model = False
 
-    rough_a, rough_b = gf.get_rough_peaks(uncalib_data[0], uncalib_data[1], calib_data[0], calib_data[1])
+    rough_coord_name = fname.split(".fits")[0] + "_rough_cords.pickle"
+    try:
+        rough_a, rough_b = pickle.load(open(rough_coord_name, "rb"))
+    except:
+        rough_a, rough_b = gf.get_rough_peaks(uncalib_data[0], uncalib_data[1], calib_data[0], calib_data[1])
+        pickle.dump((rough_a, rough_b), open(rough_coord_name, "wb"))
+
     rough_x_a = [coord[0] for coord in rough_a]
     rough_x_b = [coord[0] for coord in rough_b]
     if model:
