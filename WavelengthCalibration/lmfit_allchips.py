@@ -12,7 +12,7 @@ import lmfit
 
 
 def residual(params, pixels, wl_data):
-    # Polynomial of form q*x**2 + m*x+b
+    # Polynomial of form q * x**2 + m * x + b
     q = params["q"].value
     m = params["m"].value
     b = params["b"].value
@@ -22,46 +22,46 @@ def residual(params, pixels, wl_data):
 
     # Change spacing to add pixel gaps to chip pixel numbering
     new_pixels = np.array(pixels)
-    chipmap4 = new_pixels > 3*1024
-    chipmap3 = new_pixels > 2*1024
-    chipmap2 = new_pixels > 1*1024
-    new_pixels += Gap3*chipmap4
-    new_pixels += Gap2*chipmap3
-    new_pixels += Gap1*chipmap2
+    chipmap4 = new_pixels > 3 * 1024
+    chipmap3 = new_pixels > 2 * 1024
+    chipmap2 = new_pixels > 1 * 1024
+    new_pixels += Gap3 * chipmap4
+    new_pixels += Gap2 * chipmap3
+    new_pixels += Gap1 * chipmap2
 
-    model = q*new_pixels**2 + m*new_pixels + b
+    model = q * new_pixels**2 + m * new_pixels + b
 
     return (wl_data - model)
 
 
 def residual_individual(params, pixels, wl_data):
-    # Polynomial of form q*x**2 + m*x+b
+    # Polynomial of form q * x**2 + m * x + b
     q = params["q"].value
     m = params["m"].value
     b = params["b"].value
 
     # Change spacing to add pixel gaps to chip pixel numbering
     new_pixels = np.array(pixels)
-    model = q*new_pixels**2 + m*new_pixels + b
+    model = q * new_pixels**2 + m * new_pixels + b
 
     return (wl_data - model)
 
 
 def residual_individaul_depthweighted(params, pixels, wl_data, depths):
-    # Polynomial of form q*x**2 + m*x+b
+    # Polynomial of form q * x**2 + m * x + b
     q = params["q"].value
     m = params["m"].value
     b = params["b"].value
 
     # Change spacing to add pixel gaps to chip pixel numbering
     new_pixels = np.array(pixels)
-    model = q*new_pixels**2 + m*new_pixels + b
+    model = q * new_pixels**2 + m * new_pixels + b
 
     return (wl_data - model) / depths
 
 
 def residual_depthweighted(params, pixels, wl_data, depths):
-    # Polynomial of form q*x**2 + m*x+b
+    # Polynomial of form q * x**2 + m * x + b
     q = params["q"].value
     m = params["m"].value
     b = params["b"].value
@@ -71,27 +71,27 @@ def residual_depthweighted(params, pixels, wl_data, depths):
 
     # Change spacing to add pixel gaps to chip pixel numbering
     new_pixels = np.array(pixels)
-    chipmap4 = new_pixels > 3*1024
-    chipmap3 = new_pixels > 2*1024
-    chipmap2 = new_pixels > 1*1024
-    new_pixels += Gap3*chipmap4
-    new_pixels += Gap2*chipmap3
-    new_pixels += Gap1*chipmap2
+    chipmap4 = new_pixels > 3 * 1024
+    chipmap3 = new_pixels > 2 * 1024
+    chipmap2 = new_pixels > 1 * 1024
+    new_pixels += Gap3 * chipmap4
+    new_pixels += Gap2 * chipmap3
+    new_pixels += Gap1 * chipmap2
 
-    model = q*new_pixels**2 + m*new_pixels + b
+    model = q * new_pixels**2 + m * new_pixels + b
 
     return (wl_data - model) / depths
 
 
 # Load data
-Chipnames = ["Coordinates_CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.txt","Coordinates_CRIRE.2012-04-07T00:08:29.976_2.nod.ms.norm.sum.txt","Coordinates_CRIRE.2012-04-07T00:08:29.976_3.nod.ms.norm.sum.txt","Coordinates_CRIRE.2012-04-07T00:08:29.976_4.nod.ms.norm.sum.txt"]
+Chipnames = ["Coordinates_CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-04-07T00:08:29.976_2.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-04-07T00:08:29.976_3.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-04-07T00:08:29.976_4.nod.ms.norm.sum.txt"]
 PATH = "/home/jneal/Dropbox/PhD/"
 # PATH = "/home/jneal/Dropbox/PhD/"
 # "/home/jneal/Dropbox/PhD/"
-pix1, wlen1, dpth1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
-pix2, wlen2, dpth2 = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
-pix3, wlen3, dpth3 = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
-pix4, wlen4, dpth4 = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
+pix1, wlen1, dpth1 = np.loadtxt(PATH + Chipnames[0], skiprows=1, unpack=True)
+pix2, wlen2, dpth2 = np.loadtxt(PATH + Chipnames[1], skiprows=1, unpack=True)
+pix3, wlen3, dpth3 = np.loadtxt(PATH + Chipnames[2], skiprows=1, unpack=True)
+pix4, wlen4, dpth4 = np.loadtxt(PATH + Chipnames[3], skiprows=1, unpack=True)
 
 #### Plot  telluric line First
 
@@ -102,15 +102,15 @@ from TellRemoval import airmass_scaling
 Path = "/home/jneal/Phd/data/Crires/BDs-DRACS/HD30501-1/Fullreductionr-test-1dec2015/Combined_Nods/"
 
 Chipnames = ["CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_2.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_3.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_4.nod.ms.norm.sum.fits"]
-# Pixel_offsets = [0, Gap1+1024, Gap1+Gap2+2*1024, Gap1+Gap2+Gap3+3*1024]  # Pixel values offset for each chip
+# Pixel_offsets = [0, Gap1 + 1024, Gap1 + Gap2 + 2 * 1024, Gap1 + Gap2 + Gap3 + 3 * 1024]  # Pixel values offset for each chip
 
 ## Telluric
 
-hdr = fits.getheader(Path+Chipnames[0])
+hdr = fits.getheader(Path + Chipnames[0])
 wl_lower = hdr["HIERARCH ESO INS WLEN STRT"]
 datetime = hdr["DATE-OBS"]
 
-wl_upper = fits.getheader(Path+Chipnames[3])["HIERARCH ESO INS WLEN END"]
+wl_upper = fits.getheader(Path + Chipnames[3])["HIERARCH ESO INS WLEN END"]
 
 obsdate, obstime = datetime.split("T")
 obstime, __ = obstime.split(".")
@@ -142,9 +142,9 @@ plt.plot(calib_data[0], calib_data[1], "-", label="Telluric")
 
 
 Test_pxl1 = [pxl for pxl in pix1]
-Test_pxl2 = [pxl + 1*1024 for pxl in pix2]
-Test_pxl3 = [pxl + 2*1024 for pxl in pix3]
-Test_pxl4 = [pxl + 3*1024 for pxl in pix4]
+Test_pxl2 = [pxl + 1 * 1024 for pxl in pix2]
+Test_pxl3 = [pxl + 2 * 1024 for pxl in pix3]
+Test_pxl4 = [pxl + 3 * 1024 for pxl in pix4]
 Test_wl1 = [wl for wl in wlen1]
 Test_wl2 = [wl for wl in wlen2]
 Test_wl3 = [wl for wl in wlen3]
@@ -154,7 +154,7 @@ Test_dpth2 = [d for d in dpth2]
 Test_dpth3 = [d for d in dpth3]
 Test_dpth4 = [d for d in dpth4]
 
-Combined_pxls = np.concatenate((pix1, pix2 + 1*1024, pix3 + 2*1024, pix4 + 3*1024))
+Combined_pxls = np.concatenate((pix1, pix2 + 1 * 1024, pix3 + 2 * 1024, pix4 + 3 * 1024))
 Combined_wls = np.concatenate((wlen1, wlen2, wlen3, wlen4))
 Combined_depths = np.concatenate((dpth1, dpth2, dpth3, dpth4))
 
@@ -235,28 +235,28 @@ print("Chip4 Parameters = {}".format(Chip4_params))
 
 
 
-GapOffsets = [0, Gap1, Gap1+Gap2, Gap1+Gap2+Gap3]
-GapOffsets_depths = [0, Gap1_depths, Gap1_depths+Gap2_depths, Gap1_depths+Gap2_depths+Gap3_depths]
+GapOffsets = [0, Gap1, Gap1 + Gap2, Gap1 + Gap2 + Gap3]
+GapOffsets_depths = [0, Gap1_depths, Gap1_depths + Gap2_depths, Gap1_depths + Gap2_depths + Gap3_depths]
 Test_pixels = [Test_pxl1, Test_pxl2, Test_pxl3, Test_pxl4]
 
 wlmaps = [Chip1_params, Chip2_params, Chip3_params, Chip4_params]
 
 for num, cname in enumerate(Chipnames):
 
-    data = fits.getdata(Path+cname)
+    data = fits.getdata(Path + cname)
     Chip_data = data
-    chip_pixel = np.array(range(1,1025))
-    chip_pixel += num*1024   # pixels of chips to the left
+    chip_pixel = np.array(range(1, 1025))
+    chip_pixel += num * 1024   # pixels of chips to the left
     chip_pixel_gapped = chip_pixel + GapOffsets[num]  # pixels from detector gaps
     chip_pixel_gapped_depths = chip_pixel + GapOffsets_depths[num]
     Chip_wl_individual = np.polyval(wlmaps[num], chip_pixel)
-    plt.plot(Chip_wl_individual, Chip_data, "--", label="Individual Map Chip {}".format(num+1))
+    plt.plot(Chip_wl_individual, Chip_data, "--", label="Individual Map Chip {}".format(num + 1))
 
     Chip_wl_comb = np.polyval(Combined_map, chip_pixel_gapped)
-    plt.plot(Chip_wl_comb, Chip_data, label="Combined Map Chip {}".format(num+1))
+    plt.plot(Chip_wl_comb, Chip_data, label="Combined Map Chip {}".format(num + 1))
 
     Chip_wl_comb_depths = np.polyval(Combined_map_depths, chip_pixel_gapped_depths)
-    plt.plot(Chip_wl_comb_depths, Chip_data, label="Combined depths Map Chip {}".format(num+1))
+    plt.plot(Chip_wl_comb_depths, Chip_data, label="Combined depths Map Chip {}".format(num + 1))
 
 
 

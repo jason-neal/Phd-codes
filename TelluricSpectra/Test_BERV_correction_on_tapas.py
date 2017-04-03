@@ -19,19 +19,19 @@ from PyAstronomy import pyasl
 
 def ra2deg(ra):
     split = ra.split(":")
-    deg = float(split[0])*15.0 + float(split[1])/4.0 + float(split[2])/240.0
+    deg = float(split[0]) * 15.0 + float(split[1]) / 4.0 + float(split[2]) / 240.0
     return deg
 
 def dec2deg(dec):
-	#  degrees ( ° ), minutes ( ' ), and seconds ( " )
-	#convert to degrees in decimal
+    #  degrees ( ° ), minutes ( ' ), and seconds ( " )
+    # convert to degrees in decimal
     split = dec.split(":")
     print(split)
     if float(split[0]) < 0:
-        deg = abs(float(split[0])) + (float(split[1]) + (float(split[2])/60) )/60
+        deg = abs(float(split[0])) + (float(split[1]) + (float(split[2]) / 60) ) / 60
         deg *= -1
     else:
-        deg = float(split[0]) + (float(split[1]) + (float(split[2])/60) )/60
+        deg = float(split[0]) + (float(split[1]) + (float(split[2]) / 60) ) / 60
     return deg
 
 ####### LOAD IN TELLURIC DATA ######
@@ -98,7 +98,7 @@ tapas_barycorr = pyasl.baryCorr(jd, ra_deg, dec_deg, deq=0.0)
 tapas_helcorr = pyasl.helcorr(obs_long, obs_lat, obs_alt, ra_deg, dec_deg, jd, debug=False)
 my_barycorr = pyasl.baryCorr(jd_manual, ra_deg_manual, dec_deg_manual, deq=0.0)
 my_helcorr = pyasl.helcorr(obs_long_manual, obs_lat_manual, obs_alt_manual, ra_deg_manual, dec_deg_manual, jd_manual, debug=False)
-#helcorr calculates the motion of an observer in the direction of a star
+# helcorr calculates the motion of an observer in the direction of a star
 print("Tapas barycorr", tapas_barycorr)
 print("Tapas hellcorr", tapas_helcorr)
 print("My barycorr", my_barycorr)
@@ -113,8 +113,8 @@ plt.plot(Berv_wl, Berv_trans, "k.-", label="Berv Corrected")
 plt.plot(NoBerv_wl, NoBerv_trans, "g.-", label="No Berv")
 plt.plot(wlprime1, NoBerv_trans, "rs-", label="Tapas Values correction")
 plt.plot(wlprime2, NoBerv_trans, "c*-", label="Manual Values correction")
-plt.xlim([2123,2126])
-plt.ylim([.96,1])
+plt.xlim([2123, 2126])
+plt.ylim([.96, 1])
 ax = plt.gca()
 ax.get_xaxis().get_major_formatter().set_useOffset(False)
 plt.legend(loc=0)
@@ -126,8 +126,8 @@ plt.plot(Berv_wl, Berv_trans, "k.-", label="Berv Corrected")
 plt.plot(NoBerv_wl, NoBerv_trans, "g.-", label="No Berv")
 plt.plot(NoBerv_wl, nflux1, "rs-", label="Tapas Values correction shifted")
 plt.plot(NoBerv_wl, nflux2, "c*-", label="Manual Values correction shifted")
-plt.xlim([2123,2126])
-plt.ylim([.96,1])
+plt.xlim([2123, 2126])
+plt.ylim([.96, 1])
 ax = plt.gca()
 ax.get_xaxis().get_major_formatter().set_useOffset(False)
 plt.legend(loc=0)
@@ -139,8 +139,8 @@ plt.plot(Berv_wl, Berv_trans, "k.-", label="Berv Corrected")
 plt.plot(NoBerv_wl, NoBerv_trans, "g.-", label="No Berv")
 plt.plot(NoBerv_wl, nflux1, "cs-", label="Tapas flux shift")
 plt.plot(wlprime1, NoBerv_trans, "rs-", label="Tapas wl shift")
-plt.xlim([2123,2126])
-plt.ylim([.96,1])
+plt.xlim([2123, 2126])
+plt.ylim([.96, 1])
 ax = plt.gca()
 ax.get_xaxis().get_major_formatter().set_useOffset(False)
 plt.legend(loc=0)
@@ -151,8 +151,8 @@ plt.plot(Berv_wl, Berv_trans, "k.-", label="Berv Corrected")
 plt.plot(NoBerv_wl, NoBerv_trans, "g.-", label="No Berv")
 plt.plot(wlprime2, NoBerv_trans, "r*-", label="Manual Wl shift")
 plt.plot(NoBerv_wl, nflux2, "c*-", label="Manual Flux shift")
-plt.xlim([2123,2126])
-plt.ylim([.96,1])
+plt.xlim([2123, 2126])
+plt.ylim([.96, 1])
 ax = plt.gca()
 ax.get_xaxis().get_major_formatter().set_useOffset(False)
 plt.legend(loc=0)

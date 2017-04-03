@@ -169,7 +169,7 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
         # __ is junk parameter to take the covar returned by curve_fit
         print("init params", init_params, "stellar params", stel)
         assert len(stel)%3 is 0, "stel parameters not multiple of 3"
-        stelnum = int(len(stel)/3)  # number of stellar lines
+        stelnum = int(len(stel) / 3)  # number of stellar lines
         print("number of stellar lines ", stelnum)
         init_params = np.concatenate((init_params, stel), axis=0)
         print("appended array with stellar lines", init_params)
@@ -179,7 +179,7 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
         """ Don't need all this as telluric lines are just added"""
         print("init params", init_params, "telluric params", tell)
         assert len(tell)%3 is 0, "Telluric parameters not multiple of 3"
-        tellnum = int(len(tell)/3)  # number of stellar lines
+        tellnum = int(len(tell) / 3)  # number of stellar lines
         print("number of telluric lines ", tellnum)
         init_params = np.concatenate((init_params, tell), axis=0)
         print("appended array with telluric lines", init_params)
@@ -216,7 +216,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
     assert len(AxCoords) is len(BxCoords), "Lenght of Coords do not match"
     for i in range(len(AxCoords)):
         print("A coords Axcoords", AxCoords)
-        print(i," ith value in Axcoords", AxCoords[i])
+        print(i, " ith value in Axcoords", AxCoords[i])
         wl_a_sec, sect_a = slice_percentage(wl_a, spec_a, AxCoords[i])
         wl_b_sec, sect_b = slice_percentage(wl_b, spec_b, BxCoords[i])
 
@@ -228,10 +228,10 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
         auq = upper_quartile(b_copy)
         # print ("upper quartile A", auq, type(auq))
         # print ("upper quartile B", auq, type(auq))
-        sect_a = sect_a/auq
-        sect_b = sect_b/auq
-        # sect_a = sect_a/np.median(sect_a)
-        # sect_b = sect_b/np.median(sect_b)
+        sect_a = sect_a / auq
+        sect_b = sect_b / auq
+        # sect_a = sect_a / np.median(sect_a)
+        # sect_b = sect_b / np.median(sect_b)
 
         while True:   # Was this a good fit
             try:  # RuntimeError of fitting
@@ -239,7 +239,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                 a_coords = get_coords(wl_a_sec, sect_a, wl_b_sec, sect_b,
                                            title="Select Spectra Lines",
                                            textloc= (np.median(wl_a_sec), max(min(sect_a), 0.5)),
-                                           text="Choose lines for calibration", model=model, ref=ref)  # (x,y)'s
+                                           text="Choose lines for calibration", model=model, ref=ref)  # (x, y)'s
                 b_coords = get_coords(wl_b_sec, sect_b, wl_a_sec, sect_a,
                                            title="Select Telluric Lines",
                                            points_b=a_coords,
@@ -310,7 +310,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             except RuntimeError:
                 print("Runtime Error: Fit could not find good parameters" )
                 cont_try = inputer('Would you like to keep trying to fit to this section Y/n?')
-                if cont_try in ['n', 'no','N','No','NO']:
+                if cont_try in ['n', 'no', 'N', 'No', 'NO']:
                     fit_worked = False
                     break
                 else:    # Else try fit points again.
@@ -361,12 +361,12 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                 best_a=best_a_coords, fitcoords_b=fitted_coords_b,
                 best_b=best_b_coords, hor=1)
 
-            for i in range(0,len(fitted_coords_a)):
+            for i in range(0, len(fitted_coords_a)):
                 coord_a = fitted_coords_a[i]
                 coord_b = fitted_coords_b[i]
-                # include = input("Use Peak # " + str(i+1) +" corresponding to" +
-                #                    str([coord_a[0],'pxls', coord_b[0],'nm']) + " y/N?")
-                include = input("Use Peak # {} ".format(i+1) + "corresponding to" +
+                # include = input("Use Peak # " + str(i + 1) +" corresponding to" +
+                #                    str([coord_a[0], 'pxls', coord_b[0], 'nm']) + " y/N?")
+                include = input("Use Peak # {} ".format(i + 1) + "corresponding to" +
                              " [a-{0:.2f}, b-{1:.2f}]? y/N?".format(coord_a[0], coord_b[0]))
                 if include.lower() == "y" or include.lower() == "yes":
                     best_a_coords.append(coord_a[0])
@@ -405,12 +405,12 @@ def func(x, *params):
 
     """
     y = np.ones_like(x)
-    # print("*params inside function", type(params),len(params), params)
+    # print("*params inside function", type(params), len(params), params)
     for i in range(0, len(params), 3):
         ctr = params[i]
-        amp = np.abs(params[i+1]) # always positive so peaks always down
-        wid = params[i+2]
-        y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2)
+        amp = np.abs(params[i + 1])  # always positive so peaks always down
+        wid = params[i + 2]
+        y = y - amp * np.exp(-0.5 * ((x - ctr) / wid)**2)
     y[y < 0] = 0
     return y
 
@@ -434,17 +434,17 @@ def func_with_stellar(x, num_stell, *params):
 
     for i in range(0, len(line_params), 3):
         ctr = line_params[i]
-        amp = abs(line_params[i+1])   # always positive so peaks are downward
-        wid = line_params[i+2]
-        y_line = y_line - amp*np.exp(-0.5*((x-ctr)/wid)**2)  # Add teluric lines
+        amp = abs(line_params[i + 1])   # always positive so peaks are downward
+        wid = line_params[i + 2]
+        y_line = y_line - amp * np.exp(-0.5 * ((x - ctr) / wid)**2)  # Add teluric lines
     for i in range(0, len(stellar_params), 3):
         stel_ctr = stellar_params[i]
-        stel_amp = abs(stellar_params[i+1])  # always positive so peaks are down
-        stel_wid = stellar_params[i+2]
+        stel_amp = abs(stellar_params[i + 1])  # always positive so peaks are down
+        stel_wid = stellar_params[i + 2]
         # Addition of stellar lines
-        y_stel = y_stel - stel_amp*np.exp(-0.5*((x-stel_ctr)/stel_wid)**2)
+        y_stel = y_stel - stel_amp * np.exp(-0.5 * ((x - stel_ctr) / stel_wid)**2)
 
-    y_combined = y_line*y_stel   # multiplication of stellar and telluric lines
+    y_combined = y_line * y_stel   # multiplication of stellar and telluric lines
     y_combined[y_combined < 0] = 0   # limit minimum value to zero
     return y_combined
 
@@ -462,9 +462,9 @@ def func_for_plotting(x, params):
     #    len(params), params)
     for i in range(0, len(params), 3):
         ctr = params[i]
-        amp = np.abs(params[i+1])  # always positive so peaks are always down
-        wid = params[i+2]
-        y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2)
+        amp = np.abs(params[i + 1])  # always positive so peaks are always down
+        wid = params[i + 2]
+        y = y - amp * np.exp(-0.5 * ((x - ctr) / wid)**2)
     y[y < 0] = 0
     return y
 
@@ -482,7 +482,7 @@ def split_telluric_stellar(params, num_stellar):
     output telluric lines, stellar lines
 
     """
-    first_stel = -3*num_stellar  # index of first stellar line (from end)
+    first_stel = -3 * num_stellar  # index of first stellar line (from end)
     line_params = params[:first_stel]
     stellar_params = params[first_stel:]
     # print("line_params in func", line_params)
@@ -495,11 +495,11 @@ def split_telluric_stellar(params, num_stellar):
 
 
 def coords2gaussian_params(coords, delta):
-    """ Convert list of coordinate tuples (x,y) into a numpy gaussian
+    """ Convert list of coordinate tuples (x, y) into a numpy gaussian
     paramater array for the fitting routines. Delta is the mean step
     in the x(wl) coordinate of the data
-    input form [(x1,y1),(x2,y2),...]
-    output form np.array([x1,y1,sig1,x2,y2,sig2....])
+    input form [(x1, y1), (x2, y2), ...]
+    output form np.array([x1, y1, sig1, x2, y2, sig2....])
 
     """
     if delta > 0.5:  # large steps like pixel number
@@ -517,15 +517,15 @@ def coords2gaussian_params(coords, delta):
 
 def params2coords(params):
     """ Turn numpy array of gausian fit parameters into
-    (x,y) tuples of peak coordinates
+    (x, y) tuples of peak coordinates
 
     """
     coords = []
     for i in range(0, len(params), 3):
         xpos = params[i]
-        ypos = params[i+1]
-        std = params[i+2]
-        coords.append((xpos, 1-ypos, std))
+        ypos = params[i + 1]
+        std = params[i + 2]
+        coords.append((xpos, 1 - ypos, std))
     return coords
 
 
@@ -556,10 +556,10 @@ def slice_percentage(wl, spectrum, pos, percent=0.20):
     # print("Span Size", span)
     # print("pos", pos, type(pos))
     # print("percent", percent, type(percent))
-    map1 = wl > (pos - (percent/2)*span)
-    map2 = wl < (pos + (percent/2)*span)
-    wl_sec = wl[map1*map2]
-    spectrum_sec = spectrum[map1*map2]
+    map1 = wl > (pos - (percent / 2) * span)
+    map2 = wl < (pos + (percent / 2) * span)
+    wl_sec = wl[map1 * map2]
+    spectrum_sec = spectrum[map1 * map2]
     return wl_sec, spectrum_sec
 
 
@@ -572,8 +572,8 @@ def slice_spectra(wl, spectrum, low, high):
     # print("upper bound", high)
     map1 = wl > low
     map2 = wl < high
-    wl_sec = wl[map1*map2]
-    spectrum_sec = spectrum[map1*map2]
+    wl_sec = wl[map1 * map2]
+    spectrum_sec = spectrum[map1 * map2]
     return wl_sec, spectrum_sec
 
 
@@ -595,7 +595,7 @@ def inputer(question):
 def plot_fit(wl, Spec, params, init_params=None, title=None):
     fig = plt.figure(figsize=(15, 10))
     # http://stackoverflow.com/questions/332289/how-do-you-change-the-size-of-figures-drawn-with-matplotlib
-    plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95) # remove edge space ?
+    plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)  # remove edge space ?
     plt.plot(wl, Spec, label="Spectrum")
     if init_params is not None:
         guessfit = func_for_plotting(wl, init_params)
@@ -629,7 +629,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95) # remove edge space
     # Add horizontal line at given height
     if hor is not None:
-        ax1.plot(wl_b, hor*np.ones_like(wl_b), "k-.")
+        ax1.plot(wl_b, hor * np.ones_like(wl_b), "k-.")
     ax1.plot(wl_b, spec_b, "k", label="Spectra B", lw=2)
     ax1.set_xlim(np.min(wl_b), np.max(wl_b))
 
@@ -671,9 +671,9 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
             ax2.plot(coord_a[0], coord_a[1], "bo", ms=15, label="Fitted A peak")
             ax1.plot(coord_a[0], coord_a[1], "bo", ms=15, label="Fitted A peak")
             ax1.plot(coord_b[0], coord_b[1], "ro", ms=15, label="Fitted B peak")
-            ax2.text(coord_a[0], coord_a[1]-0.005, " "+str(i+1), fontsize=20, color='blue',
+            ax2.text(coord_a[0], coord_a[1]-0.005, " " + str(i + 1), fontsize=20, color='blue',
                 fontweight='bold')
-            ax1.text(coord_b[0], coord_b[1]-0.005, " "+str(i+1), fontsize=20, color='red',
+            ax1.text(coord_b[0], coord_b[1]-0.005, " " + str(i + 1), fontsize=20, color='red',
                 fontweight='bold')
     elif fita or fitb:
         print("Only one of the fitting coords was provided")
@@ -690,7 +690,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
 
     if textloc and text:
         """ display text on the plot"""
-        print("text location",textloc)
+        print("text location", textloc)
         ax1.text(textloc[0], textloc[1]-0.005, text, fontsize=20, color='red',
                 fontweight='bold', horizontalalignment='center')
         ax2.text(textloc[0], textloc[1]-0.005, text, fontsize=20, color='red',
@@ -710,11 +710,11 @@ def overlay_fitting(wl_a,  spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     fitted_a = func_for_plotting(wl_a, paramsA)
     fitted_b = func_for_plotting(wl_b, paramsB)
 
-    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1,figsize=(12, 8))
+    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(12, 8))
 
     if hor is not None:
-        ax1.plot(wl_a, hor*np.ones_like(wl_a), "k-.")
-        ax2.plot(wl_b, hor*np.ones_like(wl_b), "k-.")
+        ax1.plot(wl_a, hor * np.ones_like(wl_a), "k-.")
+        ax2.plot(wl_b, hor * np.ones_like(wl_b), "k-.")
 
     ax1.plot(wl_a, spec_a, label="Spectra", lw=2)
     ax1.plot(wl_a, fitted_a, label="Fit", lw=2)
@@ -775,10 +775,10 @@ def wavelength_mapping(pixels, wavelengths, order=2):
     """
     wl_map = np.polyfit(pixels, wavelengths, order)
     print("\nwl_map params\t", wl_map)
-    wlvals = np.polyval(wl_map, range(1,1025))
+    wlvals = np.polyval(wl_map, range(1, 1025))
 
-    plt.plot(pixels, wavelengths , 'ko',lw=4, ms=7, label="Points")
-    plt.plot(range(1,1025), wlvals, "-.r", lw=3, label="wl map fit")
+    plt.plot(pixels, wavelengths , 'ko', lw=4, ms=7, label="Points")
+    plt.plot(range(1, 1025), wlvals, "-.r", lw=3, label="wl map fit")
     plt.title("Plot fitted points and different fits")
     plt.legend(loc='best')
     plt.show(block=False)
@@ -812,11 +812,11 @@ if __name__ == "__main__":
     obj = "HD30501-1"
     objpath = Dracspath + obj + "/"
     chip = 0   # for testing
-    hdr, DracsUncalibdata = Get_DRACS(objpath,0)
+    hdr, DracsUncalibdata = Get_DRACS(objpath, 0)
     UnCalibdata_comb = DracsUncalibdata["Combined"]
     # UnCalibdata_noda = DracsUncalibdata["Nod A"]
     # UnCalibdata_nodb = DracsUncalibdata["Nod B"]
-    UnCalibdata = [range(1,1025), UnCalibdata_comb]
+    UnCalibdata = [range(1, 1025), UnCalibdata_comb]
     Calibdata = IOmodule.read_2col(path + "Telluric_spectra_CRIRES_Chip-" +
                                     str( 1) + ".txt")
     # print(Calibdata)
@@ -873,23 +873,23 @@ if __name__ == "__main__":
     # print("Sig", sig)
     # for i in range(len(Coords)):
     # for i in range(0, len(Coords), 2):
-        # init_params += [Coords[i][0], Coords[i][1] ,sig]
+        # init_params += [Coords[i][0], Coords[i][1] , sig]
 
 
     # percent = 0.05
     # Span_A = np.abs(wl_a[-1]-wl_a[0])
     # Span_B = np.abs(wl_b[-1]-wl_b[0])
-    # print("SpanA", Span_A,type(Span_A), "SpanB", Span_B,type(Span_B))
+    # print("SpanA", Span_A, type(Span_A), "SpanB", Span_B, type(Span_B))
 
 
       # # print("wl_a ", type(wl_a))
-      # # print(" coordsA", CoordsA,"type",type(CoordsA))
+      # # print(" coordsA", CoordsA, "type", type(CoordsA))
       # # print("wl_b ", type(wl_b))
-      # # print("CoordsB",CoordsB, "type",type(CoordsB))
-       #  wl_a_up = CoordsA[i] + (percent/2)*Span_A
-       #  wl_a_low = CoordsA[i] - (percent/2)*Span_A
-       #  wl_b_up = CoordsB[i] + (percent/2)*Span_B
-       #  wl_b_low = CoordsB[i] - (percent/2)*Span_B
+      # # print("CoordsB", CoordsB, "type", type(CoordsB))
+       #  wl_a_up = CoordsA[i] + (percent/2) * Span_A
+       #  wl_a_low = CoordsA[i] - (percent/2) * Span_A
+       #  wl_b_up = CoordsB[i] + (percent/2) * Span_B
+       #  wl_b_low = CoordsB[i] - (percent/2) * Span_B
        #  mapA1 = wl_a > wl_a_low
        #  mapA2 = wl_a < wl_a_up
        #  mapB1 = wl_b > wl_b_low
@@ -898,53 +898,53 @@ if __name__ == "__main__":
        #  compb = [wl for wl in wl_b if ( wl>wl_b_low and wl<wl_b_up)]
        #  compA = [ix for (ix, wl) in zip(range(len(wl_a)), wl_a) if ( wl>wl_a_low and wl<wl_a_up)]
        #  compB = [ix for (ix, wl) in zip(range(len(wl_b)), wl_b) if ( wl>wl_b_low and wl<wl_b_up)]
-       # # print("Compa",len(compa),"wl vals",compa)
-       # # print("CompA",len(compA),"ix vals",compA)
-       #  # print("CompB",len(compB),"ix vals",compB)
-       #  # print("Compb",len(compb),"wl vals",compb)
-       # # print("wl_alow",type(wl_a_low),"wl_aup",type(wl_a_up))
-       # # print("wl_blow",type(wl_b_low),"wl_bup",type(wl_b_up))
-       # # print("wl_a_low" , wl_a_low,"wl_a_up" , wl_a_up)
-       # # print("wl_b_low" , wl_b_low,"wl_b_up" , wl_b_up)
+       # # print("Compa", len(compa), "wl vals", compa)
+       # # print("CompA", len(compA), "ix vals", compA)
+       #  # print("CompB", len(compB), "ix vals", compB)
+       #  # print("Compb", len(compb), "wl vals", compb)
+       # # print("wl_alow", type(wl_a_low), "wl_aup", type(wl_a_up))
+       # # print("wl_blow", type(wl_b_low), "wl_bup", type(wl_b_up))
+       # # print("wl_a_low" , wl_a_low, "wl_a_up" , wl_a_up)
+       # # print("wl_b_low" , wl_b_low, "wl_b_up" , wl_b_up)
        # # print("mapA1 =" , np.sum(mapA1), "mapA2 =" , np.sum(mapA2))
-       # # print("mapB1 =" ,np.sum( mapB1), "mapB2 =" , np.sum(mapB2))
-       # # print("type A", type(mapA1*mapA2), "multiplyA", mapA1*mapA2)
-       # # print("type B", type(mapB1*mapB2), "MultiplyB", mapB1*mapB2)
-       #  multiA=mapA1*mapA2
-       #  multiB=mapB1*mapB2
-       #  # print("len multiA", len(multiA),type(multiA))
-       #  # print("len multiB", len(multiB),type(multiB))
+       # # print("mapB1 =" , np.sum( mapB1), "mapB2 =" , np.sum(mapB2))
+       # # print("type A", type(mapA1 * mapA2), "multiplyA", mapA1 * mapA2)
+       # # print("type B", type(mapB1 * mapB2), "MultiplyB", mapB1 * mapB2)
+       #  multiA=mapA1 * mapA2
+       #  multiB=mapB1 * mapB2
+       #  # print("len multiA", len(multiA), type(multiA))
+       #  # print("len multiB", len(multiB), type(multiB))
 
        #  # multiA = multiA.nonzero()
        #  # multiB = multiB.nonzero()
        #  # print("multiA nonzero", multiA)
        #  # print("multiB nonzero", multiB.nonzero())
-       #  # print("type wl_a",type(wl_a),"type spec_a",type(spec_a))
+       #  # print("type wl_a", type(wl_a), "type spec_a", type(spec_a))
        #  # wl_a_sec = wl_a[multiA]
       #   wl_a_sec = wl_a[compA]
       #   # sect_a = spec_a[multiA]
       #   sect_a = spec_a[compA]
-      #   print("len wl_a_sec",len(wl_a_sec),"len sect_a",len(sect_a))
+      #   print("len wl_a_sec", len(wl_a_sec), "len sect_a", len(sect_a))
       #   # wl_b_sec = wl_b[multiB]
       #   wl_b_sec = wl_b[compB]
 
-      #   # print("wl_b", type(wl_b),"wl_b_sec",type(wl_b_sec),"len",len(wl_b_sec))
-      #   print("----SpectB ---",type(spec_b),"len",len(spec_b))
+      #   # print("wl_b", type(wl_b), "wl_b_sec", type(wl_b_sec), "len", len(wl_b_sec))
+      #   print("----SpectB ---", type(spec_b), "len", len(spec_b))
       # # sect_b = spec_b[multiB]
       #   sect_b = spec_b[compB]
-      #   print("sect_b type",type(sect_b))
-      #   # print("sect_a",sect_a,"sect_b",sect_b)
+      #   print("sect_b type", type(sect_b))
+      #   # print("sect_a", sect_a, "sect_b", sect_b)
 
 
 # Old code from extract chunks
 
-    # wl_up = wlpos + (percent/2)*Span
-    # wl_low = wlpos - (percent/2)*Span
+    # wl_up = wlpos + (percent/2) * Span
+    # wl_low = wlpos - (percent/2) * Span
     # map1 = wl > wl_low
 
     # map2 = wl < wl_up
 
-    # multimap = map1*map2
+    # multimap = map1 * map2
     # comp = [ix for (ix, wl) in zip(range(len(wl)), wl) if (wl>wl_low and wl<wl_up)]
     # wl_sec = wl[comp]
     # spectra_sec = spectra[comp]

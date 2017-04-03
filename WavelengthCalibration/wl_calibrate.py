@@ -31,6 +31,7 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s')
 debug = logging.debug
 
+
 # @Gooey(program_name='Plot fits - Easy 1D fits plotting', default_size=(610, 730))
 def _parser():
     """Take care of all the argparse stuff.
@@ -42,17 +43,17 @@ def _parser():
                                     Spectra')
     parser.add_argument('fname', help='Input fits file')
     parser.add_argument('-o', '--output', default=False,
-                        help='Ouput Filename',)
+                        help='Ouput Filename')
     parser.add_argument('-t', '--telluric', default=False,
-                       help='Telluric line Calibrator')
+                        help='Telluric line Calibrator')
     parser.add_argument('-m', '--model', default=False,
-                       help='Stellar Model')
+                        help='Stellar Model')
     parser.add_argument('-r', '--ref', default=False,
-                       help='Reference Object with different RV')  # The other observation to identify shifted lines
+                        help='Reference Object with different RV')  # The other observation to identify shifted lines
     parser.add_argument('-b', '--berv_corr', default=False, action="store_true",
-                       help='Apply Berv corr to plot limits if using berv corrected tapas')
-    parser.add_argument('-r', '--rough', default=True, action="store_false"
-                                          help=" Get rough coordinates from stored pickle file, (if present).")
+                        help='Apply Berv corr to plot limits if using berv corrected tapas')
+    parser.add_argument('-r', '--rough', default=True, action="store_false",
+                        help=" Get rough coordinates from stored pickle file, (if present).")
     # parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
     # parser.add_argument('fname',
     #                    action='store',
@@ -62,12 +63,12 @@ def _parser():
     #                    default=False,
     #                    action='store',
     #                    widget='FileChooser',
-    #                    help='Ouput Filename',)
+    #                    help='Ouput Filename')
     # parser.add_argument('-t', '--telluric',
     #                    default=False,
     #                    action='store',
     #                    widget='FileChooser',
-    #                    help='Telluric line Calibrator',)
+    #                    help='Telluric line Calibrator')
 
     args = parser.parse_args()
     return args
@@ -107,14 +108,14 @@ def export_wavecal_2fits(filename, wavelength, spectrum, pixelpos, hdr, hdrkeys,
             os.rename(filename, filename + "_old")
             thdulist.writeto(filename, output_verify="silentfix")
         elif ans.lower() == "a":
-            thdulist.writeto(filename+"_new", output_verify="silentfix")
+            thdulist.writeto(filename + "_new", output_verify="silentfix")
         else:
             print("Did not append to name or overwrite fits file")
     return None
 
 
 # could make new module for fits handlers like this
-def append_hdr(hdr, keys, values ,item=0):
+def append_hdr(hdr, keys, values , item=0):
     ''' Apend/change parameters to fits hdr,
     can take list or tuple as input of keywords
     and values to change in the header
@@ -133,10 +134,10 @@ def append_hdr(hdr, keys, values ,item=0):
 
 
 def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
-    with open(filename,"w") as f:
+    with open(filename, "w") as f:
         f.write("# Pixels  \t Obs Depths \t Obs STD \t Wavelengths \t Tell depths \t Tell STD\n")
         for pixel, obs_depth, obs_std, wl, wl_depth, wl_std in zip(obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
-           f.write("{} \t {} \t {} \t {} \t {} \t {} \n".format(round(pixel, 4), round(1-obs_depth, 4), round(obs_std, 4), round(wl, 4), round(1-wl_depth, 4), round(wl_std, 4)))
+           f.write("{} \t {} \t {} \t {} \t {} \t {} \n".format(round(pixel, 4), round(1 - obs_depth, 4), round(obs_std, 4), round(wl, 4), round(1 - wl_depth, 4), round(wl_std, 4)))
     return None
 
 
@@ -192,7 +193,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
 
     print("obs data 0 type", type(uncalib_data[0]), "dtype", uncalib_data[0].dtype)
     print("obs data 1 type", type(uncalib_data[1]), "dtype", uncalib_data[1].dtype)
-    print("telluric type", type(tell_data[1]), "dtype", tell_data[0].dtype,tell_data[1].dtype)
+    print("telluric type", type(tell_data[1]), "dtype", tell_data[0].dtype, tell_data[1].dtype)
 
     # Scale telluric lines to airmass
     # ###### this needs t be corrected to middle of hole obs. Not just first observation
@@ -209,7 +210,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         old_wl_upper = wl_upper
         tapas_berv_value = tapas_helcorr(tell_header)
         # Doppler shift the detector limits
-        __ , wlprime = pyasl.dopplerShift(np.array([wl_lower, wl_upper]),np.array([1, 1]), tapas_berv_value[0], edgeHandling=None, fillValue=None)
+        __ , wlprime = pyasl.dopplerShift(np.array([wl_lower, wl_upper]), np.array([1, 1]), tapas_berv_value[0], edgeHandling=None, fillValue=None)
         wl_lower = wlprime[0]
         wl_upper = wlprime[1]
         # print("Old detector limits", [old_wl_lower, old_wl_upper])
@@ -239,7 +240,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     gf.print_fit_instructions()  # Instructions on how to calibrate
     if ref:  # Reference object spectra to possibly identify shifted/blended lines
         I_ref = fits.getdata(ref)
-        w_ref = range(1,1025)
+        w_ref = range(1, 1025)
         maxes = I_ref[(I_ref < 1.2)].argsort()[-50:][::-1]
         I_ref /= np.median(I_ref[maxes])
 
@@ -250,8 +251,8 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         I_mod = fits.getdata(model)
         hdr = fits.getheader(model)
         if 'WAVE' in hdr.keys():
-            w_mod = fits.getdata(modelpath+modelwave)
-            w_mod = w_mod/10.
+            w_mod = fits.getdata(modelpath + modelwave)
+            w_mod = w_mod / 10.
         else:
             w_mod = get_wavelength(hdr)
         # nre = nrefrac(w_mod)  # Correction for vacuum to air (ground based)
@@ -310,7 +311,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     # quartic_calibrated_wl = np.polyval(quartic_map, uncalib_data[0])
 
     fig = plt.figure()
-    plt.subplot(2,1,1)
+    plt.subplot(2, 1, 1)
     plt.plot(calibrated_wl, uncalib_data[1], label="Quad Calibrated spectra")
     plt.plot(cube_calibrated_wl, uncalib_data[1], label="Cube Calibrated spectra")
     # plt.plot(quartic_calibrated_wl, uncalib_data[1], label="Quartic Calibrated spectra")
@@ -323,7 +324,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     plt.ylabel("Normalized Intensity")
     plt.legend()
 
-    plt.subplot(2,1,2)
+    plt.subplot(2, 1, 2)
     plt.plot(uncalib_data[0], calibrated_wl - lin_calibrated_wl, "+", label="Quad Calibrated spectra")
     plt.plot(uncalib_data[0], cube_calibrated_wl - lin_calibrated_wl, "x", label="Cube Calibrated spectra")
     # plt.plot(uncalib_data[0], quartic_calibrated_wl - lin_calibrated_wl, "o", label="Quartic Calibrated spectra")
@@ -370,12 +371,12 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         T_now = str(time.gmtime()[0:6])
 
         hdrkeys = ["Calibration", "CALIB TIME", "Tapas ID number", \
-                   "Number Fitted",'PIXELMAP PARAM1', "PIXELMAP PARAM2", \
+                   "Number Fitted", 'PIXELMAP PARAM1', "PIXELMAP PARAM2", \
                    "PIXELMAP PARAM3", "Tapas Barycenter Correction", \
                    "Tapas wavelength scale"]
         hdrvals = ["DRACS Wavelength Calibration with Tapas spectrum", \
                    (T_now, "Time of Calibration"), \
-                   (tell_header["run_id"],"Tapas unique ID number"), \
+                   (tell_header["run_id"], "Tapas unique ID number"), \
                    (len(good_a), "Number of points in calibration map"), \
                    (wl_map[0], "Squared term"), (wl_map[1], "Linear term"), \
                    (wl_map[2], "Constant term"), (tell_header["barydone"], \
@@ -405,11 +406,11 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     linedepthpath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
     ans = input("Do you want to export the line depths to a file?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
-        with open(linedepthpath + "New_Spectral_linedepths.txt","a") as f:
+        with open(linedepthpath + "New_Spectral_linedepths.txt", "a") as f:
             for peak in peaks_a:
                 print(peak)
                 f.write(str(peak) + "\n")
-        with open(linedepthpath + "New_Telluric_linedepths.txt","a") as f:
+        with open(linedepthpath + "New_Telluric_linedepths.txt", "a") as f:
             for peak in peaks_b:
                 f.write(str(peak) + "\n")
         print("Saved line depths to New_xxxx_linedepths.txt in {}".format(linedepthpath))

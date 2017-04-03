@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-#Tapas Species
-#Test Joining a Separated Tapas sectra
+# Tapas Species
+# Test Joining a Separated Tapas sectra
 # Want to plot all 4 chips to see what liens are present.
 # Not many lines of 02 to calibrate against. only in chip 1 mainly.
 
@@ -15,13 +15,13 @@ from astropy.io import fits
 
 tapas_path = "/home/jason/Phd/data/Tapas/Tapas_march2016/HD30501_1_separated/"
 
-filenames = ["tapas_00000{0}.ipac".format(i+1) for i in range(6)]
+filenames = ["tapas_00000{0}.ipac".format(i + 1) for i in range(6)]
 
 #cr_name = r"/home/jason/MyCodes/Phd-codes/TelluricSpectra/CRIRE.2012-04-07T00%3A08%3A29.976_1.nod.ms.sum.norm.wavecal.fits"
 cr_name = r"/home/jason/Phd/Codes/Phd-codes/TelluricSpectra/CRIRE.2012-04-07T00%3A08%3A29.976_1.nod.ms.sum.norm.wavecal.fits"
 
 cr_data = fits.getdata(cr_name)
-wl = cr_data["Wavelength"] 
+wl = cr_data["Wavelength"]
 I = cr_data["Extracted_DRACS"]
 
 print(filenames)
@@ -34,9 +34,9 @@ for name in filenames:
     airmass = hdr["airmass"]
     ax.plot(data[0], data[1])
 
-#ax2 = plt.twiny(ax)
-ax.legend(["Observation","H2O","O3","O2","CO2","CH4","N2O"], loc=0)
-plt.show()   
+# ax2 = plt.twiny(ax)
+ax.legend(["Observation", "H2O", "O3", "O2", "CO2", "CH4", "N2O"], loc=0)
+plt.show()
 
 
 ax = plt.subplot(111)
@@ -50,5 +50,5 @@ for name in filenames[1:]:
     Combined_spectra *= data[1]
 
 ax.plot(wavelength, Combined_spectra)
-ax.legend(["H2O","O3","O2","CO2","CH4","N2O","Combined"], loc=0)
-plt.show()   
+ax.legend(["H2O", "O3", "O2", "CO2", "CH4", "N2O", "Combined"], loc=0)
+plt.show()

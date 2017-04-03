@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 def gen_map(x, a, b, c, noise):
     #noise_vals = noise * np.random.randn(len(x))
-    ans =  [a*xpos**2 + b*xpos + c + float(noise*np.random.randn(1)) for xpos in x]
+    ans =  [a * xpos**2 + b * xpos + c + float(noise * np.random.randn(1)) for xpos in x]
     return ans
 
 
@@ -21,12 +21,12 @@ Test_pxl2 = [100, 400, 649, 737, 815]
 Test_pxl3 = [50, 200, 549, 937, 915]
 Test_pxl4 = [207, 400, 519, 837, 1015]
 
-Test_pxl2 = [pxl + 1*1024 + Gap1 for pxl in Test_pxl2]
-Test_pxl3 = [pxl + 2*1024 + Gap1 + Gap2 for pxl in Test_pxl3]
-Test_pxl4 = [pxl + 3*1024 + Gap_sum for pxl in Test_pxl4]
+Test_pxl2 = [pxl + 1 * 1024 + Gap1 for pxl in Test_pxl2]
+Test_pxl3 = [pxl + 2 * 1024 + Gap1 + Gap2 for pxl in Test_pxl3]
+Test_pxl4 = [pxl + 3 * 1024 + Gap_sum for pxl in Test_pxl4]
 
-aa = 5/5000000.0    # smaller value
-bb = 80/5000.0   # 80 nm over 4*1024 detectors plus gaps
+aa = 5 / 5000000.0    # smaller value
+bb = 80 / 5000.0   # 80 nm over 4 * 1024 detectors plus gaps
 cc = 2110.0      # nm
 noise = 0.05   # nm
 
@@ -48,7 +48,7 @@ plt.ylabel("Wavelength")
 # plt.legend()
 # plt.show()
 
-max_pixel = 4*1024 + Gap_sum
+max_pixel = 4 * 1024 + Gap_sum
 pixel_span = range(1, max_pixel)
 
 # Fit to the individual chips
@@ -88,19 +88,19 @@ plt.legend(loc=0)
 
 plt.subplot(212)
 plt.plot(pixel_span, np.zeros_like(pixel_span), "k--", label = "")
-plt.plot(pixel_span, Combined_vals-wlvals1, 'b', label = "Combined-Chip1")
-plt.plot(pixel_span, Combined_vals-wlvals2, 'r', label = "Combined-Chip2")
-plt.plot(pixel_span, Combined_vals-wlvals3, 'g', label = "Combined-Chip3")
-plt.plot(pixel_span, Combined_vals-wlvals4, 'm', label = "Combined-Chip4")
+plt.plot(pixel_span, Combined_vals - wlvals1, 'b', label = "Combined-Chip1")
+plt.plot(pixel_span, Combined_vals - wlvals2, 'r', label = "Combined-Chip2")
+plt.plot(pixel_span, Combined_vals - wlvals3, 'g', label = "Combined-Chip3")
+plt.plot(pixel_span, Combined_vals - wlvals4, 'm', label = "Combined-Chip4")
 plt.xlabel("Pixel Position")
 plt.ylabel("Wavelength Difference\nbetween Models (nm)")
 plt.legend(loc=0)
 ax1 = plt.gca()
 ax1.get_yaxis().get_major_formatter().set_useOffset(False)
-plt.ylim([-0.3,0.3])
+plt.ylim([-0.3, 0.3])
 
 # Mark Chip positions
-linepos = [0, 1024, 1024+Gap1, 2*1024+Gap1, 2*1024+Gap1+Gap2, 3*1024+Gap1+Gap2, 3*1024+Gap1+Gap2+Gap3, 4*1024+Gap1+Gap2+Gap3]
+linepos = [0, 1024, 1024 + Gap1, 2 * 1024 + Gap1, 2 * 1024 + Gap1 + Gap2, 3 * 1024 + Gap1 + Gap2, 3 * 1024 + Gap1 + Gap2 + Gap3, 4 * 1024 + Gap1 + Gap2 + Gap3]
 plt.vlines(linepos, -1, 1)
 
 plt.show()
@@ -109,7 +109,7 @@ plt.show()
 
 x = np.array(Combined_pixels)
 y = np.array(Combined_wls)
-yerr = np.array(noise*np.ones_like(x))
+yerr = np.array(noise * np.ones_like(x))
 # print("x", x)
 # print("y", y)
 
@@ -131,16 +131,16 @@ X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 # extract from X the parameters m and b
 b, m, q = X
 
-print('b= {} +- {}'.format(b, np.sqrt(cov2[0,0])))
-print('m= {} +- {}'.format(m, np.sqrt(cov2[1,1])))
-print('q= {} +- {}'.format(q, np.sqrt(cov2[2,2])))
+print('b= {} +- {}'.format(b, np.sqrt(cov2[0, 0])))
+print('m= {} +- {}'.format(m, np.sqrt(cov2[1, 1])))
+print('q= {} +- {}'.format(q, np.sqrt(cov2[2, 2])))
 
 # plot the data (with errorbars) and the best-fit line
 plt.figure()
 plt.errorbar(x, y, yerr=noise, fmt='o')
 
 xx = np.linspace(min(x), max(x))
-plt.plot(xx, q*xx**2 + m*xx + b, '-', label="Matrix LR")
+plt.plot(xx, q * xx**2 + m * xx + b, '-', label="Matrix LR")
 plt.title("Matrix multiplication")
 plt.plot(pixel_span, Combined_vals, 'k', label="PolyVal Combined")
 plt.legend()
@@ -168,10 +168,10 @@ X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 # extract from X the parameters m and b
 b3, m3, q3 , r3 = X
 
-print('b= {} +- {}'.format(b3, np.sqrt(cov2[0,0])))
-print('m= {} +- {}'.format(m3, np.sqrt(cov2[1,1])))
-print('q= {} +- {}'.format(q3, np.sqrt(cov2[2,2])))
-print('r= {} +- {}'.format(r3, np.sqrt(cov2[3,3])))
+print('b= {} +- {}'.format(b3, np.sqrt(cov2[0, 0])))
+print('m= {} +- {}'.format(m3, np.sqrt(cov2[1, 1])))
+print('q= {} +- {}'.format(q3, np.sqrt(cov2[2, 2])))
+print('r= {} +- {}'.format(r3, np.sqrt(cov2[3, 3])))
 
 # plot the data (with errorbars) and the best-fit line
 plt.figure()
@@ -180,14 +180,14 @@ plt.errorbar(x, y, yerr=noise, fmt='o')
 
 # xx = np.linspace(min(x), max(x))
 xx = np.array(pixel_span)
-yy = r3*xx**3 + q3*xx**2 + m3*xx + b3
+yy = r3 * xx**3 + q3 * xx**2 + m3 * xx + b3
 plt.plot(xx, yy, '-', label="Matrix LR")
 plt.title("Matrix multiplication 3rd order ")
 plt.plot(pixel_span, Combined_vals, 'k', label="PolyVal Combined")
 plt.legend()
 
 plt.subplot(212)
-plt.plot(pixel_span, yy-Combined_vals)
+plt.plot(pixel_span, yy - Combined_vals)
 plt.title("Difference between x**3 term and x**2 fits")
 plt.show()
 

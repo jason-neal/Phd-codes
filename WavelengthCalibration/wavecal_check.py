@@ -24,9 +24,9 @@ import Obtain_Telluric as obt
 cwd = os.getcwd() + "/"
 
 # get files
-crires_files = get_filenames(cwd, "CRIRE.*" , "*norm.sum.wavecal.fits*")
+crires_files = get_filenames(cwd, "CRIRE.*", "*norm.sum.wavecal.fits*")
 
-tapas_file = get_filenames(cwd, "tapas_*" , "*_ReqId_10_R*")
+tapas_file = get_filenames(cwd, "tapas_*", "*_ReqId_10_R*")
 
 # Extract tapas data
 tapas_data, tapas_hdr = obt.load_telluric(cwd, tapas_file[0])
@@ -42,7 +42,7 @@ for crires_name in crires_files:
     label = "Detector " + crires_name[30]   # Chip # from the filename
     plt.plot(Obs_data["Wavelength"], Obs_data["Extracted_DRACS"], label=label)
 
-plt.legend(loc=0) 	# best legend location
+plt.legend(loc=0)  # best legend location
 plt.xlabel("Wavelength (nm)")
 plt.ylabel("Flux/Transmittance")
 plt.title("Wavelength Calibration check for {0}".format(cwd.split("/")[7]))
