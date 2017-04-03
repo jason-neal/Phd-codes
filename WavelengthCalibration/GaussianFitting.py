@@ -51,7 +51,7 @@ def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     First run through of peaks in spectra
 
     """
-    textloc_a = (np.median(wl_a), max([min(spec_a), 0.7]))
+    textloc_a = (np.median(wl_a), np.max([np.min(spec_a), 0.7]))
     text_a = "Select Spectral regions/lines for finer calibration fitting"
     text_b = "Select matching Telluric regions/lines for finer calibration fitting"
 
@@ -270,7 +270,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                                                     title="Select Spectral Lines",
                                                     points_a=a_coords,
                                                     points_b=b_coords,
-                                                    textloc=(np.median(wl_a_sec), np.max(np.min(sect_a), 0.5)),
+                                                    textloc=(np.median(wl_a_sec), np.max([np.min(sect_a), 0.5])),
                                                     text="Select Stellar lines to multiply")
                     num_stellar = len(stellar_lines)
                     stellar_params = coords2gaussian_params(stellar_lines, delta_a)
@@ -279,7 +279,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                                                     title="Select Spectral Lines",
                                                     points_a=a_coords,
                                                     points_b=b_coords,
-                                                    textloc=(np.median(wl_a_sec), np.max(np.min(sect_a), 0.5)),
+                                                    textloc=(np.median(wl_a_sec), np.max([np.min(sect_a), 0.5])),
                                                     text="Select extra telluric lines to add")
                     num_extra= len(extra_telluric_lines)
                     extra_telluric_params = coords2gaussian_params(extra_telluric_lines, delta_a)
