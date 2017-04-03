@@ -26,6 +26,10 @@ from Tapas_Berv_corr import tapas_helcorr
 from PyAstronomy import pyasl
 
 
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s')
+debug = logging.debug
+
 # @Gooey(program_name='Plot fits - Easy 1D fits plotting', default_size=(610, 730))
 def _parser():
     """Take care of all the argparse stuff.
@@ -139,6 +143,11 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     print("Output name", output)
 
     data = fits.getdata(fname)
+    if data.shape[0] == 3:   # used extras
+        debug(data.shape)
+        data = data[0][0]
+        debug(data.shape)
+        debug(data)
 
     test0 = ".ms.norm.comb.fits" in fname  # from python combination
     test1 = ".ms.sum.norm.fits" in fname

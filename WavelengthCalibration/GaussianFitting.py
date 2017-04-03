@@ -14,11 +14,12 @@ from __future__ import division
 import copy
 import math
 import numpy as np
+from logging import debug
 # import scipy as sp
 # from Get_filenames import get_filenames
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
-
+from debug_utils import pv
 import IOmodule
 from Gaussian_fit_testing import Get_DRACS
 
@@ -160,7 +161,9 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
     """
     # print("Params before fit", init_params, type(init_params))
     if (stel is not None) & (tell is not None):
-        raise NotImplemented("Need to finish adding this")
+        debug(pv("stel"))
+        debug(pv("tell"))
+        raise NotImplementedError("Need to finish adding this")
     elif stel is not None:
         # use lambda instead here
         # __ is junk parameter to take the covar returned by curve_fit
@@ -531,13 +534,16 @@ def upper_quartile(nums):
     nums.sort() # < Sort the list in ascending order
     try:
         high_mid = (len(nums) - 1) * 0.75
+        debug(pv("high_mid"))
         upq = nums[high_mid]
-    except TypeError:   # <  There were an even amount of values
+        debug(pv("upq"))
+    except (TypeError, IndexError):   # <  There were an even amount of values
         # Make sure to type results of math.floor/ceil to int for use in list indices
         ceil = int(math.ceil(high_mid))
         floor = int(math.floor(high_mid))
         upq = (nums[ceil] + nums[floor]) / 2
         # print("upper quartile value", uq)
+        debug(pv("upq"))
     return upq
 
 
