@@ -5,6 +5,7 @@
 
 import os
 import time
+import logging
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -200,6 +201,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     ### Air wavelengths
     # Convert limits if using air wavelengths
     if tell_header["WAVSCALE"] == "air":
+        logging.warning("Using Air Wavelengths")
         # vac2air on the crires limits
         #print("Using AIR wavelength scale so changing wl limits")
         wl_lower_vac = wl_lower
