@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf8 -*-
+#-*- coding: utf8 -*-
 
 from __future__ import division
 from astropy.io import fits
@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 import scipy.optimize as opt
 
+
 def onclick(event):
     global ix, iy, coords
     # Disconnect after right click
@@ -25,14 +26,15 @@ def onclick(event):
     print("Click position", [ix, iy])
     return
 
+
 def func(x, *params):
-#""" Function to generate the multiple gaussian profiles.
+# """ Function to generate the multiple gaussian profiles.
 #    Adapted from http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python """
     y = np.ones_like(x)
     for i in range(0, len(params), param_nums):
-        #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
+        # print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
         ctr = params[i]
-        amp = abs(params[i+1]) #always positive so peaks are always downward
+        amp = abs(params[i+1]) # always positive so peaks are always downward
         wid = params[i+2]
         y = y - amp * np.exp( -0.5 * ((x - ctr)/wid)**2)
     return y
@@ -43,9 +45,9 @@ def func4(x, *params):
     y = np.ones_like(x)
     global param_nums
     for i in range(0, len(params), param_nums):
-        #print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
+        # print("params", params, "length", len(params), "range",range(0, len(params), 3)," i", i)
         ctr = params[i]
-        amp = abs(params[i+1]) #always positive so peaks are always downward
+        amp = abs(params[i+1]) # always positive so peaks are always downward
         wid = params[i+2]
         if param_nums == 4: # doesn't work well
             vert = params[i+3]
@@ -54,7 +56,6 @@ def func4(x, *params):
         else:
             y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2)
     return y
-
 
 
 def Get_DRACS(filepath, chip):
@@ -67,6 +68,7 @@ def Get_DRACS(filepath, chip):
     data = fits.getdata(filepath + filename[0])
     return hdr, data
 
+
 def RV_Calc(Lambda, deltalambda):
     """ Calcualte the Radial velocity associated to an error in wavelength calibrations"""
     c = 299792458 # Speed of Light in m/s
@@ -75,14 +77,13 @@ def RV_Calc(Lambda, deltalambda):
     return Verror
 
 
-
 # def FittingLines(WLA,SpecA,CoordsA,WLB,SpecB,CoordsB):
 #    # plot 5% of spectra either side of each spectra
 #     BestCoordsA, BestCoordsB = [],[]
 #     Len_A = len(SpecA)
 #     Len_B = len(SpecB)
 #     assert len(CoordsA) == len(CoordsB)
-#     #for i in range(len(CoordsA)):
+#     # for i in range(len(CoordsA)):
 #     mapA = [WLA < CoordsA[i] + prcnt/2*Len_A and WLA > CoordsA[i] - prcnt/2*Len_A ]
 #     mapB = [WLB < CoordsB[i] + prcnt/2*Len_B and WLB > CoordsB[i] - prcnt/2*Len_B ]
 
@@ -104,7 +105,7 @@ def RV_Calc(Lambda, deltalambda):
 #         pass
 #     else:
 
-#     #perform the normal fit
+#     # perform the normal fit
 #         pass
 #     # ask if line fits were good.
 #     # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
@@ -115,21 +116,11 @@ def RV_Calc(Lambda, deltalambda):
 #     return BestCoordsA, BestCoordsB
 
 
-
-
-
-
-
-
-
-
-
-
 if __name__=="__main__":
 
-    #path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
+    # path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
     path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
-    #path = "C:/Users/Jason/Documents/Phd/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
+    # path = "C:/Users/Jason/Documents/Phd/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
     global param_nums
     param_nums = 3  # 4 does not work as well
 
@@ -148,19 +139,16 @@ if __name__=="__main__":
 
         UnCalibdata = [range(1024), UnCalibdata_comb]
 
-
-
         # Need to get proper telluric lines from the folders for each observation
 
         # Orignal way I tested this
-        #UnCalibdata = IOmodule.read_2col(path + "HD30501-1_DRACS_Blaze_Corrected_spectra_chip-" + str(chip + 1) + ".txt")
+        # UnCalibdata = IOmodule.read_2col(path + "HD30501-1_DRACS_Blaze_Corrected_spectra_chip-" + str(chip + 1) + ".txt")
         Calibdata = IOmodule.read_2col(path + "Telluric_spectra_CRIRES_Chip-" + str(chip + 1) + ".txt")
 
-        #plt.plot(UnCalibdata)
-        #plt.plot(Calibdata[1],"g")
-        #plt.title("Test of new combined nods fits")
-        #plt.show()
-
+        # plt.plot(UnCalibdata)
+        # plt.plot(Calibdata[1],"g")
+        # plt.title("Test of new combined nods fits")
+        # plt.show()
 
         Goodfit = False # for good line fits
         while True:
@@ -174,7 +162,7 @@ if __name__=="__main__":
             ax1.set_xlabel('Wavelength (nm)')
             ax1.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
 
-            ax2.plot(UnCalibdata[0],UnCalibdata[1],'r',label="UnCalib")   #-0.03*np.ones_like(UnCalibdata[1])
+            ax2.plot(UnCalibdata[0],UnCalibdata[1],'r',label="UnCalib")   # -0.03*np.ones_like(UnCalibdata[1])
             ax2.set_xlabel('Pixel vals')
             ax2.set_ylabel('Normalized ADU')
             ax2.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
@@ -209,7 +197,7 @@ if __name__=="__main__":
                 print("coords found for second plot", coords)
                 coords_wl = coords
                 print("coords lengths","wl",len(coords_wl), "pxl", len(coords_pxl))
-                #assert len(coords_wl) == len(coords_pxl), " Choosen points were not the same so retry"
+                # assert len(coords_wl) == len(coords_pxl), " Choosen points were not the same so retry"
                 if len(coords_wl) == len(coords_pxl):
                     break  # continue on outside while loop
 
@@ -220,14 +208,14 @@ if __name__=="__main__":
                 cal_xpos.append(tup[0])
                 cal_ypos.append(1-tup[1])
 
-            #ratio = (xpos - np.min(UnCalibdata)) / (np.max(UnCalibdata) - np.min(UnCalibdata))
+            # ratio = (xpos - np.min(UnCalibdata)) / (np.max(UnCalibdata) - np.min(UnCalibdata))
             print("xpositions", xpos)
             print("y positions", ypos)
             print("cal_x wl positions", cal_xpos)
             print("cal y pos", cal_ypos)
 
-            #cal_xpos = ratio * (np.max(Calibdata[0])-np.min(Calibdata[0])) + np.min(Calibdata[0])
-            #print("calibration xpos cal_xpos", cal_xpos)
+            # cal_xpos = ratio * (np.max(Calibdata[0])-np.min(Calibdata[0])) + np.min(Calibdata[0])
+            # print("calibration xpos cal_xpos", cal_xpos)
             """ # cal_xpos and xpos are the xpostions to try fit
             # ypos are the amplitudes
             # sig = 5?
@@ -254,8 +242,8 @@ if __name__=="__main__":
             print("init_params_calib", init_params_calib)
             print("init_params_uncalib", init_params_uncalib)
 
-            #leastsq_uncalib, covar = opt.curve_fit(make_mix(len(ypos)),UnCalibdata[0],UnCalibdata[1],params_uncalib)
-            #leastsq_calib, covar = opt.curve_fit(make_mix(len(ypos)),Calibdata[0],Calibdata[1],params_calib)
+            # leastsq_uncalib, covar = opt.curve_fit(make_mix(len(ypos)),UnCalibdata[0],UnCalibdata[1],params_uncalib)
+            # leastsq_calib, covar = opt.curve_fit(make_mix(len(ypos)),Calibdata[0],Calibdata[1],params_calib)
 
             fit_params_uncalib = []
             fit_params_calib = []
@@ -276,10 +264,10 @@ if __name__=="__main__":
                 for par in range(param_nums):
                     fit_params_uncalib.append(this_fit_uncalib[par])
                     fit_params_calib.append(this_fit_calib[par])
-                #leastsq_uncalib, covar = opt.curve_fit(func,UnCalibdata[0],UnCalibdata[1], params_uncalib)
-                #leastsq_calib, covar_cal = opt.curve_fit(func,Calibdata[0],Calibdata[1], params_calib)
+                # leastsq_uncalib, covar = opt.curve_fit(func,UnCalibdata[0],UnCalibdata[1], params_uncalib)
+                # leastsq_calib, covar_cal = opt.curve_fit(func,Calibdata[0],Calibdata[1], params_calib)
 
-            print("fit params individual", fit_params_uncalib, fit_params_calib) #, "covar", covar)
+            print("fit params individual", fit_params_uncalib, fit_params_calib) # , "covar", covar)
             print("init_params_uncalib", init_params_uncalib)
 
             Fitted_uncalib = func(UnCalibdata[0], *fit_params_uncalib)
@@ -313,14 +301,14 @@ if __name__=="__main__":
                 Reply = raw_input(" Is this a good fit, y/n?")
             except:
                 pass
-            #try:
-            #    Reply = input(" Is this a good fit, y/n?")  #python 3.4
-            #except:
+            # try:
+            #    Reply = input(" Is this a good fit, y/n?")  # python 3.4
+            # except:
             #    pass
             if Reply == "y":
                 print("Good fit found")
                 break
-            #Goodfit = input(" Is this a good fit")  # python 3
+            # Goodfit = input(" Is this a good fit")  # python 3
         # after good fit
 
         #### pixel map creation
@@ -334,7 +322,7 @@ if __name__=="__main__":
         plt.ylabel("Wavelength")
         plt.xlabel("Pixel position")
 
-        #plt.plot([min(pixel_pos), max(pixel_pos)],[min(wl_pos), max(wl_pos)], "k")
+        # plt.plot([min(pixel_pos), max(pixel_pos)],[min(wl_pos), max(wl_pos)], "k")
         # need to fit a linear fit to this from star to end values
 
         # create wavelenght map
@@ -358,7 +346,7 @@ if __name__=="__main__":
         lin_pointvals = np.polyval(linfit, pixel_pos)
         quad_pointvals = np.polyval(quadfit, pixel_pos)
 
-        #plot differences in points from the fits
+        # plot differences in points from the fits
         diff_lin = lin_pointvals-wl_pos
         diff_quad = quad_pointvals-wl_pos
         std_diff_lin = np.std(diff_lin)
@@ -398,9 +386,9 @@ if __name__=="__main__":
 
         fig = plt.figure()
         fig.add_subplot(111)
-        #ax2 = ax1.twiny()
+        # ax2 = ax1.twiny()
         plt.plot(Calibdata[0], Calibdata[1], label="Telluric")
-        #plt.set_ylabel('Transmittance')
+        # plt.set_ylabel('Transmittance')
         plt.xlabel('Wavelength (nm)')
         plt.xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
         plt.plot(Calibrated_lin,UnCalibdata[1], 'r', label="Lin Caibrated Spectrum")

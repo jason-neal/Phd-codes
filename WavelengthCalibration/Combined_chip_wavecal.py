@@ -4,10 +4,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def gen_map(x, a, b, c, noise):
     #noise_vals = noise * np.random.randn(len(x))
     ans =  [a*xpos**2 + b*xpos + c + float(noise*np.random.randn(1)) for xpos in x]
     return ans
+
 
 # Pixel gaps Brogi et al 2015
 Gap1 = 282
@@ -43,8 +45,8 @@ ax1 = plt.gca()
 ax1.get_yaxis().get_major_formatter().set_useOffset(False)
 plt.xlabel("Pixel Position")
 plt.ylabel("Wavelength")
-#plt.legend()
-#plt.show()
+# plt.legend()
+# plt.show()
 
 max_pixel = 4*1024 + Gap_sum
 pixel_span = range(1, max_pixel)
@@ -103,16 +105,13 @@ plt.vlines(linepos, -1, 1)
 
 plt.show()
 
-
-
-
 #  Try fitting with matrix multiplication
 
 x = np.array(Combined_pixels)
 y = np.array(Combined_wls)
 yerr = np.array(noise*np.ones_like(x))
-#print("x", x)
-#print("y", y)
+# print("x", x)
+# print("y", y)
 
 ## least-squares solution
 # build the matrix A (you can use the np.vstack function)
@@ -151,7 +150,7 @@ plt.show()
 print("They return the equivalent results")
 
 
- #Third order regression
+ # Third order regression
 print("adding x**3 term ")
 A = np.vstack((np.ones_like(x), x, x**2, x**3)).T
 
@@ -179,7 +178,7 @@ plt.figure()
 plt.subplot(211)
 plt.errorbar(x, y, yerr=noise, fmt='o')
 
-#xx = np.linspace(min(x), max(x))
+# xx = np.linspace(min(x), max(x))
 xx = np.array(pixel_span)
 yy = r3*xx**3 + q3*xx**2 + m3*xx + b3
 plt.plot(xx, yy, '-', label="Matrix LR")

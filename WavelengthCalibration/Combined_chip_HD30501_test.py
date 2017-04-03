@@ -4,10 +4,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def gen_map(x, a, b, c, noise):
     #noise_vals = noise * np.random.randn(len(x))
     ans =  [a*xpos**2 + b*xpos + c + float(noise*np.random.randn(1)) for xpos in x]
     return ans
+
 
 # Pixel gaps Brogi et al 2015
 Gap1 = 282
@@ -17,30 +19,30 @@ Gap_sum = Gap1 + Gap2 + Gap3
 
 Chipnames = ["Coordinates_CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.txt","Coordinates_CRIRE.2012-04-07T00:08:29.976_2.nod.ms.norm.sum.txt","Coordinates_CRIRE.2012-04-07T00:08:29.976_3.nod.ms.norm.sum.txt","Coordinates_CRIRE.2012-04-07T00:08:29.976_4.nod.ms.norm.sum.txt"]
 PATH = "/home/jneal/Dropbox/PhD/"
-#PATH = "/home/jneal/Dropbox/PhD/"
-#"/home/jneal/Dropbox/PhD/"
+# PATH = "/home/jneal/Dropbox/PhD/"
+# "/home/jneal/Dropbox/PhD/"
 pix1, wlen1, dpth1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
 pix2, wlen2, dpth2 = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
 pix3, wlen3, dpth3 = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
 pix4, wlen4, dpth4 = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
 while False:
 	pass
-	#Test_pxl1 = [70, 200, 549, 937, 1015]
-	#Test_pxl2 = [100, 400, 649, 737, 815]
-	#Test_pxl3 = [50, 200, 549, 937, 915]
-	#Test_pxl4 = [207, 400, 519, 837, 1015]
+	# Test_pxl1 = [70, 200, 549, 937, 1015]
+	# Test_pxl2 = [100, 400, 649, 737, 815]
+	# Test_pxl3 = [50, 200, 549, 937, 915]
+	# Test_pxl4 = [207, 400, 519, 837, 1015]
 
-	#Test_pxl2 = [pxl + 1*1024 + Gap1 for pxl in Test_pxl2]
-	#Test_pxl3 = [pxl + 2*1024 + Gap1 + Gap2 for pxl in Test_pxl3]
-	#Test_pxl4 = [pxl + 3*1024 + Gap_sum for pxl in Test_pxl4]
+	# Test_pxl2 = [pxl + 1*1024 + Gap1 for pxl in Test_pxl2]
+	# Test_pxl3 = [pxl + 2*1024 + Gap1 + Gap2 for pxl in Test_pxl3]
+	# Test_pxl4 = [pxl + 3*1024 + Gap_sum for pxl in Test_pxl4]
 
-	#aa = 5/5000000.0    # smaller value
-	#bb = 80/5000.0   # 80 nm over 4*1024 detectors plus gaps
+	# aa = 5/5000000.0    # smaller value
+	# bb = 80/5000.0   # 80 nm over 4*1024 detectors plus gaps
 	## noise = 0.05   # nm
 
-	##Test_wl2 = gen_map(Test_pxl2, aa, bb, cc, noise)
-	#Test_wl3 = gen_map(Test_pxl3, aa, bb, cc, noise)
-	#Test_wl4 = gen_map(Test_pxl4, aa, bb, cc, noise)
+	## Test_wl2 = gen_map(Test_pxl2, aa, bb, cc, noise)
+	# Test_wl3 = gen_map(Test_pxl3, aa, bb, cc, noise)
+	# Test_wl4 = gen_map(Test_pxl4, aa, bb, cc, noise)
 
 Test_pxl1 = [pxl for pxl in pix1]
 Test_pxl2 = [pxl + 1*1024 + Gap1 for pxl in pix2]
@@ -61,8 +63,8 @@ ax1 = plt.gca()
 ax1.get_yaxis().get_major_formatter().set_useOffset(False)
 plt.xlabel("Pixel Position")
 plt.ylabel("Wavelength")
-#plt.legend()
-#plt.show()
+# plt.legend()
+# plt.show()
 
 max_pixel = 4*1024 + Gap_sum
 pixel_span = range(1, max_pixel)
@@ -126,16 +128,13 @@ plt.vlines(linepos, -1, 1)
 
 plt.show()
 
-
-
-
 #  Try fitting with matrix multiplication
 
 x = np.array(Combined_pixels)
 y = np.array(Combined_wls)
 yerr = np.array(noise*np.ones_like(x))
-#print("x", x)
-#print("y", y)
+# print("x", x)
+# print("y", y)
 
 ## least-squares solution
 # build the matrix A (you can use the np.vstack function)
@@ -174,7 +173,7 @@ plt.show()
 print("They return the equivalent results")
 
 
- #Third order regression
+ # Third order regression
 print("adding x**3 term ")
 A = np.vstack((np.ones_like(x), x, x**2, x**3)).T
 
@@ -202,7 +201,7 @@ plt.figure()
 plt.subplot(211)
 plt.errorbar(x, y, yerr=noise, fmt='o')
 
-#xx = np.linspace(min(x), max(x))
+# xx = np.linspace(min(x), max(x))
 xx = np.array(pixel_span)
 yy = r3*xx**3 + q3*xx**2 + m3*xx + b3
 plt.plot(xx, yy, '-', label="Matrix LR")

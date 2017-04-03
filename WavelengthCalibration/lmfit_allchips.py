@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #lmfit_allchips.py
 
-#Non-Linear Wavelength Mapping:
+# Non-Linear Wavelength Mapping:
 
 import sys
 import matplotlib.pyplot as plt
@@ -9,6 +9,7 @@ import numpy as np
 from astropy.io import fits
 from lmfit import minimize, Parameters
 import lmfit
+
 
 def residual(params, pixels, wl_data):
     # Polynomial of form q*x**2 + m*x+b
@@ -32,6 +33,7 @@ def residual(params, pixels, wl_data):
 
     return (wl_data - model)
 
+
 def residual_individual(params, pixels, wl_data):
     # Polynomial of form q*x**2 + m*x+b
     q = params["q"].value
@@ -44,6 +46,7 @@ def residual_individual(params, pixels, wl_data):
 
     return (wl_data - model)
 
+
 def residual_individaul_depthweighted(params, pixels, wl_data, depths):
     # Polynomial of form q*x**2 + m*x+b
     q = params["q"].value
@@ -55,6 +58,7 @@ def residual_individaul_depthweighted(params, pixels, wl_data, depths):
     model = q*new_pixels**2 + m*new_pixels + b
 
     return (wl_data - model) / depths
+
 
 def residual_depthweighted(params, pixels, wl_data, depths):
     # Polynomial of form q*x**2 + m*x+b
@@ -82,8 +86,8 @@ def residual_depthweighted(params, pixels, wl_data, depths):
 # Load data
 Chipnames = ["Coordinates_CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.txt","Coordinates_CRIRE.2012-04-07T00:08:29.976_2.nod.ms.norm.sum.txt","Coordinates_CRIRE.2012-04-07T00:08:29.976_3.nod.ms.norm.sum.txt","Coordinates_CRIRE.2012-04-07T00:08:29.976_4.nod.ms.norm.sum.txt"]
 PATH = "/home/jneal/Dropbox/PhD/"
-#PATH = "/home/jneal/Dropbox/PhD/"
-#"/home/jneal/Dropbox/PhD/"
+# PATH = "/home/jneal/Dropbox/PhD/"
+# "/home/jneal/Dropbox/PhD/"
 pix1, wlen1, dpth1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
 pix2, wlen2, dpth2 = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
 pix3, wlen3, dpth3 = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
@@ -98,7 +102,7 @@ from TellRemoval import airmass_scaling
 Path = "/home/jneal/Phd/data/Crires/BDs-DRACS/HD30501-1/Fullreductionr-test-1dec2015/Combined_Nods/"
 
 Chipnames = ["CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_2.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_3.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_4.nod.ms.norm.sum.fits"]
-#Pixel_offsets = [0, Gap1+1024, Gap1+Gap2+2*1024, Gap1+Gap2+Gap3+3*1024]  # Pixel values offset for each chip
+# Pixel_offsets = [0, Gap1+1024, Gap1+Gap2+2*1024, Gap1+Gap2+Gap3+3*1024]  # Pixel values offset for each chip
 
 ## Telluric
 
@@ -122,10 +126,10 @@ start_airmass = hdr["HIERARCH ESO TEL AIRM START"]
 end_airmass = hdr["HIERARCH ESO TEL AIRM END"]
 obs_airmass = (start_airmass + end_airmass) / 2
 
-#print(tell_header)
+# print(tell_header)
 tell_airmass = float(tell_header["airmass"])
-#print(obs_airmass, type(obs_airmass))
-#print(tell_airmass, type(tell_airmass))
+# print(obs_airmass, type(obs_airmass))
+# print(tell_airmass, type(tell_airmass))
 tell_data[1] = airmass_scaling(tell_data[1], tell_airmass, obs_airmass)
 
 # Sliced to wavelength measurement of detector
@@ -154,9 +158,9 @@ Combined_pxls = np.concatenate((pix1, pix2 + 1*1024, pix3 + 2*1024, pix4 + 3*102
 Combined_wls = np.concatenate((wlen1, wlen2, wlen3, wlen4))
 Combined_depths = np.concatenate((dpth1, dpth2, dpth3, dpth4))
 
-#Combined_pixels = Test_pxl1 + Test_pxl2 + Test_pxl3 + Test_pxl4
-#Combined_wls = Test_wl1 + Test_wl2 + Test_wl3 + Test_wl4
-#Combined_depths = dpth1
+# Combined_pixels = Test_pxl1 + Test_pxl2 + Test_pxl3 + Test_pxl4
+# Combined_wls = Test_wl1 + Test_wl2 + Test_wl3 + Test_wl4
+# Combined_depths = dpth1
 
 
 params = Parameters()
@@ -171,7 +175,7 @@ out = minimize(residual, params, args=(Combined_pxls, Combined_wls))
 outreport = lmfit.fit_report(out)
 
 
-#Combined_map = [q, m, b]
+# Combined_map = [q, m, b]
 Combined_map = [out.params["q"].value, out.params["m"].value, out.params["b"].value]
 Gap1 = out.params["Gap1"].value
 Gap2 = out.params["Gap2"].value
@@ -262,8 +266,8 @@ ax1.get_xaxis().get_major_formatter().set_useOffset(False)
 plt.legend(loc=0)
 
 
-#"Print results"
-#print(outreport4)
+# "Print results"
+# print(outreport4)
 
 print("Normal Combined Report\n")
 print(outreport)
