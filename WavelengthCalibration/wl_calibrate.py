@@ -48,8 +48,8 @@ def _parser():
     parser.add_argument('-m', '--model', default=False,
                        help='Stellar Model')
     parser.add_argument('-r', '--ref', default=False,
-                       help='Reference Object with different RV') # The other observation to identify shifted lines
-    parser.add_argument('-b', '--berv_corr', default=False,
+                       help='Reference Object with different RV')  # The other observation to identify shifted lines
+    parser.add_argument('-b', '--berv_corr', default=False, action="store_true",
                        help='Apply Berv corr to plot limits if using berv corrected tapas')
     parser.add_argument('-r', '--rough', default=True, action="store_false"
                                           help=" Get rough coordinates from stored pickle file, (if present).")
