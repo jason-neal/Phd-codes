@@ -52,7 +52,7 @@ def _parser():
                         help='Reference Object with different RV')  # The other observation to identify shifted lines
     parser.add_argument('-b', '--berv_corr', default=False, action="store_true",
                         help='Apply Berv corr to plot limits if using berv corrected tapas')
-    parser.add_argument('-r', '--rough', default=True, action="store_false",
+    parser.add_argument('-u', '--use_rough', default=True, action="store_false",
                         help=" Get rough coordinates from stored pickle file, (if present).")
     # parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
     # parser.add_argument('fname',
@@ -141,7 +141,7 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
     return None
 
 
-def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, rough=True):
+def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, use_rough=True):
     homedir = os.getcwd()
     print("Input name", fname)
     print("Output name", output)
@@ -279,7 +279,10 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
 
     rough_coord_name = fname.split(".fits")[0] + "_rough_cords.pickle"
     try:
-        rough_a, rough_b = pickle.load(open(rough_coord_name, "rb"))
+        if use_rough:
+            rough_a, rough_b = pickle.load(open(rough_coord_name, "rb"))
+        else:
+            raise
     except:
         rough_a, rough_b = gf.get_rough_peaks(uncalib_data[0], uncalib_data[1], calib_data[0], calib_data[1])
         pickle.dump((rough_a, rough_b), open(rough_coord_name, "wb"))
