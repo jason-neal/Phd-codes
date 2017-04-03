@@ -6,7 +6,7 @@ from astropy.io import fits
 import Obtain_Telluric
 import IOmodule
 import numpy as np
-import scipy as sp 
+import scipy as sp
 from Get_filenames import get_filenames
 import matplotlib.pyplot as plt
 
@@ -26,7 +26,7 @@ def onclick(event):
     return
 
 def func(x, *params):
-#""" Function to generate the multiple gaussian profiles. 
+#""" Function to generate the multiple gaussian profiles.
 #    Adapted from http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python """
     y = np.ones_like(x)
     for i in range(0, len(params), param_nums):
@@ -47,12 +47,12 @@ def func4(x, *params):
         ctr = params[i]
         amp = abs(params[i+1]) #always positive so peaks are always downward
         wid = params[i+2]
-        if param_nums == 4: # doesn't work well 
+        if param_nums == 4: # doesn't work well
             vert = params[i+3]
             mask = (x > (ctr - 1.5*wid)) * (x < (ctr + 1.5*wid))
             y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2) + vert * mask
         else:
-            y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2) 
+            y = y - amp * np.exp(-0.5 * ((x - ctr)/wid)**2)
     return y
 
 
@@ -95,21 +95,21 @@ def RV_Calc(Lambda, deltalambda):
 #     # seek new coords of line center. would usually be just one but
 
 #     # if spectral lines do a fit with spectral lines multiplied to telluric lines
-    
-#     stel= raw_input("Are there any Stellar lines to include in the fit y/N") == y   
+
+#     stel= raw_input("Are there any Stellar lines to include in the fit y/N") == y
 #     if stel.lower() == "y" or stel.lower()== "yes" : # Are there any spectral lines you want to add?
 #         # Select the stellar lines for the spectral fit
-#         # 
+#         #
 # 	# perform the stellar line fitting version
 #         pass
 #     else:
-        
-#     #perform the normal fit 
+
+#     #perform the normal fit
 #         pass
 #     # ask if line fits were good.
 #     # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
 #     # no - individually ask if want want each line included and append if yes
-#     # probably plot each individually to identify 
+#     # probably plot each individually to identify
 
 
 #     return BestCoordsA, BestCoordsB
@@ -126,7 +126,7 @@ def RV_Calc(Lambda, deltalambda):
 
 
 if __name__=="__main__":
-   
+
     #path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
     path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
     #path = "C:/Users/Jason/Documents/Phd/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
@@ -138,19 +138,19 @@ if __name__=="__main__":
     objpath = Dracspath + obj + "/"
 
     for chip in range(4):
-       
+
         hdr, DracsUncalibdata = Get_DRACS(objpath,chip)
         print("Dracs hdr",hdr)
         print("Dracs data ",DracsUncalibdata)
         UnCalibdata_comb = DracsUncalibdata["Combined"]
         UnCalibdata_noda = DracsUncalibdata["Nod A"]
         UnCalibdata_nodb = DracsUncalibdata["Nod B"]
-        
+
         UnCalibdata = [range(1024), UnCalibdata_comb]
 
 
 
-        # Need to get proper telluric lines from the folders for each observation 
+        # Need to get proper telluric lines from the folders for each observation
 
         # Orignal way I tested this
         #UnCalibdata = IOmodule.read_2col(path + "HD30501-1_DRACS_Blaze_Corrected_spectra_chip-" + str(chip + 1) + ".txt")
@@ -209,17 +209,17 @@ if __name__=="__main__":
                 print("coords found for second plot", coords)
                 coords_wl = coords
                 print("coords lengths","wl",len(coords_wl), "pxl", len(coords_pxl))
-                #assert len(coords_wl) == len(coords_pxl), " Choosen points were not the same so retry" 
+                #assert len(coords_wl) == len(coords_pxl), " Choosen points were not the same so retry"
                 if len(coords_wl) == len(coords_pxl):
                     break  # continue on outside while loop
-                
+
             # Calculate the ratios to determine where to try fit gausians
             cal_xpos = []
             cal_ypos = []
             for tup in coords_wl:
                 cal_xpos.append(tup[0])
                 cal_ypos.append(1-tup[1])
-         
+
             #ratio = (xpos - np.min(UnCalibdata)) / (np.max(UnCalibdata) - np.min(UnCalibdata))
             print("xpositions", xpos)
             print("y positions", ypos)
@@ -242,28 +242,28 @@ if __name__=="__main__":
             init_params_calib = []
             for i in range(len(ypos)):
                 if param_nums == 3:
-                    init_params_uncalib += [xpos[i], ypos[i], 1.2]        # center , amplitude, std 
+                    init_params_uncalib += [xpos[i], ypos[i], 1.2]        # center , amplitude, std
                 elif param_nums == 4:
                     init_params_uncalib += [xpos[i], ypos[i], 1.2, 0.01]        # center , amplitude, std (vertshift)
             for i in range(len(cal_ypos)):
                 if param_nums == 3:
-                    init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04]    # center , amplitude, std  
+                    init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04]    # center , amplitude, std
                 elif param_nums == 4:
                     init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04, 0.004]    # center , amplitude, std (vertshift)
-           
+
             print("init_params_calib", init_params_calib)
             print("init_params_uncalib", init_params_uncalib)
 
             #leastsq_uncalib, covar = opt.curve_fit(make_mix(len(ypos)),UnCalibdata[0],UnCalibdata[1],params_uncalib)
             #leastsq_calib, covar = opt.curve_fit(make_mix(len(ypos)),Calibdata[0],Calibdata[1],params_calib)
-            
+
             fit_params_uncalib = []
             fit_params_calib = []
 
             for jj in range(0,len(init_params_uncalib),param_nums):
                 print("jj", jj)
                 print("type jj",type(jj))
-    
+
                 print(type([jj, jj + 1, jj + 2]))
                 print("[jj, jj + 1, jj + 2]",[jj,jj+param_nums])
                 this_params_uncalib = init_params_uncalib[jj:jj+param_nums]
@@ -281,7 +281,7 @@ if __name__=="__main__":
 
             print("fit params individual", fit_params_uncalib, fit_params_calib) #, "covar", covar)
             print("init_params_uncalib", init_params_uncalib)
-          
+
             Fitted_uncalib = func(UnCalibdata[0], *fit_params_uncalib)
             Fitted_calib = func(Calibdata[0], *fit_params_calib)
             # Guess models used for fitting
@@ -336,7 +336,7 @@ if __name__=="__main__":
 
         #plt.plot([min(pixel_pos), max(pixel_pos)],[min(wl_pos), max(wl_pos)], "k")
         # need to fit a linear fit to this from star to end values
-       
+
         # create wavelenght map
 
         # fit linear
@@ -356,7 +356,7 @@ if __name__=="__main__":
         plt.show()
 
         lin_pointvals = np.polyval(linfit, pixel_pos)
-        quad_pointvals = np.polyval(quadfit, pixel_pos) 
+        quad_pointvals = np.polyval(quadfit, pixel_pos)
 
         #plot differences in points from the fits
         diff_lin = lin_pointvals-wl_pos
@@ -411,6 +411,3 @@ if __name__=="__main__":
         plt.show()
 
         CalibratedSpectra = [Calibrated_lin, UnCalibdata[1]] ## Justa test for now
-
-
-

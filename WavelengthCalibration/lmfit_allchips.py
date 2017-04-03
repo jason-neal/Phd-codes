@@ -18,42 +18,42 @@ def residual(params, pixels, wl_data):
     Gap1 = params["Gap1"].value
     Gap2 = params["Gap2"].value
     Gap3 = params["Gap3"].value
-    
+
     # Change spacing to add pixel gaps to chip pixel numbering
     new_pixels = np.array(pixels)
     chipmap4 = new_pixels > 3*1024
     chipmap3 = new_pixels > 2*1024
     chipmap2 = new_pixels > 1*1024
-    new_pixels += Gap3*chipmap4 
-    new_pixels += Gap2*chipmap3 
-    new_pixels += Gap1*chipmap2  
-    
+    new_pixels += Gap3*chipmap4
+    new_pixels += Gap2*chipmap3
+    new_pixels += Gap1*chipmap2
+
     model = q*new_pixels**2 + m*new_pixels + b
-    
-    return (wl_data - model) 
+
+    return (wl_data - model)
 
 def residual_individual(params, pixels, wl_data):
     # Polynomial of form q*x**2 + m*x+b
     q = params["q"].value
     m = params["m"].value
     b = params["b"].value
-   
+
     # Change spacing to add pixel gaps to chip pixel numbering
     new_pixels = np.array(pixels)
     model = q*new_pixels**2 + m*new_pixels + b
-    
-    return (wl_data - model) 
+
+    return (wl_data - model)
 
 def residual_individaul_depthweighted(params, pixels, wl_data, depths):
     # Polynomial of form q*x**2 + m*x+b
     q = params["q"].value
     m = params["m"].value
     b = params["b"].value
-    
+
     # Change spacing to add pixel gaps to chip pixel numbering
     new_pixels = np.array(pixels)
     model = q*new_pixels**2 + m*new_pixels + b
-    
+
     return (wl_data - model) / depths
 
 def residual_depthweighted(params, pixels, wl_data, depths):
@@ -64,18 +64,18 @@ def residual_depthweighted(params, pixels, wl_data, depths):
     Gap1 = params["Gap1"].value
     Gap2 = params["Gap2"].value
     Gap3 = params["Gap3"].value
-    
+
     # Change spacing to add pixel gaps to chip pixel numbering
     new_pixels = np.array(pixels)
     chipmap4 = new_pixels > 3*1024
     chipmap3 = new_pixels > 2*1024
     chipmap2 = new_pixels > 1*1024
-    new_pixels += Gap3*chipmap4 
-    new_pixels += Gap2*chipmap3 
-    new_pixels += Gap1*chipmap2  
-    
+    new_pixels += Gap3*chipmap4
+    new_pixels += Gap2*chipmap3
+    new_pixels += Gap1*chipmap2
+
     model = q*new_pixels**2 + m*new_pixels + b
-    
+
     return (wl_data - model) / depths
 
 
@@ -116,18 +116,18 @@ tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hou
 print("Telluric Name", tellname)
 
 tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
-    
+
 # Scale telluric lines to airmass
 start_airmass = hdr["HIERARCH ESO TEL AIRM START"]
 end_airmass = hdr["HIERARCH ESO TEL AIRM END"]
 obs_airmass = (start_airmass + end_airmass) / 2
-    
+
 #print(tell_header)
 tell_airmass = float(tell_header["airmass"])
 #print(obs_airmass, type(obs_airmass))
 #print(tell_airmass, type(tell_airmass))
 tell_data[1] = airmass_scaling(tell_data[1], tell_airmass, obs_airmass)
-    
+
 # Sliced to wavelength measurement of detector
 calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
@@ -137,7 +137,7 @@ plt.plot(calib_data[0], calib_data[1], "-", label="Telluric")
 
 
 
-Test_pxl1 = [pxl for pxl in pix1] 
+Test_pxl1 = [pxl for pxl in pix1]
 Test_pxl2 = [pxl + 1*1024 for pxl in pix2]
 Test_pxl3 = [pxl + 2*1024 for pxl in pix3]
 Test_pxl4 = [pxl + 3*1024 for pxl in pix4]
@@ -243,8 +243,8 @@ for num, cname in enumerate(Chipnames):
     Chip_data = data
     chip_pixel = np.array(range(1,1025))
     chip_pixel += num*1024   # pixels of chips to the left
-    chip_pixel_gapped = chip_pixel + GapOffsets[num]  # pixels from detector gaps 
-    chip_pixel_gapped_depths = chip_pixel + GapOffsets_depths[num] 
+    chip_pixel_gapped = chip_pixel + GapOffsets[num]  # pixels from detector gaps
+    chip_pixel_gapped_depths = chip_pixel + GapOffsets_depths[num]
     Chip_wl_individual = np.polyval(wlmaps[num], chip_pixel)
     plt.plot(Chip_wl_individual, Chip_data, "--", label="Individual Map Chip {}".format(num+1))
 

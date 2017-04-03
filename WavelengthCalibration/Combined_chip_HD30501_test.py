@@ -26,23 +26,23 @@ pix4, wlen4, dpth4 = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
 while False:
 	pass
 	#Test_pxl1 = [70, 200, 549, 937, 1015]
-	#Test_pxl2 = [100, 400, 649, 737, 815] 
-	#Test_pxl3 = [50, 200, 549, 937, 915] 
-	#Test_pxl4 = [207, 400, 519, 837, 1015] 
+	#Test_pxl2 = [100, 400, 649, 737, 815]
+	#Test_pxl3 = [50, 200, 549, 937, 915]
+	#Test_pxl4 = [207, 400, 519, 837, 1015]
 
 	#Test_pxl2 = [pxl + 1*1024 + Gap1 for pxl in Test_pxl2]
 	#Test_pxl3 = [pxl + 2*1024 + Gap1 + Gap2 for pxl in Test_pxl3]
 	#Test_pxl4 = [pxl + 3*1024 + Gap_sum for pxl in Test_pxl4]
 
-	#aa = 5/5000000.0    # smaller value 
+	#aa = 5/5000000.0    # smaller value
 	#bb = 80/5000.0   # 80 nm over 4*1024 detectors plus gaps
 	## noise = 0.05   # nm
 
 	##Test_wl2 = gen_map(Test_pxl2, aa, bb, cc, noise)
 	#Test_wl3 = gen_map(Test_pxl3, aa, bb, cc, noise)
 	#Test_wl4 = gen_map(Test_pxl4, aa, bb, cc, noise)
- 
-Test_pxl1 = [pxl for pxl in pix1] 
+
+Test_pxl1 = [pxl for pxl in pix1]
 Test_pxl2 = [pxl + 1*1024 + Gap1 for pxl in pix2]
 Test_pxl3 = [pxl + 2*1024 + Gap1 + Gap2 for pxl in pix3]
 Test_pxl4 = [pxl + 3*1024 + Gap_sum for pxl in pix4]
@@ -71,19 +71,19 @@ pixel_span = range(1, max_pixel)
 order = 2
 wl_map1 = np.polyfit(Test_pxl1, Test_wl1, order)
 print("\nwl_map params 1\t", wl_map1)
-wlvals1 = np.polyval(wl_map1, pixel_span) 
+wlvals1 = np.polyval(wl_map1, pixel_span)
 
 wl_map2 = np.polyfit(Test_pxl2, Test_wl2, order)
 print("\nwl_map params 2\t", wl_map2)
-wlvals2 = np.polyval(wl_map2, pixel_span) 
+wlvals2 = np.polyval(wl_map2, pixel_span)
 
 wl_map3 = np.polyfit(Test_pxl3, Test_wl3, order)
 print("\nwl_map params 3 \t", wl_map3)
-wlvals3 = np.polyval(wl_map3, pixel_span) 
+wlvals3 = np.polyval(wl_map3, pixel_span)
 
 wl_map4 = np.polyfit(Test_pxl4, Test_wl4, order)
 print("\nWl map params Combined\t", wl_map4)
-wlvals4 = np.polyval(wl_map4, pixel_span) 
+wlvals4 = np.polyval(wl_map4, pixel_span)
 
 # Fit to combined data
 Combined_pixels = Test_pxl1 + Test_pxl2 + Test_pxl3 + Test_pxl4
@@ -96,7 +96,7 @@ print(Combined_wls)
 
 Combined_map = np.polyfit(Combined_pixels, Combined_wls, order)
 print("\nwl_map params 4\t", Combined_map)
-Combined_vals = np.polyval(Combined_map, pixel_span) 
+Combined_vals = np.polyval(Combined_map, pixel_span)
 
 
 plt.plot(pixel_span, wlvals1, 'b', label="Chip1")
@@ -153,7 +153,7 @@ cov2 = np.linalg.inv(cov)
 X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 
 # extract from X the parameters m and b
-b, m, q = X 
+b, m, q = X
 
 print('b= {} +- {}'.format(b, np.sqrt(cov2[0,0])))
 print('m= {} +- {}'.format(m, np.sqrt(cov2[1,1])))
@@ -190,7 +190,7 @@ cov2 = np.linalg.inv(cov)
 X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 
 # extract from X the parameters m and b
-b3, m3, q3 , r3 = X 
+b3, m3, q3 , r3 = X
 
 print('b= {} +- {}'.format(b3, np.sqrt(cov2[0,0])))
 print('m= {} +- {}'.format(m3, np.sqrt(cov2[1,1])))

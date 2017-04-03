@@ -28,7 +28,7 @@ crires_files = get_filenames(cwd, "CRIRE.*" , "*norm.sum.wavecal.fits*")
 
 tapas_file = get_filenames(cwd, "tapas_*" , "*_ReqId_10_R*")
 
-#Extract tapas data 
+#Extract tapas data
 tapas_data, tapas_hdr = obt.load_telluric(cwd, tapas_file[0])
 
 # start figure
