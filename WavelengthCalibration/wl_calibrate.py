@@ -90,11 +90,11 @@ def get_wavelength(hdr):
 
 def export_wavecal_2fits(filename, wavelength, spectrum, pixelpos, hdr, hdrkeys, hdrvals):
     """ Write Combined DRACS CRIRES NOD Spectra to a fits table file"""
-    col1 = fits.Column(name="Wavelength", format="E", array=wavelength) # colums of data
+    col1 = fits.Column(name="Wavelength", format="E", array=wavelength)  # colums of data
     col2 = fits.Column(name="Extracted_DRACS", format="E", array=spectrum)
     col3 = fits.Column(name="Pixel", format="E", array=pixelpos)
     cols = fits.ColDefs([col1, col2, col3])
-    tbhdu = fits.BinTableHDU.from_columns(cols) # binary tbale hdu
+    tbhdu = fits.BinTableHDU.from_columns(cols)  # binary table hdu
     prihdr = append_hdr(hdr, hdrkeys, hdrvals)
     prihdu = fits.PrimaryHDU(header=prihdr)
     thdulist = fits.HDUList([prihdu, tbhdu])
@@ -115,7 +115,7 @@ def export_wavecal_2fits(filename, wavelength, spectrum, pixelpos, hdr, hdrkeys,
 
 
 # could make new module for fits handlers like this
-def append_hdr(hdr, keys, values , item=0):
+def append_hdr(hdr, keys, values, item=0):
     ''' Apend/change parameters to fits hdr,
     can take list or tuple as input of keywords
     and values to change in the header
@@ -136,8 +136,9 @@ def append_hdr(hdr, keys, values , item=0):
 def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
     with open(filename, "w") as f:
         f.write("# Pixels  \t Obs Depths \t Obs STD \t Wavelengths \t Tell depths \t Tell STD\n")
-        for pixel, obs_depth, obs_std, wl, wl_depth, wl_std in zip(obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
-           f.write("{} \t {} \t {} \t {} \t {} \t {} \n".format(round(pixel, 4), round(1 - obs_depth, 4), round(obs_std, 4), round(wl, 4), round(1 - wl_depth, 4), round(wl_std, 4)))
+        for pixel, obs_d, obs_s, wl, wl_d, wl_s in zip(obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
+            f.write(("{:5.40f}\t{:01.40f}\t{:02.40f}\t{:5.40f}\t{:01.40f}\t{:02.40f}\n"
+                     "").format(pixel, 1 - obs_d, obs_s, wl, 1 - wl_d, wl_s))
     return None
 
 
@@ -167,7 +168,8 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     elif test1 or test2 or test3 or test4 or test5 or test6:
         uncalib_combined = np.array(data, dtype="float64")
     else:
-        print("Unrecgonized input filename. Can take ouput from sumnormnodcycle8jn.cl, normalizeobsrsum.cl or Combine_nod_spectra.py")
+        print("Unrecgonized input filename. Can take ouput from sumnormnodcycle8jn.cl, "
+              "normalizeobsrsum.cl or Combine_nod_spectra.py")
         raise("Spectra_Error", "Unrecgonized input filename type")
 
     # uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
@@ -205,12 +207,13 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
 
     if tell_header["barydone"] == "YES" and berv_corr:
         # Only if berv has been done on tapas and the user asks for it
-        ### BERV adjust from tapas the wl_limits to align the plotting
+        # ## BERV adjust from tapas the wl_limits to align the plotting
         old_wl_lower = wl_lower
         old_wl_upper = wl_upper
         tapas_berv_value = tapas_helcorr(tell_header)
         # Doppler shift the detector limits
-        __ , wlprime = pyasl.dopplerShift(np.array([wl_lower, wl_upper]), np.array([1, 1]), tapas_berv_value[0], edgeHandling=None, fillValue=None)
+        __, wlprime = pyasl.dopplerShift(np.array([wl_lower, wl_upper]), np.array([1, 1]),
+                                         tapas_berv_value[0], edgeHandling=None, fillValue=None)
         wl_lower = wlprime[0]
         wl_upper = wlprime[1]
         # print("Old detector limits", [old_wl_lower, old_wl_upper])
@@ -218,7 +221,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     elif berv_corr:
         print("Berv_corr flag given but tapas data was not berv corrected. Not adjusting limits")
 
-    ### Air wavelengths
+    # ## Air wavelengths
     # Convert limits if using air wavelengths
     if tell_header["WAVSCALE"] == "air":
         logging.warning("Using Air Wavelengths")
@@ -258,7 +261,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         # nre = nrefrac(w_mod)  # Correction for vacuum to air (ground based)
         # w_mod = w_mod / (1 + 1e-6 * nre)
 
-        i = (w_mod >  wl_lower) & (w_mod < wl_upper)
+        i = (w_mod > wl_lower) & (w_mod < wl_upper)
         w_mod = w_mod[i]
         I_mod = I_mod[i]
 
@@ -291,16 +294,16 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     rough_x_b = [coord[0] for coord in rough_b]
     if model:
         fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1],
-                                       rough_x_a, calib_data[0], calib_data[1],
-                                       rough_x_b, model=[w_mod, I_mod])
+                                                rough_x_a, calib_data[0], calib_data[1],
+                                                rough_x_b, model=[w_mod, I_mod])
     elif ref:
         fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1],
-                                       rough_x_a, calib_data[0], calib_data[1],
-                                       rough_x_b, ref=[w_ref, I_ref])
+                                                rough_x_a, calib_data[0], calib_data[1],
+                                                rough_x_b, ref=[w_ref, I_ref])
     else:
         fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1],
-                                       rough_x_a, calib_data[0], calib_data[1],
-                                       rough_x_b)
+                                                rough_x_a, calib_data[0], calib_data[1],
+                                                rough_x_b)
     good_a, peaks_a, std_a, good_b, peaks_b, std_b = fit_results
 
     lin_map = gf.wavelength_mapping(good_a, good_b, order=1)
@@ -344,7 +347,8 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     ans = input("Do you want to finetune the calibtration?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         print("\n\nFinetune with XCORR WAVECAL using this result as the guess wavelength\n")
-        Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((calibrated_wl, uncalib_data[1]), (tell_data[0], tell_data[1]), increment=0.1)
+        Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((calibrated_wl, uncalib_data[1]),
+                                                               (tell_data[0], tell_data[1]), increment=0.1)
         fig = plt.figure()
         plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
         plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
@@ -356,7 +360,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         plt.xlabel("Wavelength (nm)")
         plt.ylabel("Normalized Intensity")
         plt.legend()
-        plt.show(block=True)
+        plt.show(fig, block=True)
 
         print("Warning - at this stage the fine tuning does not get saved.")
     # This to possible tune,  sample_num, ratio, increment
@@ -373,19 +377,20 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
 
         T_now = str(time.gmtime()[0:6])
 
-        hdrkeys = ["Calibration", "CALIB TIME", "Tapas ID number", \
-                   "Number Fitted", 'PIXELMAP PARAM1', "PIXELMAP PARAM2", \
-                   "PIXELMAP PARAM3", "Tapas Barycenter Correction", \
+        hdrkeys = ["Calibration", "CALIB TIME", "Tapas ID number",
+                   "Number Fitted", 'PIXELMAP PARAM1', "PIXELMAP PARAM2",
+                   "PIXELMAP PARAM3", "Tapas Barycenter Correction",
                    "Tapas wavelength scale"]
-        hdrvals = ["DRACS Wavelength Calibration with Tapas spectrum", \
-                   (T_now, "Time of Calibration"), \
-                   (tell_header["run_id"], "Tapas unique ID number"), \
-                   (len(good_a), "Number of points in calibration map"), \
-                   (wl_map[0], "Squared term"), (wl_map[1], "Linear term"), \
-                   (wl_map[2], "Constant term"), (tell_header["barydone"], \
-                    "Barycenter correction done by Tapas"), \
+        hdrvals = ["DRACS Wavelength Calibration with Tapas spectrum",
+                   (T_now, "Time of Calibration"),
+                   (tell_header["run_id"], "Tapas unique ID number"),
+                   (len(good_a), "Number of points in calibration map"),
+                   (wl_map[0], "Squared term"), (wl_map[1], "Linear term"),
+                   (wl_map[2], "Constant term"),
+                   (tell_header["barydone"], "Barycenter correction done by Tapas"),
                    (tell_header["WAVSCALE"], "Either air, vacuum, or wavenumber")]
-                ###### ADD OTHER parameter need to store above - estimated errors of fitting?
+        # # ADD OTHER parameter need to store above - estimated errors of fitting?
+
         export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], uncalib_data[0], hdr, hdrkeys, hdrvals)
 
         # Save calibration values to a txt file
@@ -400,7 +405,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
 
     ans = input("Do you want to observe the line depths?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
-    # observe heights of fitted peaks
+        # observe heights of fitted peaks
         plt.figure
         plt.plot(peaks_a, label="Specta line depths")
         plt.plot(peaks_b, label="Telluric line depths")
