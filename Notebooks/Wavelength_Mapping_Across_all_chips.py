@@ -12,34 +12,40 @@
 # 
 # Used jupyter intro suggestions from - http://bebi103.caltech.edu/2015/tutorials/t0b_intro_to_jupyter_notebooks.html
 
-# In[1]:
+# In[ ]:
 
 # Imports from __future__ in case we're running Python 2
 from __future__ import division, print_function
 from __future__ import absolute_import, unicode_literals
 
 import numpy as np
-
-# Import pyplot for plotting
 import matplotlib.pyplot as plt
+from astropy.io import fits
+import Obtain_Telluric as obt
+from Get_filenames import get_filenames
 
 # Seaborn, useful for graphics
 import seaborn as sns
 
 
 # Magic function to make matplotlib inline; other style specs must come AFTER
-get_ipython().magic(u'matplotlib inline')
+get_ipython().magic('matplotlib inline')
 
 
-# In[2]:
+# In[ ]:
 
 # Import Bokeh modules for interactive plotting
 import bokeh.io
 import bokeh.mpl
 import bokeh.plotting
 
+
+from bokeh.plotting import figure, show, output_file, gridplot, vplot
+from bokeh.models import BoxAnnotation
+from bokeh.models import Range1d
+
 # This enables SVG graphics inline.  There is a bug, so uncomment if it works.
-get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
+get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
 
 # This enables high resolution PNGs. SVG is preferred, but has problems
 # rendering vertical and horizontal lines
@@ -57,17 +63,52 @@ sns.set_style('darkgrid', rc=rc)
 bokeh.io.output_notebook()
 
 
+# In[ ]:
+
+import os
+here = os.getcwd()
+print(here)
+
+
 # #### Load data
 
-# In[3]:
+# In[ ]:
 
 #Chipnames = ["Coordinates_CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-04-07T00-08-29.976_2.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-04-07T00-08-29.976_3.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-04-07T00-08-29.976_4.nod.ms.norm.sum.txt"]
 
 #Coordinates files from hd30501-2b
-Chipnames = ["Coordinates_CRIRE.2012-08-06T09-42-07.888_1.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_2.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_3.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_4.nod.ms.norm.sum.txt"]
+#Chipnames = ["Coordinates_CRIRE.2012-08-06T09-42-07.888_1.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_2.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_3.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_4.nod.ms.norm.sum.txt"]
 
 #PATH = "/home/jneal/Dropbox/PhD/hd30501-Wavecal-march16/"
-PATH = "C:/Users/Jason/Dropbox/PhD/hd30501-Wavecal-march16/"
+#PATH = "C:/Users/Jason/Dropbox/PhD/hd30501-Wavecal-march16/"
+
+
+
+
+# In[ ]:
+
+# Updated load in for beter calibration data
+chip_num = 1
+obs_num = "2a"
+#ref_num = "3"
+target = "HD30501-" + obs_num
+#reference_target = "HD30501-"+ ref_num    # should be different from target
+
+### Coord data
+coord_path = here +"/HD30501_data/{0}/".format(obs_num)
+print(coord_path)
+#PATH = coord_path
+#dracs_path = "C:/Users/Jason/Documents/PhD/Phd-codes/Notebooks/HD30501_data/{0}/".format(obs_num)
+#dracs_path = "../HD30501_data/{0}".format(obs_num)
+def get_Coordfile_name(path, chipnum):
+    spliting = path.split("/")
+    print(spliting)
+    if spliting[-3] in spliting[-4]:
+        print("Double path add -hack")
+        path = path + "../../"
+        print(path)
+    coord_name = get_filenames(path, "Coordinates_CRIRE.*","*{}.nod.ms.norm.sum*".format(chipnum))
+    return path + coord_name[0]
 
 
 # Need to load in the data and unpack all the parameters from each of the detectors for this observation.
@@ -76,17 +117,22 @@ PATH = "C:/Users/Jason/Dropbox/PhD/hd30501-Wavecal-march16/"
 # 
 # Will use these to create a mapping of pixels to wavelength.
 
-# In[4]:
+# In[ ]:
 
-pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
-pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
-pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
-pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
+#pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
+#pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
+#pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
+#pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
+
+pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(get_Coordfile_name(coord_path, 1), skiprows=1, unpack=True)
+pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(get_Coordfile_name(coord_path, 2), skiprows=1, unpack=True)
+pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(get_Coordfile_name(coord_path, 3), skiprows=1, unpack=True)
+pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(get_Coordfile_name(coord_path, 4), skiprows=1, unpack=True)
 
 
 # ### Arrange pixels with gaps
 
-# In[5]:
+# In[ ]:
 
 # Pixel gaps Brogi et al 2015
 Fixed_Gap0 = 0
@@ -115,7 +161,7 @@ Test_wl4 = [wl for wl in wlen4]
 
 # ### Indivudal chip fits with polyfit
 
-# In[6]:
+# In[ ]:
 
 # Fit to the individual chips
 order = 2
@@ -138,7 +184,7 @@ wlvals4 = np.polyval(wl_map4, pixel_span)
 
 # #### Combining all 4 detectors and doing a combined fit
 
-# In[7]:
+# In[ ]:
 
 # Fit to combined data
 Combined_pixels = Test_pxl1 + Test_pxl2 + Test_pxl3 + Test_pxl4
@@ -155,7 +201,7 @@ Combined_vals = np.polyval(Combined_map, pixel_span)
 
 # ### Plot the data
 
-# In[8]:
+# In[ ]:
 
 #plt.subplot(211)
 plt.plot(Test_pxl1, Test_wl1, "bo", label="1")
@@ -184,7 +230,7 @@ plt.legend(loc='best')
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[9]:
+# In[ ]:
 
 # Compare differences in wavelength
 #plt.subplot(212)
@@ -222,7 +268,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # # LmFit with Variable Detector Gaps
 
-# In[10]:
+# In[ ]:
 
 from lmfit import minimize, Parameters
 import lmfit
@@ -230,7 +276,7 @@ import lmfit
 
 # Create the residual functions to minimize
 
-# In[11]:
+# In[ ]:
 
 def add_pixel_gaps(pixels, Gap1, Gap2, Gap3):
     new_pixels = np.array(pixels)
@@ -269,14 +315,18 @@ def residual(params, pixels, wl_data):
 
 # arranging the data
 
-# In[12]:
+# In[ ]:
 
 # USE same data as above
-pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
-pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2  = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
-pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3  = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
-pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4  = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
+#pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
+#pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
+#pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
+#pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
 
+pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(get_Coordfile_name(coord_path, 1), skiprows=1, unpack=True)
+pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(get_Coordfile_name(coord_path, 2), skiprows=1, unpack=True)
+pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(get_Coordfile_name(coord_path, 3), skiprows=1, unpack=True)
+pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(get_Coordfile_name(coord_path, 4), skiprows=1, unpack=True)
 
 Test_pxl1 = [pxl for pxl in pix1] 
 Test_pxl2 = [pxl + 1*1024 for pxl in pix2]
@@ -296,7 +346,7 @@ Combined_pxl_depths = np.concatenate((pxl_depth1, pxl_depth2, pxl_depth3, pxl_de
 # Set up inital parameters
 # 
 
-# In[13]:
+# In[ ]:
 
 params = Parameters()
 params.add('q', value=0.0000001)
@@ -309,7 +359,7 @@ params.add('Gap3', value=275+278+283)
 
 # Do the minimization
 
-# In[14]:
+# In[ ]:
 
 out = minimize(residual, params, args=(Combined_pxls, Combined_wls))
 outreport = lmfit.fit_report(out)
@@ -321,7 +371,7 @@ print(outreport)
 
 
 
-# In[15]:
+# In[ ]:
 
 lmfit_Combined_map = [out.params["q"].value, out.params["m"].value, out.params["b"].value]
 Variable_Gap1_fit = out.params["Gap1"].value
@@ -339,7 +389,7 @@ print("Gap3 individual", Variable_Gap3_fit-Variable_Gap2_fit)
 
 # ### Plot the solutions
 
-# In[18]:
+# In[ ]:
 
 Fitted_pixels = add_pixel_gaps(Combined_pxls, Variable_Gap1_fit, Variable_Gap2_fit, Variable_Gap3_fit)
 
@@ -358,7 +408,38 @@ plt.ylim([2100,2170])
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[19]:
+# In[ ]:
+
+# Bokeh Plot
+    
+p = figure(width=600, height=300)
+
+p.line(Fitted_pixels, residual(out.params, Combined_pxls, Combined_wls) + Combined_wls, line_color="black")
+p.circle(Fitted_pixels, Combined_wls, fill_color = "red", line_color="black", radius=30)
+
+gap_starts =  [1024, 2*1024+Variable_Gap1_fit, 3*1024+Variable_Gap2_fit]
+gap_ends = [1024+Variable_Gap1_fit, 2*1024+Variable_Gap2_fit, 3*1024+Variable_Gap3_fit]
+Boxes = [BoxAnnotation(plot=p, left=start, right=end, fill_alpha=0.3, fill_color="yellow") for start, end in zip(gap_starts, gap_ends)]
+p.renderers.extend(Boxes)
+    
+# Mark Chip positions
+#linepos = [0, 1024, 1024+Variable_Gap1_fit, 2*1024+Variable_Gap1_fit, 2*1024+Variable_Gap2_fit, 3*1024+Variable_Gap2_fit, 3*1024+Variable_Gap3_fit, 4*1024+Variable_Gap3_fit]
+#plt.vlines(linepos, 2110, 2170)
+#plt.ylim([2100,2170])
+
+p.title = "Wavelenght Mapping"
+p.title_text_font_size = "14pt"
+p.yaxis.axis_label = 'Wavelength (nm)'
+p.yaxis.axis_label_text_font_size = "12pt"
+p.xaxis.axis_label = 'Pixel Position'
+p.xaxis.axis_label_text_font_size = "12pt"
+#s3.legend.location = "bottom_right"
+#s3.legend.border_line_color = None
+
+show(p)
+
+
+# In[ ]:
 
 plt.plot(Fitted_pixels, residual(out.params, Combined_pxls, Combined_wls), 'ro')
 plt.title("Residual with Variable Gaps")
@@ -371,7 +452,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # # lmFit with Fixed Gaps:
 # Change parameters so the gaps are fixed and see what the difference in results is.
 
-# In[20]:
+# In[ ]:
 
 fixed_gap_params = Parameters()
 fixed_gap_params.add('q', value=0.0000001)
@@ -382,7 +463,7 @@ fixed_gap_params.add('Gap2', value=278+283, vary=False)
 fixed_gap_params.add('Gap3', value=275+278+283, vary=False)
 
 
-# In[21]:
+# In[ ]:
 
 fixed_gap_out = minimize(residual, fixed_gap_params, args=(Combined_pxls, Combined_wls))
 fixed_gap_outreport = lmfit.fit_report(fixed_gap_out)
@@ -396,7 +477,7 @@ print(fixed_gap_outreport)
 
 # # Plotting
 
-# In[22]:
+# In[ ]:
 
 Fixed_Gap1_fit = fixed_gap_out.params["Gap1"].value
 Fixed_Gap2_fit = fixed_gap_out.params["Gap2"].value
@@ -418,7 +499,7 @@ plt.ylim([2100,2170])
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[23]:
+# In[ ]:
 
 plt.plot(Fitted_pixels_fixed_gap, residual(fixed_gap_out.params, Combined_pxls, Combined_wls), 'ro')
 plt.title("Residual with Fixed Gaps")
@@ -438,7 +519,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # # Individual chip fitting with lmfit
 
-# In[24]:
+# In[ ]:
 
 def individual_residual(params, pixels, wl_data):
     # Polynomial of form q*x**2 + m*x+b
@@ -452,7 +533,7 @@ def individual_residual(params, pixels, wl_data):
     return (wl_data - model) 
 
 
-# In[25]:
+# In[ ]:
 
 chip1_params = Parameters()
 chip1_params.add('q', value=0.0000001)
@@ -477,7 +558,7 @@ chip4_params.add('b', value=2110)
 
 
 
-# In[26]:
+# In[ ]:
 
 chip1_out = minimize(individual_residual, chip1_params, args=(Test_pxl1, Test_wl1))
 chip1_outreport = lmfit.fit_report(chip1_out)
@@ -496,7 +577,7 @@ chip4_outreport = lmfit.fit_report(chip4_out)
 print(chip4_outreport)
 
 
-# In[27]:
+# In[ ]:
 
 # Similar parameters out 
 print("Chip1 polyval params \t", wl_map1)
@@ -523,7 +604,7 @@ print("Chip4 lmfit params \t", lm_wl_map4)
 
 # # LmFit Combined map with Weighted residuals
 
-# In[35]:
+# In[ ]:
 
 def weighted_residual(params, pixels, wl_data, weigths):
     # Polynomial of form q*x**2 + m*x+b
@@ -550,7 +631,7 @@ def weighted_residual(params, pixels, wl_data, weigths):
     return weigths*(wl_data - model) 
 
 
-# In[36]:
+# In[ ]:
 
 weighted_params = Parameters()
 weighted_params.add('q', value=0.0000001)
@@ -561,7 +642,7 @@ weighted_params.add('Gap2', value=278+283)
 weighted_params.add('Gap3', value=275+278+283)
 
 
-# In[37]:
+# In[ ]:
 
 pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
 pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2  = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
@@ -586,7 +667,7 @@ Combined_pxl_fwhm = np.concatenate((pxl_fwhm1, pxl_fwhm2, pxl_fwhm3, pxl_fwhm4))
 Combined_wl_fwhm = np.concatenate((wl_fwhm1, wl_fwhm2, wl_fwhm3, wl_fwhm4))
 
 
-# In[41]:
+# In[ ]:
 
 weighted_out = minimize(weighted_residual, weighted_params, args=(Combined_pxls, Combined_wls, Combined_wl_fwhm))
 weighted_outreport = lmfit.fit_report(weighted_out)
@@ -599,7 +680,7 @@ weighted_Gap3_fit = weighted_out.params["Gap3"].value
 
 
 
-# In[42]:
+# In[ ]:
 
 weighted_Fitted_pixels = add_pixel_gaps(Combined_pxls, weighted_Gap1_fit, weighted_Gap2_fit, weighted_Gap3_fit)
 
@@ -618,7 +699,7 @@ plt.ylim([2100,2170])
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[45]:
+# In[ ]:
 
 
 plt.plot(weighted_Fitted_pixels, weighted_residual(weighted_out.params, Combined_pxls, Combined_wls, Combined_wl_fwhm), 'ro')
@@ -646,7 +727,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # # Actual data with wavelength solutions 
 
-# In[28]:
+# In[ ]:
 
 
 import Obtain_Telluric as obt
@@ -666,7 +747,7 @@ Tapas_name = "tapas_HD30501_2b_R50000_2012-08-06T09-56-00.ipac"
 # 
 # and plot the wavelength mapping
 
-# In[32]:
+# In[ ]:
 
 
 tell_data, tell_hdr = obt.load_telluric(Path, Tapas_name)
