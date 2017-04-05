@@ -10,7 +10,7 @@
 # Fit to the observed data (Probably with the other lines removed) to fnd the best x to apply for the correction. (Gives flatest result or zero linewidth.) 
 # 
 
-# In[2]:
+# In[ ]:
 
 ### Load modules and Bokeh
 # Imports from __future__ in case we're running Python 2
@@ -51,7 +51,7 @@ sns.set_style('darkgrid', rc=rc)
 bokeh.io.output_notebook()
 
 
-# In[3]:
+# In[ ]:
 
 # Define Faster functions to try
 def fast_wav_selector(wav, flux, wav_min, wav_max, verbose=False):
@@ -83,7 +83,7 @@ def fast_wav_selector(wav, flux, wav_min, wav_max, verbose=False):
 
 # ### Load in Observed Data
 
-# In[91]:
+# In[ ]:
 
 # Need to update these to the vacuum with no berv corrections
 #chip1 = "CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.fits"
@@ -125,7 +125,7 @@ obs_airmass = (start_airmass + end_airmass) / 2
 print("Data from Detectors is now loaded")
 
 
-# In[93]:
+# In[ ]:
 
 ## Rough berv correction until input calibrated file is calibrated with non berv tapas 
 #wl1 = wl1-.5   #including rough berv correction
@@ -138,7 +138,7 @@ print("Data from Detectors is now loaded")
 
 # ### Load in the tapas data
 
-# In[5]:
+# In[ ]:
 
 import Obtain_Telluric as obt
 tapas_all = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
@@ -176,7 +176,7 @@ print("Telluric Resolution Power =", tapas_not_h20_respower)
 # Including the 3 tapas models to show they align well and are consistent.
 # 
 
-# In[95]:
+# In[ ]:
 
 plt.plot(wl1, I1_uncorr, 'b') #including rough berv correction
 plt.plot(wl2, I2_uncorr, 'b') #including rough berv correction
@@ -201,7 +201,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # (Use telluric removal modules)
 # And plot the result.  
 
-# In[14]:
+# In[ ]:
 
 from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
 
@@ -241,7 +241,7 @@ I4_not_h20_corr = correction(wl4, I4_uncorr, tapas_not_h20_data[0], tapas_not_h2
 #%timeit faster_correction(wl1, I1_uncorr, tapas_not_h20_data[0], tapas_not_h20_data[1], obs_airmass, tapas_not_h20_airmass, kind="linear", method="scipy")
 
 
-# In[15]:
+# In[ ]:
 
 # Plot not h20 correction
 
@@ -273,7 +273,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # 
 # The Pyastronomy convolution needs equidistant points to work. This involves performing an interpolation. We prefer not to use this method as it losses information.
 
-# In[16]:
+# In[ ]:
 
 # Just to my CRIRES range 
 from PyAstronomy import pyasl    
@@ -320,7 +320,7 @@ Conv_flux_pysal = pyasl.instrBroadGaussFast(new_wav, new_flux, 50000, edgeHandli
 print("done")
 
 
-# In[17]:
+# In[ ]:
 
 # PLot Pyasl convolution
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
@@ -336,7 +336,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # # No interpolation convolution 
 # Speed up with numpy mask instead of comprehnsion list
 
-# In[9]:
+# In[ ]:
 
 # Chip version
 def chip_selector(wav, flux, chip):
@@ -429,7 +429,7 @@ def convolution_nir_chip(wav, flux, chip, R, FWHM_lim=5.0, plot=True, verbose=Tr
 # ### Convole instrument profile function:
 # To use inside fit
 
-# In[18]:
+# In[ ]:
 
 ## USEFUL functions from pedros code:
 # This is pedros slow selector
@@ -462,7 +462,7 @@ def unitary_Gauss(x, center, FWHM):
 
 
 
-# In[19]:
+# In[ ]:
 
 -
 
@@ -471,7 +471,7 @@ print("Done")
 
 # ## Test convolution runtime
 
-# In[25]:
+# In[ ]:
 
 # 10 seconds per loop for chip "1" and plotting   (down from 900s)
 #timeit x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
@@ -479,7 +479,7 @@ limits = [2124,2136]
 x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], limits, 50000, FWHM_lim=5.0, plot=False)
 
 
-# In[26]:
+# In[ ]:
 
 # Profile to see what takes the most time
 get_ipython().magic('prun x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], limits, 50000, FWHM_lim=5.0, plot=False)')
@@ -488,7 +488,7 @@ get_ipython().magic('prun x, y = convolution_nir(tapas_h20_data[0], tapas_h20_da
 
 # Time on work comp - 188.6781919 s  
 
-# In[27]:
+# In[ ]:
 
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
 plt.plot(x, y, "r")
@@ -514,13 +514,13 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # Does each chip need a differnet scaling power?
 # 
 
-# In[28]:
+# In[ ]:
 
 from lmfit import minimize, Parameters
 import lmfit
 
 
-# In[30]:
+# In[ ]:
 
 from scipy.interpolate import interp1d
 #from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
@@ -547,7 +547,7 @@ def match_wl(wl, spec, ref_wl, method="scipy", kind="linear"):
 print("Done")
 
 
-# In[59]:
+# In[ ]:
 
 ### Fit using lmfit
 
@@ -605,7 +605,7 @@ print("Done")
 
 
 
-# In[60]:
+# In[ ]:
 
 # Set up parameters 
 params = Parameters()
@@ -617,7 +617,7 @@ params.add('FWHM_lim', value=5, vary=False)
 params.add('fit_lines', value=True, vary=False)   # only fit the peaks of lines < 0.995
 
 
-# In[85]:
+# In[ ]:
 
 #wl2, I2_uncorr
 # wl2, I2_not_h20_corr
@@ -642,7 +642,7 @@ print("Input telluic wl- Min ", np.min(Test_tell_data[0])," Max ", np.max(Test_t
                
 
 
-# In[76]:
+# In[ ]:
 
 # Peform minimization
 import time
@@ -656,7 +656,7 @@ print(outreport)
 # 74 seconds for one detector
 
 
-# In[77]:
+# In[ ]:
 
 # Convolution with scaling
 
@@ -682,7 +682,7 @@ Interped_conv_tell = [Test_Obs_wl, match_wl(Conv_Scalled_tell[0], Conv_Scalled_t
 
 
 
-# In[78]:
+# In[ ]:
 
 # Just convolution without scaling
 Just_convolved_tell = convolution_nir(Test_tell_data[0], Test_tell_data[1], chip_limits,
@@ -691,7 +691,7 @@ Just_convolved_tell = convolution_nir(Test_tell_data[0], Test_tell_data[1], chip
 Interped_just_conv_tell = [Test_Obs_wl, match_wl(Just_convolved_tell[0], Just_convolved_tell[1], Test_Obs_wl)]
 
 
-# In[79]:
+# In[ ]:
 
 # Plot scalled telluric and convolved value
 plt.plot(Test_Obs_wl, Test_Obs_I, 'k', label="Obs ")
@@ -708,7 +708,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 
-# In[80]:
+# In[ ]:
 
 # plot corrected value
 plt.plot(Test_Obs_wl, Test_Obs_I/Interped_conv_tell[1], 'k', label="H20 Corrections ")
@@ -723,7 +723,7 @@ plt.plot(tapas_h20_data[0],tapas_h20_data[1], 'g', label="tapas h20")
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[87]:
+# In[ ]:
 
 # plot corrected value
 plt.plot(Test_Obs_wl, Test_Obs_I_org, label= "Uncorrected")
@@ -737,7 +737,7 @@ plt.plot(Test_Obs_wl, Test_Obs_I/Interped_just_conv_tell[1], 'r', label="Non Sca
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[88]:
+# In[ ]:
 
 #%%timeit
 # Time the Peform minimization
@@ -800,7 +800,7 @@ Mask = tapas_all
 
 # #  Normailizing tapas effect
 
-# In[10]:
+# In[ ]:
 
 tell_all_data, tell_all_hdr = obt.load_telluric("", tapas_all)
 
