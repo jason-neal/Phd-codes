@@ -1,4 +1,4 @@
 # Ignore python generate .pyc files
-
+.sync/*
 *.pyc
 .ipynb_checkpoints
