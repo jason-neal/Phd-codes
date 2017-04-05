@@ -5,7 +5,7 @@
 # 
 # 
 
-# In[1]:
+# In[ ]:
 
 ### Load modules and Bokeh
 # Imports from __future__ in case we're running Python 2
@@ -20,7 +20,7 @@ from astropy.io import fits
 import seaborn as sns
 
 # Magic function to make matplotlib inline; other style specs must come AFTER
-get_ipython().magic(u'matplotlib inline')
+get_ipython().magic('matplotlib inline')
 
 # Import Bokeh modules for interactive plotting
 import bokeh.io
@@ -28,7 +28,7 @@ import bokeh.mpl
 import bokeh.plotting
 
 # This enables SVG graphics inline.  There is a bug, so uncomment if it works.
-get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
+get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
 
 # This enables high resolution PNGs. SVG is preferred, but has problems
 # rendering vertical and horizontal lines
@@ -48,7 +48,7 @@ bokeh.io.output_notebook()
 
 # ## Load non convolved telluric
 
-# In[2]:
+# In[ ]:
 
 import Obtain_Telluric as obt
 
@@ -65,12 +65,12 @@ except:
 print("Telluric Resolution Power =", tapas_h20_respower)
 
 
-# In[3]:
+# In[ ]:
 
 # Load convolved
 
 
-# In[4]:
+# In[ ]:
 
 #conv_wav, conv_flux = np.loadtxt("Convolved_50000_tapas_allchips.txt", delimiter="'",unpack=True)
 
@@ -81,7 +81,7 @@ print(conv_wav)
 print(conv_flux)
 
 
-# In[6]:
+# In[ ]:
 
 orig_flux = np.array([flux for wav, flux in zip(tapas_h20_data[0], tapas_h20_data[1]) if wav in conv_wav])
 
@@ -94,7 +94,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 
-# In[12]:
+# In[ ]:
 
 plt.plot(tapas_h20_data[0],tapas_h20_data[1])
 plt.plot(conv_wav, conv_flux)
@@ -104,7 +104,7 @@ plt.ylabel("Flux")
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[13]:
+# In[ ]:
 
 #Wavelenght density
 plt.plot(tapas_h20_data[0][1:],tapas_h20_data[0][1:]-tapas_h20_data[0][:-1])
@@ -116,7 +116,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # ## Testing dividing by number of values in gaussian convolution
 
-# In[14]:
+# In[ ]:
 
 # Convolved_50000_tapas_wavelength_allchips_dividebynumber.txt
 # Testing dividing each value by number of points in convolution gaussian
@@ -126,7 +126,7 @@ conv_flux_divide = np.loadtxt("Convolved_50000_tapas_transmitance_allchips_divid
 # Convolution with division by # of values in convolution did not work well. So proably have to divide by a fitted line.
 
 
-# In[15]:
+# In[ ]:
 
 plt.plot(orig_flux, conv_flux_divide, "o")
 plt.title("Divided values \n Affect of Convolution R=50000")
@@ -136,7 +136,7 @@ plt.ylabel("Convolved Flux\nR=50000")
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[16]:
+# In[ ]:
 
 plt.plot(tapas_h20_data[0],tapas_h20_data[1])
 plt.plot(conv_wav_divide, conv_flux_divide)
