@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-"""Fitting the Centroid positions of telluric lines with gausians
+"""CRIRES Wavelength Calibration.
+Fitting the Centroid positions of telluric lines with gausians
 to obtain a wavelenght calibration from pixel to wavelength.
 
 """
@@ -10,17 +11,16 @@ to obtain a wavelenght calibration from pixel to wavelength.
 from __future__ import division
 # from astropy.io import fits
 # import Obtain_Telluric
-
 import copy
 import math
-import numpy as np
-from logging import debug
-# import scipy as sp
-# from Get_filenames import get_filenames
-import matplotlib.pyplot as plt
-import scipy.optimize as opt
-from debug_utils import pv
 import IOmodule
+import numpy as np
+from typing import List
+from logging import debug
+from debug_utils import pv
+import scipy.optimize as opt
+import matplotlib.pyplot as plt
+# from Get_filenames import get_filenames
 from Gaussian_fit_testing import Get_DRACS
 
 # Gaussian Fitting Module
@@ -163,7 +163,19 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
     if (stel is not None) & (tell is not None):
         debug(pv("stel"))
         debug(pv("tell"))
-        raise NotImplementedError("Need to finish adding this")
+        print("init params", init_params, "stellar params", stel)
+        assert len(stel) % 3 is 0, "stel parameters not multiple of 3"
+        assert len(tell) % 3 is 0, "Telluric parameters not multiple of 3"
+        stelnum = int(len(stel) / 3)  # number of stellar lines
+        tellnum = int(len(tell) / 3)  # number of stellar lines
+        debug(pv("stelnum"))
+        debug(pv("tellnum"))
+
+        init_params = np.concatenate((init_params, stel, tell), axis=0)
+        print("appended array with stellar lines and telluric lines",)
+        debug(pv("init_params"))
+        params, __ = opt.curve_fit(lambda x, *params: func_with_stellar_and_tell(x, stelnum, tellnum, params), wl, spec, init_params)
+        # raise NotImplementedError("Need to finish adding this")
     elif stel is not None:
         # use lambda instead here
         # __ is junk parameter to take the covar returned by curve_fit
@@ -270,7 +282,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                                                points_a=a_coords,
                                                points_b=b_coords,
                                                textloc=(np.median(wl_a_sec), np.max([np.min(sect_a), 0.5])),
-                                               text="Select Stellar lines to multiply")
+                                               text="Select Stellar lines to multiply (non-telluric).")
                     num_stellar = len(stellar_lines)
                     stellar_params = coords2gaussian_params(stellar_lines, delta_a)
                     # ADD telluric lines to stellar line fit
@@ -279,7 +291,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                                                       points_a=a_coords,
                                                       points_b=b_coords,
                                                       textloc=(np.median(wl_a_sec), np.max([np.min(sect_a), 0.5])),
-                                                      text="Select extra telluric lines to add")
+                                                      text="Select extra telluric lines in observed spectrum.")
                     num_extra = len(extra_telluric_lines)
                     extra_telluric_params = coords2gaussian_params(extra_telluric_lines, delta_a)
                 # perform the stellar line fitting version
@@ -287,6 +299,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                                           stel=stellar_params, tell=extra_telluric_params)
                 else:  # Perform the normal fit
                     num_stellar = 0
+                    num_extra = 0
                     fit_params_a = do_fit(wl_a_sec, sect_a, init_params_a)
 
                 tell = "y"
@@ -295,8 +308,8 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                                                 title="Select Spectral Lines",
                                                 points_a=b_coords,
                                                 points_b=a_coords,
-                                                textloc=(np.median(wl_b_sec), np.max(np.min(sect_b), 0.5)),
-                                                text="Select extra Telluric lines to add.")
+                                                textloc=(np.median(wl_b_sec), np.max([np.min(sect_b), 0.5])),
+                                                text="Select extra Telluric lines to add to telluric spectrum.")
                     num_telluric = len(telluric_lines)
                     telluric_params = coords2gaussian_params(telluric_lines, delta_b)
                     fit_params_b = do_fit(wl_b_sec, sect_b, init_params_b,
@@ -316,10 +329,12 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                     fit_worked = True
                     continue  # start next iteration of loop selecting points.
 
-
-            print("Using plot_both_fits ", " to plot fit results")
+            # Get calibration lines to display using the init_params_? keyword.
+            cal_params_a, __ = split_telluric_stellar(fit_params_a, num_stellar + num_extra)
+            cal_params_b, __ = split_telluric_stellar(fit_params_b, num_telluric)
             fig, __, __ = overlay_fitting(wl_a_sec, sect_a, wl_b_sec, sect_b, show_plot=True, paramsA=fit_params_a,
-                                          paramsB=fit_params_b, hor=1)
+                                          paramsB=fit_params_b, hor=1, init_params_a=cal_params_a,
+                                          init_params_b=cal_params_b)
 
             # fig, __, __ = plot_both_fits(wl_a_sec, sect_a, wl_b_sec, sect_b, paramsA=fit_params_a,
             #                             paramsB=fit_params_b, init_params_a=None, init_params_b=None,
@@ -339,11 +354,15 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
 
         if fit_worked:
             # Seperate back out the stellar/telluric lines
-            if num_stellar is not 0:
+            if (num_stellar is not 0) and (num_extra is not 0):
+                fit_line_params_a, fit_stell_params, fit_extra_params = split_telluric_stellar_telluric(fit_params_a, num_stellar, num_extra)
+
+            elif num_stellar is not 0:
                 fit_line_params_a, fit_stell_params = split_telluric_stellar(fit_params_a, num_stellar)
+                fit_extra_params = []
             else:
                 fit_line_params_a = fit_params_a
-                fit_stell_params = []
+                fit_stell_params, fit_extra_params = [], []
 
             if num_telluric is not 0:
                 fit_line_params_b, fit_tell_params = split_telluric_stellar(fit_params_b, num_telluric)
@@ -413,14 +432,15 @@ def func(x, *params):
     return y
 
 
-def func_with_stellar(x, num_stell, *params):
-    """Function to generate the multiple gaussian profiles with
-    stellar gausian. Adapted from
+def func_with_stellar(x, num_stell: int, *params):
+    """Function to generate the multiple gaussian profiles with stellar gausian.
+
+    Adapted from
     http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python
     For the stellar line case the frist param contains then number of
     stellar lines are present. The stellar lines are at the end of the
-     list of parameters so need to seperate them out.
-    [[number of telluric lines], telluric lines, stellar lines]
+    List of parameters so need to seperate them out.
+    [number of stellar lines, telluric lines, stellar lines]
     # not any more use lambda fucntion as a fixed parameter
 
     """
@@ -445,6 +465,55 @@ def func_with_stellar(x, num_stell, *params):
     y_combined = y_line * y_stel   # multiplication of stellar and telluric lines
     y_combined[y_combined < 0] = 0   # limit minimum value to zero
     return y_combined
+
+
+def func_with_stellar_and_tell(x, num_stell: int, num_tell: int, *params):
+        """Function to generate the multiple gaussian profiles with stellar gausian.
+
+        Adapted from
+        http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python
+        For the stellar line case the frist param contains then number of
+        stellar lines are present. The stellar lines are at the end of the
+         list of parameters so need to seperate them out.
+        [[number of telluric lines], telluric lines, stellar lines]
+        # not any more use lambda fucntion as a fixed parameter
+
+        """
+        y_line = np.ones_like(x)
+        y_tell = np.zeros_like(x)
+        y_stel = np.ones_like(x)
+        # num_stel = params[0]                     # number of stellar lines given
+        debug(pv("params"))
+        debug(pv("params[0]"))
+        par = params[0]
+        line_params, stellar_params, telluric_params = split_telluric_stellar_telluric(par, num_stell, num_tell)
+
+        # Main Telluric lines to calibtate with
+        for i in range(0, len(line_params), 3):
+            ctr = line_params[i]
+            amp = abs(line_params[i + 1])   # always positive so peaks are downward
+            wid = line_params[i + 2]
+            y_line = y_line - amp * np.exp(-0.5 * ((x - ctr) / wid)**2)  # Add teluric lines
+
+        # Smaller Telluric lines not used for calibration.
+        for i in range(0, len(telluric_params), 3):
+            ctr = telluric_params[i]
+            amp = abs(telluric_params[i + 1])   # always positive so peaks are downward
+            wid = telluric_params[i + 2]
+            y_tell = y_tell - amp * np.exp(-0.5 * ((x - ctr) / wid)**2)  # Add teluric lines
+
+        # Stellar lines to multiply by
+        for i in range(0, len(stellar_params), 3):
+            stel_ctr = stellar_params[i]
+            stel_amp = abs(stellar_params[i + 1])  # always positive so peaks are down
+            stel_wid = stellar_params[i + 2]
+            # Addition of stellar lines
+            y_stel = y_stel - stel_amp * np.exp(-0.5 * ((x - stel_ctr) / stel_wid)**2)
+
+        # y_tell is zero centered to add
+        y_combined = (y_line + y_tell) * y_stel   # multiplication of stellar and telluric lines
+        y_combined[y_combined < 0] = 0   # limit minimum value to zero
+        return y_combined
 
 
 def func_for_plotting(x, params):
@@ -490,6 +559,34 @@ def split_telluric_stellar(params, num_stellar):
     assert len(line_params) % 3 is 0, "Line list is not correct length"
     assert len(stellar_params) % 3 is 0, "Stellar line list not correct length"
     return line_params, stellar_params,
+
+
+def split_telluric_stellar_telluric(params: List[float], num_stellar: int, num_telluric: int):
+    """Split up the array of lines into the telluric and stellar parts
+    input np.array(teluric lines, stellar lines)
+    num_stellar is the number of stellar lines at the end
+    output telluric lines, stellar lines
+
+    To add extra smaller telluric lines that you do not want to calibrate with.
+
+    """
+    first_tell = int(-3 * num_telluric)  # index of first stellar line (from end)
+    first_stel = int(-3 * num_stellar + first_tell)  # index of first stellar line (from end)
+    debug(pv("first_tell"))
+    debug(pv("first_stel"))
+    debug(pv("len(params)"))
+
+    line_params = params[:first_stel]
+    stellar_params = params[first_stel:first_tell]
+    telluric_params = params[first_tell:]
+
+    debug(pv("params"))
+    debug(pv("line_params"))
+    debug(pv("stellar_params"))
+    debug(pv("telluric_params"))
+    assert len(line_params) % 3 is 0, "Line list is not correct length"
+    assert len(stellar_params) % 3 is 0, "Stellar line list not correct length"
+    return line_params, stellar_params, telluric_params
 
 
 def coords2gaussian_params(coords, delta):
@@ -602,6 +699,7 @@ def plot_fit(wl, Spec, params, init_params=None, title=None):
     plt.plot(wl, returnfit, label="Fitted Lines")
     plt.title(title)
     plt.legend(loc='best')
+
     # Stopping scientific notation offset in wavelength
     plt.get_xaxis().get_major_formatter().set_useOffset(False)
 
@@ -616,7 +714,6 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     """Plotting both together, many kwargs for different parts of code."""
     """hor for add horizontal line"""
     fig2 = plt.figure(figsize=(12, 12))
-    # fig.set_size_inches(25, 15, forward=False)
     ax1 = fig2.add_subplot(111)
     ax2 = ax1.twiny()
 
@@ -706,6 +803,7 @@ def overlay_fitting(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
 
     On separate subplots to better see if the fits are good.
     """
+    fitted_cal_a = func_for_plotting(wl_a, init_params_a)
     fitted_a = func_for_plotting(wl_a, paramsA)
     fitted_b = func_for_plotting(wl_b, paramsB)
 
@@ -717,12 +815,16 @@ def overlay_fitting(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
 
     ax1.plot(wl_a, spec_a, label="Spectra", lw=2)
     ax1.plot(wl_a, fitted_a, label="Fit", lw=2)
+    if init_params_a is not None:
+        ax1.plot(wl_a, func_for_plotting(wl_a, init_params_a), "--", label="Calibration lines.")
     ax1.set_title("CRIRES NIR Spectra")
     ax1.set_xlabel("Pixel Number")
     ax1.legend(loc="best")
 
     ax2.plot(wl_b, spec_b, label="Spectra", lw=2)
     ax2.plot(wl_b, fitted_b, label="Fit", lw=2)
+    if init_params_b is not None:
+        ax2.plot(wl_b, func_for_plotting(wl_b, init_params_b), "--", label="Calibration lines.")
     ax2.set_title("TAPAS Telluric Spectra")
     ax2.set_xlabel("Wavelength (nm)")
     ax2.get_xaxis().get_major_formatter().set_useOffset(False)
