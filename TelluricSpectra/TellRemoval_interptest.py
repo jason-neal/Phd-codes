@@ -31,31 +31,31 @@ def match_wl(wl, spec, ref_wl):
     """Interpolate Wavelengths of spectra to common WL
     Most likely convert telluric to observed spectra wl after wl mapping performed"""
     newspec1 = np.interp(ref_wl, wl, spec)  # 1-d peicewise linear interpolat
-    test_plot_interpolation(wl, spec,ref_wl,newspec1)
+    test_plot_interpolation(wl, spec, ref_wl, newspec1)
 
     print("newspec1")
     # cubic spline with scipy
-    #linear_interp = interp1d(wl, spec)
-    #linear_interp = interp1d(wl, spec, kind='cubic')
+    # linear_interp = interp1d(wl, spec)
+    # linear_interp = interp1d(wl, spec, kind='cubic')
 
     # Timeing interpolation
     starttime = time.time()
     newspec2 = interpolate.interp1d(wl, spec, kind='linear')(ref_wl)
-    print("linear intergration time =", time.time()-starttime)
+    print("linear intergration time =", time.time() - starttime)
     starttime = time.time()
     newspec2 = interpolate.interp1d(wl, spec, kind='slinear')(ref_wl)
-    print("slinear intergration time =", time.time()-starttime)
+    print("slinear intergration time =", time.time() - starttime)
     starttime = time.time()
     newspec2 = interpolate.interp1d(wl, spec, kind='quadratic')(ref_wl)
-    print("quadratic intergration time =", time.time()-starttime)
+    print("quadratic intergration time =", time.time() - starttime)
     starttime = time.time()
     newspec2 = interpolate.interp1d(wl, spec, kind='cubic')(ref_wl)
-    print("cubic intergration time =", time.time()-starttime)
+    print("cubic intergration time =", time.time() - starttime)
 
-    #newspec2 = interp1d(wl, spec, kind='cubic')(ref_wl)
+    # newspec2 = interp1d(wl, spec, kind='cubic')(ref_wl)
 
     print("newspec2")
-    #ewspec2 = sp.interpolate.interp1d(wl, spec, kind='cubic')(ref_wl)
+    # ewspec2 = sp.interpolate.interp1d(wl, spec, kind='cubic')(ref_wl)
     return newspec1, newspec2  # test inperpolations
 
 
@@ -94,19 +94,17 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell):
     print("After match_wl")
     # could just do interp here without  match_wl function
     # test outputs
-    #print("test1")
-    #test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp1)
-    #print("test2")
-   # test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp2)
+    # print("test1")
+    # test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp1)
+    # print("test2")
+    # test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp2)
 
     # division
     print("Before divide_spectra")
     corrected_spec = divide_spectra(spec_obs, interp2)
     print("After divide_spectra")
-    #
+
     # other corrections?
-
-
     return corrected_spec
 
 
@@ -138,10 +136,10 @@ def main(fname, output=False):
 
     tell_data = obt.load_telluric(tellpath, tellname[0])
 
-    wl_lower = np.min(wl/1.0001)
-    wl_upper = np.max(wl*1.0001)
+    wl_lower = np.min(wl / 1.0001)
+    wl_upper = np.max(wl * 1.0001)
     tell_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
-    #tell_data =
+    # tell_data =
     print("After slice spectra")
     plt.figure()
     plt.plot(wl, I, label="Spectra")
@@ -171,13 +169,13 @@ if __name__ == "__main__":
     x2 = range(sze)
     y2 = np.random.randn(len(x2)) + np.ones_like(x2)
     y2 = 0.5 * np.ones_like(x2)
-    x1 = np.linspace(1, sze-1.5, 9)
+    x1 = np.linspace(1, sze - 1.5, 9)
     y1 = np.random.randn(len(x1)) + np.ones_like(x1)
     y1 = np.ones_like(x1)
     print(x1)
     print(x2)
-    #print(y1)
-    #print(y2)
+    # print(y1)
+    # print(y2)
     y1_cor = telluric_correct(x1, y1, x2, y2)
     print(x1)
     print(y1)

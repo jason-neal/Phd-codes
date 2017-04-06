@@ -74,19 +74,17 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell):
     print("After match_wl")
     # could just do interp here without  match_wl function
     # test outputs
-    #print("test1")
+    # print("test1")
     # test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp1)
-    #print("test2")
-   # test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp2)
+    # print("test2")
+    # test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp2)
 
     # division
     print("Before divide_spectra")
     corrected_spec = divide_spectra(spec_obs, interp2)
     print("After divide_spectra")
-    #
+
     # other corrections?
-
-
     return corrected_spec
 
 
@@ -158,8 +156,8 @@ if __name__ == "__main__":
     y1 = np.ones_like(x1)
     print(x1)
     print(x2)
-    #print(y1)
-    #print(y2)
+    # print(y1)
+    # print(y2)
     y1_cor = telluric_correct(x1, y1, x2, y2)
     print(x1)
     print(y1)

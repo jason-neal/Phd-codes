@@ -18,10 +18,12 @@ import Obtain_Telluric as obt
 
 from PyAstronomy import pyasl
 
+
 def ra2deg(ra):
     split = ra.split(":")
     deg = float(split[0]) * 15.0 + float(split[1]) / 4.0 + float(split[2]) / 240.0
     return deg
+
 
 def dec2deg(dec):
     #  degrees ( ° ), minutes ( ' ), and seconds ( " )
@@ -29,13 +31,14 @@ def dec2deg(dec):
     split = dec.split(":")
     print(split)
     if float(split[0]) < 0:
-        deg = abs(float(split[0])) + (float(split[1]) + (float(split[2]) / 60) ) / 60
+        deg = abs(float(split[0])) + (float(split[1]) + (float(split[2]) / 60)) / 60
         deg *= -1
     else:
-        deg = float(split[0]) + (float(split[1]) + (float(split[2]) / 60) ) / 60
+        deg = float(split[0]) + (float(split[1]) + (float(split[2]) / 60)) / 60
     return deg
 
-####### LOAD IN TELLURIC DATA ######
+
+# ###### LOAD IN TELLURIC DATA ######
 tapas1_path = "/home/jneal/Phd/data/Tapas/hd30501-50000-bervcorrected/"
 Bervname = "tapas_HD30501_1_R50000_2012-04-07T00:20:00.ipac"
 
@@ -52,7 +55,7 @@ Berv_trans = BervData[1]
 NoBerv_wl = NoBervData[0]
 NoBerv_trans = NoBervData[1]
 
-### Corrdinates for BERV Correction
+# ## Corrdinates for BERV Correction
 # From Tapas file
 print(NoBervHdr)
 obs_alt = float(NoBervHdr["SITEELEV"])
@@ -67,9 +70,9 @@ dec = NoBervHdr["DEC"]
 dec_deg = dec2deg(dec)
 print("dec decimal", dec_deg)
 
-Time =  NoBervHdr["DATE-OBS"]
+Time = NoBervHdr["DATE-OBS"]
 
-jd =  ephem.julian_date(Time)
+jd = ephem.julian_date(Time)
 print("jd tapas", jd)
 
 # From My book
@@ -97,17 +100,18 @@ tapas_barycorr = pyasl.baryCorr(jd, ra_deg, dec_deg, deq=0.0)
 
 tapas_helcorr = pyasl.helcorr(obs_long, obs_lat, obs_alt, ra_deg, dec_deg, jd, debug=False)
 my_barycorr = pyasl.baryCorr(jd_manual, ra_deg_manual, dec_deg_manual, deq=0.0)
-my_helcorr = pyasl.helcorr(obs_long_manual, obs_lat_manual, obs_alt_manual, ra_deg_manual, dec_deg_manual, jd_manual, debug=False)
+my_helcorr = pyasl.helcorr(obs_long_manual, obs_lat_manual, obs_alt_manual, ra_deg_manual, dec_deg_manual, jd_manual,
+                           debug=False)
 # helcorr calculates the motion of an observer in the direction of a star
 print("Tapas barycorr", tapas_barycorr)
 print("Tapas hellcorr", tapas_helcorr)
 print("My barycorr", my_barycorr)
 print("My hellcorr", my_helcorr)
 
-nflux1, wlprime1= pyasl.dopplerShift(NoBerv_wl, NoBerv_trans, tapas_helcorr[0], edgeHandling=None, fillValue=None)
+nflux1, wlprime1 = pyasl.dopplerShift(NoBerv_wl, NoBerv_trans, tapas_helcorr[0], edgeHandling=None, fillValue=None)
 nflux2, wlprime2 = pyasl.dopplerShift(NoBerv_wl, NoBerv_trans, my_helcorr[0], edgeHandling=None, fillValue=None)
 
-#### Plot berv correction stuff
+# ### Plot berv correction stuff
 plt.figure()
 plt.plot(Berv_wl, Berv_trans, "k.-", label="Berv Corrected")
 plt.plot(NoBerv_wl, NoBerv_trans, "g.-", label="No Berv")
@@ -120,7 +124,7 @@ ax.get_xaxis().get_major_formatter().set_useOffset(False)
 plt.legend(loc=0)
 plt.show()
 
-#### Plot berv correction stuff
+# ### Plot berv correction stuff
 plt.figure()
 plt.plot(Berv_wl, Berv_trans, "k.-", label="Berv Corrected")
 plt.plot(NoBerv_wl, NoBerv_trans, "g.-", label="No Berv")
@@ -133,7 +137,7 @@ ax.get_xaxis().get_major_formatter().set_useOffset(False)
 plt.legend(loc=0)
 plt.show()
 
-#### Plot berv correction stuff
+# ### Plot berv correction stuff
 plt.figure()
 plt.plot(Berv_wl, Berv_trans, "k.-", label="Berv Corrected")
 plt.plot(NoBerv_wl, NoBerv_trans, "g.-", label="No Berv")
@@ -145,7 +149,7 @@ ax = plt.gca()
 ax.get_xaxis().get_major_formatter().set_useOffset(False)
 plt.legend(loc=0)
 
-#### Plot berv correction stuff
+# ### Plot berv correction stuff
 plt.figure()
 plt.plot(Berv_wl, Berv_trans, "k.-", label="Berv Corrected")
 plt.plot(NoBerv_wl, NoBerv_trans, "g.-", label="No Berv")

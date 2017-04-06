@@ -9,14 +9,14 @@ from astropy.io import fits
 ESO_path = "/home/jneal/Phd/data/ESO-Skydata/"
 tapas_path = "/home/jneal/Phd/data/tapas-testing/"
 
-filenames = ["HD30501-1-R50000-gaussianconvolution-2FWHM.dat", \
-            "HD30501-1-R50000-gaussianconvolution-5FWHM.dat", \
-            "HD30501-1-R50000-gaussianconvolution-8FWHM.dat", \
-            "HD30501-1-R50000-noconvolution-.dat", \
-            "HD30501-1-R100000-gaussianconvolution-5FWHM.dat", \
+filenames = ["HD30501-1-R50000-gaussianconvolution-2FWHM.dat",
+            "HD30501-1-R50000-gaussianconvolution-5FWHM.dat",
+            "HD30501-1-R50000-gaussianconvolution-8FWHM.dat",
+            "HD30501-1-R50000-noconvolution-.dat",
+            "HD30501-1-R100000-gaussianconvolution-5FWHM.dat",
             "HD30501-1-R100000-noconvolution-.dat"]
 
-Fits_skytables = ["HD30501-1-100000-no-convolution.fits", \
+Fits_skytables = ["HD30501-1-100000-no-convolution.fits",
                     "HD30501-1-50000-no-convolution.fits"]
 
 
@@ -35,7 +35,7 @@ plt.xlim([2117, 2121])
 # plt.show()
 
 
-no_conv_filenames = ["HD30501-1-R50000-noconvolution-.dat", \
+no_conv_filenames = ["HD30501-1-R50000-noconvolution-.dat",
                     "HD30501-1-R100000-noconvolution-.dat"]
 plt.figure()
 for name in no_conv_filenames:
@@ -47,9 +47,9 @@ plt.legend()
 plt.title("Resolution Change Effect with No Convolution")
 # plt.show()
 
-R5_filenames = ["HD30501-1-R50000-noconvolution-.dat", \
-            "HD30501-1-R50000-gaussianconvolution-2FWHM.dat", \
-            "HD30501-1-R50000-gaussianconvolution-5FWHM.dat", \
+R5_filenames = ["HD30501-1-R50000-noconvolution-.dat",
+            "HD30501-1-R50000-gaussianconvolution-2FWHM.dat",
+            "HD30501-1-R50000-gaussianconvolution-5FWHM.dat",
             "HD30501-1-R50000-gaussianconvolution-8FWHM.dat"]
 plt.figure()
 for name in R5_filenames:
@@ -71,7 +71,7 @@ plt.title("50000 Resolution Effect of Line Profile")
 # plt.show()
 
 
-R10_filenames = ["HD30501-1-R100000-gaussianconvolution-5FWHM.dat", \
+R10_filenames = ["HD30501-1-R100000-gaussianconvolution-5FWHM.dat",
             "HD30501-1-R100000-noconvolution-.dat"]
 plt.figure()
 for name in R10_filenames:
@@ -96,8 +96,8 @@ plt.title("R=100000 Convolution Effect")
 #####  Tapas at R 50000
 # path = "/home/jneal/Phd/data/tapas-testing/"
 
-tapas1_filenames = ["tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-10.ipac", \
-            "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-5.ipac", \
+tapas1_filenames = ["tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-10.ipac",
+            "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-5.ipac",
             "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-15.ipac"]
 plt.figure()
 for name in tapas1_filenames:
@@ -115,9 +115,9 @@ plt.title("Tapas R=50000 sampling Effect")
 # plt.show()
 
 
-tapas2_filenames = ["tapas_test2_1.ipac", \
-            "tapas_test2_2.ipac", \
-            "tapas_test2_3.ipac", \
+tapas2_filenames = ["tapas_test2_1.ipac",
+            "tapas_test2_2.ipac",
+            "tapas_test2_3.ipac",
             "tapas_test2_4.ipac"]
 plt.figure()
 for name in tapas2_filenames:
@@ -147,12 +147,12 @@ plt.title("Tapas Instrument Effect")
 # Effect of 1 hour time increments on tapas spectra
 # (to see the effect of the 1hr timing difference given by tapas)
 plt.figure()
-tapas3_filenames = ["tapas_test3_timing_-3.ipac", \
-            "tapas_-2timing.ipac", \
-            "tapas_test3_timing_-2.ipac", \
-            "tapas_test3_timing_-1.ipac", \
-            "tapas_test3_timing_0.ipac", \
-            "tapas_test3_timing_+1.ipac", \
+tapas3_filenames = ["tapas_test3_timing_-3.ipac",
+            "tapas_-2timing.ipac",
+            "tapas_test3_timing_-2.ipac",
+            "tapas_test3_timing_-1.ipac",
+            "tapas_test3_timing_0.ipac",
+            "tapas_test3_timing_+1.ipac",
             "tapas_test3_timing_+2.ipac"]
             # "tapas_test3_timing_+3.ipac"
 
@@ -177,12 +177,12 @@ plt.xlim([2117, 2121])
 # Effect of 1 hour time increments on tapas spectra
 # (to see the effect of the 1hr timing difference given by tapas)
 plt.figure()
-tapas3_filenames = ["tapas_test3_timing_-3.ipac", \
-            "tapas_-2timing.ipac", \
-            "tapas_test3_timing_-2.ipac", \
-            "tapas_test3_timing_-1.ipac", \
-            "tapas_test3_timing_0.ipac", \
-            "tapas_test3_timing_+1.ipac", \
+tapas3_filenames = ["tapas_test3_timing_-3.ipac",
+            "tapas_-2timing.ipac",
+            "tapas_test3_timing_-2.ipac",
+            "tapas_test3_timing_-1.ipac",
+            "tapas_test3_timing_0.ipac",
+            "tapas_test3_timing_+1.ipac",
             "tapas_test3_timing_+2.ipac"]
             # "tapas_test3_timing_+3.ipac"
 
@@ -221,7 +221,7 @@ plt.xlim([2117, 2121])
 # wavelength calibration of the observed spectrum, since it is
 # taken simultaneously with the target spectrum.
 
-tapas4_filenames = ["tapas_test3_timing_0_no_berv_corr.ipac", \
+tapas4_filenames = ["tapas_test3_timing_0_no_berv_corr.ipac",
             "tapas_test3_timing_0.ipac"]
 plt.figure()
 for name in tapas4_filenames:
@@ -244,9 +244,9 @@ plt.xlim([2117, 2121])
 ##################################################################### 3
 
 ## Compare ESO Sky Calc and TAPAS
-comp_filenames = ["tapas_test3_timing_-1.ipac", \
-        "HD30501-1-R50000-gaussianconvolution-2FWHM.dat", \
-        "HD30501-1-R50000-gaussianconvolution-5FWHM.dat", \
+comp_filenames = ["tapas_test3_timing_-1.ipac",
+        "HD30501-1-R50000-gaussianconvolution-2FWHM.dat",
+        "HD30501-1-R50000-gaussianconvolution-5FWHM.dat",
         "HD30501-1-R50000-gaussianconvolution-8FWHM.dat"]
 plt.figure()
 for name in comp_filenames:
