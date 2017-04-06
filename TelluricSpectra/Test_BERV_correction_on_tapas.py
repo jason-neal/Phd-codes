@@ -6,6 +6,7 @@ import os
 # import time
 import ephem
 # import datetime
+
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -90,7 +91,6 @@ print("Time_manual", Time_manual)
 
 jd_manual = ephem.julian_date(Time_manual)
 print("JD manual", jd_manual)
-
 
 # Apply corrections
 tapas_barycorr = pyasl.baryCorr(jd, ra_deg, dec_deg, deq=0.0)

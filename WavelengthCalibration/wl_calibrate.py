@@ -175,6 +175,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     print("telluric type", type(tell_data[1]), "dtype", tell_data[0].dtype,tell_data[1].dtype)
 
     # Scale telluric lines to airmass
+
     ####### this needs t be corrected to middle of hole obs. Not just first observation
     obs_airmass = (hdr["HIERARCH ESO TEL AIRM START"] + hdr["HIERARCH ESO TEL AIRM END"]) / 2
     
