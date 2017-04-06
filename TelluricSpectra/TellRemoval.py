@@ -41,6 +41,7 @@ def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
     plt.show(block=False)
     return None
     
+    
 def airmass_scaling(spectra, spec_airmass, obs_airmass):
     """Scale the Telluric spectra to match the airmass of the observation"""
     B = obs_airmass / spec_airmass
@@ -90,8 +91,6 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     Correction_labels.append("Header values B Correction")
 
     return Corrections, Correction_tells, Correction_Bs, Correction_labels
-
-
 
 def export_correction_2fits(filename, wavelength, corrected, original, telluric, hdr, hdrkeys, hdrvals, tellhdr):
     """ Write Telluric Corrected spectra to a fits table file"""
@@ -196,7 +195,7 @@ def h20_residual(params, obs_data, telluric_data):
     #print("Input telluic wl- Min ", np.min(telluric_wl)," Max ", np.max(telluric_wl))
     #print("conv tell wl- Min ", np.min(conv_tell_wl)," Max ", np.max(conv_tell_wl))
   
-    
+
     interped_conv_tell = wl_interpolation(conv_tell_wl, conv_tell_I, obs_wl)
     print("Convolution and interpolation inside residual function was done")
     
@@ -241,6 +240,7 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
 
     return h20_corrected_obs, interp_conv_h20_I, out, outreport
 
+
 def telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmass):
     """ Set obs_airmas and spec_airmass equal to achieve a scaling factor of 1 = No scaling"""
     #tell_I = airmass_scaling(tell_I, spec_airmass, obs_airmass)
@@ -249,6 +249,7 @@ def telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmas
     corrected_obs = divide_spectra(obs_I, interp_tell_I)
 
     return corrected_obs, interp_tell_I, obs_airmass/spec_airmass
+
 
 def _parser():
     """Take care of all the argparse stuff.
@@ -267,6 +268,7 @@ def _parser():
                         help='Interpolation order, linear, quadratic or cubic')
     parser.add_argument('-m', '--method', default="scipy",
                         help='Interpolation method numpy or scipy')
+
     parser.add_argument("-s", "--show", action='store_true', 
                         help="Show plots") # Does not work without a display
     parser.add_argument("-c", "--h2o_scaling", action='store_true',
@@ -275,6 +277,7 @@ def _parser():
                         help="Use new code method")
     args = parser.parse_args()
     return args
+
 
 def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy", 
          show=False, h2o_scaling=False, new_method=False):
@@ -306,7 +309,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     obs_airmass = Average_airmass
     print("From all 8 raw spectra: \nAverage_airmass", Average_airmass, 
           "\nAverage_time", average_time)
-
+    
     # Calculate Resolving Power.
     # Using the rule of thumb equation from the CRIRES manual. 
     # Check for adaptive optics use.
@@ -316,11 +319,11 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     tiptilt_loop = hdr["HIERARCH ESO AOS RTC LOOP TIPTILT"] # Tip Tilt loop on or off
     slit_width = hdr["HIERARCH ESO INS SLIT1 WID"]          # Slit width
     
-    if any([horder_loop, loopstate,tiptilt_loop]) and (loopstate != "OPEN"):
+    if any([horder_loop, loopstate, tiptilt_loop]) and (loopstate != "OPEN"):
         print("Adaptive optics was used - Rule of thumb for Resolution is not good enough")
     else:
-        R = int(100000*0.2 / slit_width)
-
+        R = int(100000 * 0.2 / slit_width)
+             
  #################################################  NEW METHOD section ############################
     if new_method:
         # Changing for new telluric line location defaults (inside the Combined_nods)
@@ -506,7 +509,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         print("Saved corected telluric spectra to " + str(output_filename))
     else:
         print("Skipped Saving corected telluric spectra ")
-
+        
 
 if __name__ == "__main__":
     args = vars(_parser())

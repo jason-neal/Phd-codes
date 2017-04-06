@@ -12396,7 +12396,70 @@ wvl : array
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">-</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fast_convolve</span><span class="p">(</span><span class="n">wav_val</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IP convolution multiplication step for a single wavelength value&quot;&quot;&quot;</span>
+    <span class="n">FWHM</span> <span class="o">=</span> <span class="n">wav_val</span><span class="o">/</span><span class="n">R</span>
+    
+    <span class="n">index_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">wav_extended</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">wav_val</span> <span class="o">-</span> <span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM</span><span class="p">))</span> <span class="o">&amp;</span>  <span class="p">(</span><span class="n">wav_extended</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">wav_val</span> <span class="o">+</span> <span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM</span><span class="p">))</span>
+    
+    <span class="n">flux_2convolve</span> <span class="o">=</span> <span class="n">flux_extended</span><span class="p">[</span><span class="n">index_mask</span><span class="p">]</span>
+    <span class="n">IP</span> <span class="o">=</span> <span class="n">unitary_Gauss</span><span class="p">(</span><span class="n">wav_extended</span><span class="p">[</span><span class="n">index_mask</span><span class="p">],</span> <span class="n">wav_val</span><span class="p">,</span> <span class="n">FWHM</span><span class="p">)</span>
+    
+    <span class="n">sum_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">IP</span><span class="o">*</span><span class="n">flux_2convolve</span><span class="p">)</span> 
+    <span class="n">unitary_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">IP</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">flux_2convolve</span><span class="p">))</span>  <span class="c1"># Effect of convolution onUnitary. For changing number of points</span>
+        
+    <span class="k">return</span> <span class="n">sum_val</span><span class="o">/</span><span class="n">unitary_val</span>
+
+<span class="k">def</span> <span class="nf">convolution_nir</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">chip_limits</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convolution code adapted from pedros code and speed up with np mask logic&quot;&quot;&quot;</span>
+    
+    <span class="c1">#print(&quot;types&quot;, type(wav), type(flux), type(chip))</span>
+    <span class="c1">#print(&quot;lengths&quot;, len(wav), len(flux), len(chip))</span>
+    
+    <span class="c1"># CRIRES HDR vals for chip limits don&#39;t match well with calibrated values (get interpolation out of range error)</span>
+    <span class="c1"># So will use limits from the obs data instead </span>
+    <span class="c1">#wav_chip, flux_chip = chip_selector(wav, flux, chip)</span>
+    <span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_chip</span> <span class="o">=</span> <span class="n">fast_wav_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">chip_limits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">chip_limits</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c1">#we need to calculate the FWHM at this value in order to set the starting point for the convolution</span>
+    
+    <span class="n">FWHM_min</span> <span class="o">=</span> <span class="n">wav_chip</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">R</span>    <span class="c1">#FWHM at the extremes of vector</span>
+    <span class="n">FWHM_max</span> <span class="o">=</span> <span class="n">wav_chip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">R</span>       
+    
+    <span class="c1">#wide wavelength bin for the resolution_convolution</span>
+    <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span> <span class="o">=</span> <span class="n">fast_wav_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">wav_chip</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM_min</span><span class="p">,</span> <span class="n">wav_chip</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">FWHM_lim</span><span class="o">*</span><span class="n">FWHM_max</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> 
+    <span class="c1"># isinstance check is ~100*faster then arraying the array again.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wav_extended</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">wav_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wav_extended</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span> 
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flux_extended</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">flux_extended</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">flux_extended</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting the Resolution convolution...&quot;</span><span class="p">)</span>
+    <span class="c1"># Predefine np array space</span>
+    <span class="n">flux_conv_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;float64&quot;</span><span class="p">)</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">base_val</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">)</span><span class="o">//</span><span class="mi">20</span>   <span class="c1"># Adjust here to change % between reports</span>
+    
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">wav</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">):</span>
+        <span class="c1"># put value directly into the array</span>
+        <span class="n">flux_conv_res</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">fast_convolve</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">wav_extended</span><span class="p">,</span> <span class="n">flux_extended</span><span class="p">,</span> <span class="n">FWHM_lim</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="k">base_val</span>== 0) and verbose:
+            <span class="n">counter</span> <span class="o">=</span> <span class="n">counter</span><span class="o">+</span><span class="mi">5</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Resolution Convolution at </span><span class="si">{}%%</span><span class="s2">...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">counter</span><span class="p">))</span>
+    
+    <span class="c1">#if not isinstance(flux_conv_res, np.ndarray):</span>
+    <span class="c1">#    flux_conv_res = np.array(flux_conv_res, dtype=&quot;float64&quot;)</span>
+        
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span><span class="p">(</span><span class="n">plot</span><span class="p">):</span>
+        <span class="n">fig</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;wavelength [ $\mu$m ])&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;flux [counts] &quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_chip</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">flux_chip</span><span class="p">),</span> <span class="n">color</span> <span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original spectra&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_conv_res</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">flux_conv_res</span><span class="p">),</span> <span class="n">color</span> <span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Spectrum observed at and R=</span><span class="si">%d</span><span class="s2"> .&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">R</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span> 
+    <span class="k">return</span> <span class="p">[</span><span class="n">wav_chip</span><span class="p">,</span> <span class="n">flux_conv_res</span><span class="p">]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done&quot;</span><span class="p">)</span>
 </pre></div>
@@ -12971,6 +13034,7 @@ All the scaling values are all over the place. Something like 0.5, 0.9, 0.8, 0.2
 <span class="n">maxes</span> <span class="o">=</span> <span class="n">I_tell</span><span class="p">[(</span><span class="n">I_tell</span> <span class="o">&lt;</span> <span class="mf">1.2</span><span class="p">)]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[</span><span class="o">-</span><span class="mi">50</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 <span class="n">norm_tell_all_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">tell_all_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tell_all_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">I_tell</span><span class="p">[</span><span class="n">maxes</span><span class="p">]))</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Telluric normaliztion value&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">I_tell</span><span class="p">[</span><span class="n">maxes</span><span class="p">]))</span>
+<div class=" highlight hl-ipython3"><pre><span></span> 
 </pre></div>
 
 </div>

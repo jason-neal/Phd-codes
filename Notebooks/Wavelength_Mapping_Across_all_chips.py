@@ -19,9 +19,10 @@ from __future__ import division, print_function
 from __future__ import absolute_import, unicode_literals
 
 import numpy as np
-
-# Import pyplot for plotting
 import matplotlib.pyplot as plt
+from astropy.io import fits
+import Obtain_Telluric as obt
+from Get_filenames import get_filenames
 
 # Seaborn, useful for graphics
 import seaborn as sns
@@ -38,6 +39,9 @@ import bokeh.io
 import bokeh.mpl
 import bokeh.plotting
 
+from bokeh.plotting import figure, show, output_file, gridplot, vplot
+from bokeh.models import BoxAnnotation
+from bokeh.models import Range1d
 # This enables SVG graphics inline.  There is a bug, so uncomment if it works.
 get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
 
@@ -57,6 +61,10 @@ sns.set_style('darkgrid', rc=rc)
 bokeh.io.output_notebook()
 
 
+import os
+here = os.getcwd()
+print(here)
+
 # #### Load data
 
 # In[ ]:
@@ -64,10 +72,40 @@ bokeh.io.output_notebook()
 #Chipnames = ["Coordinates_CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-04-07T00-08-29.976_2.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-04-07T00-08-29.976_3.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-04-07T00-08-29.976_4.nod.ms.norm.sum.txt"]
 
 #Coordinates files from hd30501-2b
-Chipnames = ["Coordinates_CRIRE.2012-08-06T09-42-07.888_1.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_2.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_3.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_4.nod.ms.norm.sum.txt"]
+
+#Chipnames = ["Coordinates_CRIRE.2012-08-06T09-42-07.888_1.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_2.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_3.nod.ms.norm.sum.txt", "Coordinates_CRIRE.2012-08-06T09-42-07.888_4.nod.ms.norm.sum.txt"]
 
 #PATH = "/home/jneal/Dropbox/PhD/hd30501-Wavecal-march16/"
-PATH = "C:/Users/Jason/Dropbox/PhD/hd30501-Wavecal-march16/"
+#PATH = "C:/Users/Jason/Dropbox/PhD/hd30501-Wavecal-march16/"
+
+
+
+
+# In[ ]:
+
+# Updated load in for beter calibration data
+chip_num = 1
+obs_num = "2a"
+#ref_num = "3"
+target = "HD30501-" + obs_num
+#reference_target = "HD30501-"+ ref_num    # should be different from target
+
+### Coord data
+coord_path = here +"/HD30501_data/{0}/".format(obs_num)
+print(coord_path)
+#PATH = coord_path
+#dracs_path = "C:/Users/Jason/Documents/PhD/Phd-codes/Notebooks/HD30501_data/{0}/".format(obs_num)
+#dracs_path = "../HD30501_data/{0}".format(obs_num)
+def get_Coordfile_name(path, chipnum):
+    spliting = path.split("/")
+    print(spliting)
+    if spliting[-3] in spliting[-4]:
+        print("Double path add -hack")
+        path = path + "../../"
+        print(path)
+    coord_name = get_filenames(path, "Coordinates_CRIRE.*","*{}.nod.ms.norm.sum*".format(chipnum))
+    return path + coord_name[0]
+
 
 
 # Need to load in the data and unpack all the parameters from each of the detectors for this observation.
@@ -78,10 +116,16 @@ PATH = "C:/Users/Jason/Dropbox/PhD/hd30501-Wavecal-march16/"
 
 # In[ ]:
 
-pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
-pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
-pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
-pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
+#pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
+#pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
+#pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
+#pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
+
+pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(get_Coordfile_name(coord_path, 1), skiprows=1, unpack=True)
+pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(get_Coordfile_name(coord_path, 2), skiprows=1, unpack=True)
+pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(get_Coordfile_name(coord_path, 3), skiprows=1, unpack=True)
+pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(get_Coordfile_name(coord_path, 4), skiprows=1, unpack=True)
+
 
 
 # ### Arrange pixels with gaps
@@ -272,10 +316,16 @@ def residual(params, pixels, wl_data):
 # In[ ]:
 
 # USE same data as above
-pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
-pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2  = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
-pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3  = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
-pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4  = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
+
+#pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(PATH+Chipnames[0], skiprows=1, unpack=True)
+#pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(PATH+Chipnames[1], skiprows=1, unpack=True)
+#pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(PATH+Chipnames[2], skiprows=1, unpack=True)
+#pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(PATH+Chipnames[3], skiprows=1, unpack=True)
+
+pix1, pxl_depth1, pxl_fwhm1, wlen1, wl_depth1, wl_fwhm1 = np.loadtxt(get_Coordfile_name(coord_path, 1), skiprows=1, unpack=True)
+pix2, pxl_depth2, pxl_fwhm2, wlen2, wl_depth2, wl_fwhm2 = np.loadtxt(get_Coordfile_name(coord_path, 2), skiprows=1, unpack=True)
+pix3, pxl_depth3, pxl_fwhm3, wlen3, wl_depth3, wl_fwhm3 = np.loadtxt(get_Coordfile_name(coord_path, 3), skiprows=1, unpack=True)
+pix4, pxl_depth4, pxl_fwhm4, wlen4, wl_depth4, wl_fwhm4 = np.loadtxt(get_Coordfile_name(coord_path, 4), skiprows=1, unpack=True)
 
 
 Test_pxl1 = [pxl for pxl in pix1] 
@@ -359,6 +409,38 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # In[ ]:
+
+# Bokeh Plot
+    
+p = figure(width=600, height=300)
+
+p.line(Fitted_pixels, residual(out.params, Combined_pxls, Combined_wls) + Combined_wls, line_color="black")
+p.circle(Fitted_pixels, Combined_wls, fill_color = "red", line_color="black", radius=30)
+
+gap_starts =  [1024, 2*1024+Variable_Gap1_fit, 3*1024+Variable_Gap2_fit]
+gap_ends = [1024+Variable_Gap1_fit, 2*1024+Variable_Gap2_fit, 3*1024+Variable_Gap3_fit]
+Boxes = [BoxAnnotation(plot=p, left=start, right=end, fill_alpha=0.3, fill_color="yellow") for start, end in zip(gap_starts, gap_ends)]
+p.renderers.extend(Boxes)
+    
+# Mark Chip positions
+#linepos = [0, 1024, 1024+Variable_Gap1_fit, 2*1024+Variable_Gap1_fit, 2*1024+Variable_Gap2_fit, 3*1024+Variable_Gap2_fit, 3*1024+Variable_Gap3_fit, 4*1024+Variable_Gap3_fit]
+#plt.vlines(linepos, 2110, 2170)
+#plt.ylim([2100,2170])
+
+p.title = "Wavelenght Mapping"
+p.title_text_font_size = "14pt"
+p.yaxis.axis_label = 'Wavelength (nm)'
+p.yaxis.axis_label_text_font_size = "12pt"
+p.xaxis.axis_label = 'Pixel Position'
+p.xaxis.axis_label_text_font_size = "12pt"
+#s3.legend.location = "bottom_right"
+#s3.legend.border_line_color = None
+
+show(p)
+
+
+# In[ ]:
+
 
 plt.plot(Fitted_pixels, residual(out.params, Combined_pxls, Combined_wls), 'ro')
 plt.title("Residual with Variable Gaps")
