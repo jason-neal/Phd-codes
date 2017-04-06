@@ -6,46 +6,31 @@
     can plot result
 
 """
+from __future__ import division, print_function
 import os
 import time
-import numpy as np
-import scipy as sp
-import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d
-from astropy.io import fits
 import argparse
-import GaussianFitting as gf
+import numpy as np
+#import scipy as sp
+from scipy.interpolate import interp1d
+import matplotlib.pyplot as plt
+from astropy.io import fits
+from lmfit import minimize, Parameters
+import lmfit
+#import GaussianFitting as gf
 import Obtain_Telluric as obt
-from SpectralTools import wav_selector
+from Get_filenames import get_filenames
+from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
 
 
 def divide_spectra(spec_a, spec_b):
-    """ Assumes that the spectra have been interpolated to same wavelength step"""
-    """ Divide two spectra"""
+    """ Assumes that the spectra have been interpolated to same wavelength step
+
+    Divide two spectra
+    """
     assert(len(spec_a) == len(spec_b)), "Not the same length"
     divide = spec_a / spec_b
     return divide
-
-
-def match_wl(wl, spec, ref_wl, method="scipy", kind="linear"):
-    """Interpolate Wavelengths of spectra to common WL
-    Most likely convert telluric to observed spectra wl after wl mapping performed"""
-    starttime = time.time()
-    if method == "scipy":
-        print(kind + " scipy interpolation")
-        linear_interp = interp1d(wl, spec, kind=kind)
-        new_spec = linear_interp(ref_wl)
-    elif method == "numpy":
-        if kind.lower() is not "linear":
-            print("Warning: Cannot do " + kind + " interpolation with numpy, switching to linear" )
-        print("Linear numpy interpolation")
-        new_spec = np.interp(ref_wl, wl, spec)  # 1-d peicewise linear interpolat
-    else:
-        print("Method was given as " + method)
-        raise("Not correct interpolation method specified")
-    print("Interpolation Time = " + str(time.time() - starttime) + " seconds")
-
-    return new_spec  # test inperpolations
 
 
 def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
@@ -58,17 +43,6 @@ def plot_spectra(wl, spec, colspec="k.-", label=None, title="Spectrum"):
     plt.show(block=False)
     return None
 
-# def test_plot_interpolation(x1, y1, x2, y2, methodname=None):
-#     """ Plotting code """
-#     plt.plot(x1, y1, label="original values")
-#     plt.plot(x2, y2, label="new points")
-#     plt.title("testing Interpolation: ", methodname)
-#     plt.legend()
-#     plt.xlabel("Wavelength (nm)")
-#     plt.ylabel("Norm Intensity")
-#     plt.show()
-#     return None
-
 
 def airmass_scaling(spectra, spec_airmass, obs_airmass):
     """Scale the Telluric spectra to match the airmass of the observation"""
@@ -80,12 +54,12 @@ def airmass_scaling(spectra, spec_airmass, obs_airmass):
 def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_airmass, kind="linear", method="scipy"):
     """Code to contain other functions in this file
 
-     1. Interpolate spectra to same wavelengths with match_wl()
-     2. Divide by Telluric
-     3.   ...
+     1. Interpolate spectra to same wavelengths with wl_interpolation()
+     2. Divide by Telluric (bad correction)
+     3. Scale telluric and divide again (Better correction)
+     4.   ...
     """
-    interped_tell = match_wl(wl_tell, spec_tell, wl_obs, kind=kind, method=method)
-
+    interped_tell = wl_interpolation(wl_tell, spec_tell, wl_obs, kind=kind, method=method)
     """ from Makee: Atmospheric Absorption Correction
     Assuming that the telluric spectra I have is equvilant to the star
     flux and steps 1-3 have been done by using the Tapas spectrum and
@@ -118,144 +92,7 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
     Correction_Bs.append(B)
     Correction_tells.append(new_tell)
     Correction_labels.append("Header values B Correction")
-
-
-    # Bvals, Blabels = B_minimization(wl_obs, spec_obs, interped_tell, B_init=False)
-    #print("Minimised B values")
-    # for bval, blabel in zip(Bvals, Blabels):
-    #    print(blabel + ", B = {0:.3f}".format(bval))
-
-    #    b_tell = interped_tell ** bval
-    #    b_correction = divide_spectra(spec_obs, b_tell) # Divide by telluric spectra
-
-    #    Correction_Bs.append(bval)
-    #    Corrections.append(b_correction)
-    #    Correction_tells.append(b_tell)
-    #    Correction_labels.append(blabel)
-
-    # bmin, bminpeaks, bslopes = B_minimization(wl_obs, spec_obs, interped_tell, B_init=False)
-    # new_tell = interped_tell ** B
-    # corrected_spec = divide_spectra(spec_obs, new_tell) # Divide by telluric spectra
-    # new_tell_min = interped_tell ** bmin
-    # corrected_min_spec = divide_spectra(spec_obs, new_tell_min) # Divide by telluric spectra
-    # new_tell_minpeaks = interped_tell ** bminpeaks
-    # corrected_minpeaks_spec = divide_spectra(spec_obs, new_tell_minpeaks) # Divide by telluric spectra
-    # new_tell_slopes = interped_tell ** bslopes
-    # corrected_slopes_spec = divide_spectra(spec_obs, new_tell_slopes) # Divide by telluric spectra
-
-    # other corrections?
-
-    # return corrected_spec, interped_tell, bad_correction, new_tell, corrected_min_spec, new_tell_min, corrected_minpeaks_spec, new_tell_minpeaks, corrected_slopes_spec, new_tell_slopes
     return Corrections, Correction_tells, Correction_Bs, Correction_labels
-
-
-def B_minimization(wl, spec_obs, spec_tell, B_init=False, show=True):
-    """
-    Find Optimal B that scales the telluric spectra to best match the
-    intesity of the observed spectra
-
-    """
-    blist = np.linspace(0.10, 1.5, 500)
-    subtracts = []
-    divisions = []
-    peak_subtracts = []
-    peak_divisions = []
-    # Slopediffs = []
-    # peak_slopediffs = []
-    abs_area = []
-    # area = []
-    std = []        # minimize stdeviation
-    std_peaks = []  # minimize std around telluric lines
-    std_30kms = []  # values withing the 30kms telluric exclusion window
-    peaks = spec_tell<0.98
-   # peakslopes = spec_tell>0.95
-
-    obs_peaks = spec_obs[peaks]
-    tell_peaks = spec_tell[peaks]
-
-   # obs_slope_peaks = spec_obs[peaks]
-   # tell_slope_peaks = spec_tell[peaks]
-
-    for bb in blist:
-        subtracts.append(sum(abs(spec_obs - spec_tell**bb)))
-        peak_subtracts.append(sum(abs(obs_peaks - tell_peaks**bb)))
-        divisions.append(sum(abs(np.ones_like(spec_obs) - (spec_obs / (spec_tell**bb)))))
-        peak_divisions.append(sum(abs(np.ones_like(obs_peaks) - (obs_peaks / (tell_peaks**bb)))))
-
-        corr = spec_obs / (spec_tell**bb)
-        peaks_corr = obs_peaks / (tell_peaks**bb)
-
-    #  slopes = corr[1:]-corr[:-1]
-    #  Slopediffs.append(sum(abs(slopes)))
-
-    #  peak_slopes = peaks_corr[1:]-peaks_corr[:-1]
-    #  peak_slopediffs.append(sum(abs(peak_slopes)))
-
-        # Area around 1    # Sort of measuring the linewidth (should be zero for good correction)
-        d_wl = wl[1:]-wl[:-1]
-        h = ((corr[1:]+corr[:-1]) / 2.0 ) - 1
-        abs_area.append(sum(np.abs(h * d_wl)))
-        #area.append(sum(h * d_wl))
-
-        std.append(np.std(corr))
-        std_peaks.append(np.std(peaks_corr))
-
-    plt.figure()
-    plt.plot(blist, subtracts / max(subtracts), label="Subtractions")
-    plt.plot(blist, peak_subtracts / max(peak_subtracts), label="peaks subtractions <0.98")
-    plt.plot(blist, divisions / max(divisions), label="Divisions")
-    plt.plot(blist, peak_divisions / max(peak_divisions), label="Peak Divisions")
-    plt.plot(blist, abs_area / max(abs_area), label="absolute area")
-    plt.plot(blist, std / max(std), label="std")
-    plt.plot(blist, std_peaks / max(std_peaks), label="Peak std")
-    # absa = list(np.abs(area))
-    # plt.plot(blist, area / area[absa.index(max(absa))], label="area")
-    plt.xlabel("b values")
-    plt.ylabel("Normalized Scale")
-    plt.title("B minimization testing")
-    plt.legend()
-    if show:
-        plt.show()
-
-    # B = blist[diffs.index(min(diffs))]
-    B_subtracts = blist[subtracts.index(min(subtracts))]
-    B_peak_subtracts = blist[peak_subtracts.index(min(peak_subtracts))]
-    B_divisions = blist[divisions.index(min(divisions))]
-    B_peak_divisions = blist[peak_divisions.index(min(peak_divisions))]
-    B_abs_area = blist[abs_area.index(min(abs_area))]
-    # B_area = blist[area.index(min(area))]
-    B_std = blist[std.index(min(std))]
-    B_std_peaks = blist[std_peaks.index(min(std_peaks))]
-
-    Bvals = (B_subtracts, B_peak_subtracts, B_divisions, B_peak_divisions, B_abs_area, B_std, B_std_peaks)
-    Blabels = ("Min Subtraction", "Min Peak Subtraction", "Min Division", "Min Peak Division", \
-               "Min Absolute Area from 1", "Min std", "min peaks std")
-    # B_area , "Min Area from 1"
-    return Bvals, Blabels
-
-
-
-def _parser():
-    """Take care of all the argparse stuff.
-
-    :returns: the args
-    """
-    parser = argparse.ArgumentParser(description='Telluric Removal')
-    parser.add_argument('fname', help='Input fits file')
-    parser.add_argument('-x', '--export', default=False,
-                        help='Export result to fits file True/False')
-    parser.add_argument('-o', '--output', default=False,
-                        help='Ouput Filename')
-    parser.add_argument('-t', '--tellpath', default=False,
-                        help='Path to find the telluric spectra to use.')
-    parser.add_argument('-k', '--kind', default="linear",
-                        help='Interpolation order, linear, quadratic or cubic')
-    parser.add_argument('-m', '--method', default="scipy",
-                        help='Interpolation method numpy or scipy')
-    parser.add_argument("-s", "--show", default=True,
-                        help="Show plots") # Does not wokwithout display though for some reason
-    args = parser.parse_args()
-    return args
 
 
 def export_correction_2fits(filename, wavelength, corrected, original, telluric, hdr, hdrkeys, hdrvals, tellhdr):
@@ -277,13 +114,14 @@ def export_correction_2fits(filename, wavelength, corrected, original, telluric,
 
 
 # could make new module for fits handlers like this
-def append_hdr(hdr, keys, values , item=0):
-    ''' Apend/change parameters to fits hdr,
+def append_hdr(hdr, keys, values, item=0):
+    """Apend/change parameters to fits hdr,
     can take list or tuple as input of keywords
     and values to change in the header
     Defaults at changing the header in the 0th item
     unless the number the index is givien,
-    If a key is not found it adds it to the header'''
+    If a key is not found it adds it to the header.
+    """
 
     if type(keys) == str:           # To handle single value
         hdr[keys] = values
@@ -307,161 +145,373 @@ def get_observation_averages(homedir):
     Uses the list_spectra.txt that is in this directory to open each file and extract values from the headers.
     *Possibly add extra extensions to the headrer in the future when combining.
     """
-    Raw_path = homedir[:-13] + "Raw_files/"
+    raw_path = homedir[:-13] + "Raw_files/"
     list_name = "list_spectra.txt"
 
-    Nod_airmass = []
-    Nod_median_time = []
+    nod_airmass = []
+    nod_median_time = []
     with open(list_name, "r") as f:
         for line in f:
             fname = line[:-1] + ".fits"
-            hdr = fits.getheader(Raw_path + fname)
+            hdr = fits.getheader(raw_path + fname)
             datetime = hdr["DATE-OBS"]
             time = datetime[11:19]
             airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
             airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
-            Nod_mean_airmass = round((airmass_start + airmass_end) / 2 , 4)
-            Nod_airmass.append(Nod_mean_airmass)
-            Nod_median_time.append(time)
+            nod_mean_airmass = round((airmass_start + airmass_end) / 2 , 4)
+            nod_airmass.append(nod_mean_airmass)
+            nod_median_time.append(time)
 
-    print("Observation Nod_airmass ", Nod_airmass)
-    print("Observation Nod_time ", Nod_median_time)
-    return np.mean(Nod_airmass), Nod_median_time
+    print("Observation Nod_airmass ", nod_airmass)
+    print("Observation Nod_time ", nod_median_time)
+    return np.mean(nod_airmass), nod_median_time
 
 
-def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy", show=True):
+def h20_residual(params, obs_data, telluric_data):
+    # Parameters
+    scale_factor = params["scale_factor"].value
+    R = params["R"].value
+    fwhm_lim = params["fwhm_lim"].value
+    #n_jobs = params["n_jobs"].value  # parallel implementaiton
+    #chip_select = params["chip_select"].value
+    verbose = params["verbose"].value
+    fit_lines = params["fit_lines"].value # if true only fit areas deeper than 0.995
+
+    # Data
+    obs_wl = obs_data[0]
+    obs_I = obs_data[1]
+    telluric_wl = telluric_data[0]
+    telluric_I = telluric_data[1]
+
+    # Telluric scaling T ** x
+    scaled_telluric_I = telluric_I ** scale_factor
+
+    # smallest wl step in telluric wl
+    min_dwl = np.min(telluric_wl[1:]-telluric_wl[:-1])
+    # Make sure atleast 1 telluric value is outside wl range of observation for interpoltion later
+    chip_limits = [obs_wl[0]-2*min_dwl, obs_wl[-1]+2*min_dwl]
+    # Convolution
+    #def convolution_nir(wav, flux, chip, R, fwhm_lim=5.0, plot=True):
+    #    return [wav_chip, flux_conv_res]
+    conv_tell_wl, conv_tell_I = instrument_convolution(telluric_wl, scaled_telluric_I, chip_limits,
+                                                R, fwhm_lim=fwhm_lim, plot=False, verbose=verbose)
+
+    #print("Obs wl- Min ", np.min(obs_wl)," Max ", np.max(obs_wl))
+    #print("Input telluic wl- Min ", np.min(telluric_wl)," Max ", np.max(telluric_wl))
+    #print("conv tell wl- Min ", np.min(conv_tell_wl)," Max ", np.max(conv_tell_wl))
+    interped_conv_tell = wl_interpolation(conv_tell_wl, conv_tell_I, obs_wl)
+    print("Convolution and interpolation inside residual function was done")
+
+    # Mask fit to peaks in telluric data
+    if fit_lines:
+        #wl_interpolation(telluric_wl, telluric_I, obs_wl)
+        Tell_line_mask = wl_interpolation(telluric_wl, telluric_I, obs_wl) < 0.995
+        return 1 - (obs_I / interped_conv_tell)[Tell_line_mask]
+    else:
+        return 1 - (obs_I / interped_conv_tell)
+
+
+def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
+    """ H20 Telluric correction
+    Performs nonlinear least squares fitting to fit the scale factor
+    Uses the scale factor
+    Then Convolves by the instrument resolution
+
+    """
+    params = Parameters()
+    params.add('scale_factor', value=1)   # add min and max values ?
+    params.add('R', value=R, vary=False)
+    params.add('fwhm_lim', value=5, vary=False)
+    params.add('fit_lines', value=True, vary=False)   # only fit the peaks of lines < 0.995
+    params.add("verbose", value=False, vary=False)
+
+    out = minimize(h20_residual, params, args=([obs_wl, obs_I], [h20_wl, h20_I]))
+
+    outreport = lmfit.fit_report(out)
+    print(outreport)
+
+    # Telluric scaling T ** x
+    Scaled_h20_I = h20_I ** out.params["scale_factor"].value
+
+    Convolved_h20_wl, Convolved_h20_I = instrument_convolution(h20_wl, Scaled_h20_I, [h20_wl[0], h20_wl[-1]],
+                                                    R, fwhm_lim=5, plot=False, verbose=True)
+
+    # Interpolation to obs positions
+    interp_conv_h20_I =  wl_interpolation(Convolved_h20_wl, Convolved_h20_I, obs_wl)
+
+    h20_corrected_obs = divide_spectra(obs_I, interp_conv_h20_I)
+
+    return h20_corrected_obs, interp_conv_h20_I, out, outreport
+
+
+def telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmass):
+    """ Set obs_airmas and spec_airmass equal to achieve a scaling factor of 1 = No scaling"""
+    #tell_I = airmass_scaling(tell_I, spec_airmass, obs_airmass)
+    tell_I = tell_I ** (obs_airmass / spec_airmass)   # Airmass scaling
+    interp_tell_I =  wl_interpolation(tell_wl, tell_I, obs_wl)
+    corrected_obs = divide_spectra(obs_I, interp_tell_I)
+
+    return corrected_obs, interp_tell_I, obs_airmass/spec_airmass
+
+
+def _parser():
+    """Take care of all the argparse stuff.
+
+    :returns: the args
+    """
+    parser = argparse.ArgumentParser(description='Telluric Removal')
+    parser.add_argument('fname', help='Input fits file')
+    parser.add_argument('-e', '--export', action='store_true',
+                        help='Export/save results to fits file')
+    parser.add_argument('-o', '--output', default=False,
+                        help='Ouput Filename')
+    parser.add_argument('-t', '--tellpath', default=False,
+                        help='Path to find the telluric spectra to use.')
+    parser.add_argument('-k', '--kind', default="linear",
+                        help='Interpolation order, linear, quadratic or cubic')
+    parser.add_argument('-m', '--method', default="scipy",
+                        help='Interpolation method numpy or scipy')
+
+    parser.add_argument("-s", "--show", action='store_true',
+                        help="Show plots") # Does not work without a display
+    parser.add_argument("-c", "--h2o_scaling", action='store_true',
+                        help="Perform separate H20 scaling")
+    parser.add_argument("-n", "--new_method", action='store_true',
+                        help="Use new code method")
+    args = parser.parse_args()
+    return args
+
+
+def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy",
+         show=False, h2o_scaling=False, new_method=False):
+    # Set and test homedir
     homedir = os.getcwd()
+    if homedir[-13:] != "Combined_Nods":
+        print("Not running telluric removal from Combined_Nods folder \n Crashing")
+        print("Actual directory currently in is", homedir)
+        raise ValueError("Not correct path")
+
+    # Load in Crires Spectra
     data = fits.getdata(fname)
+    hdr = fits.getheader(fname)
+
     wl = data["Wavelength"]
     I = data["Extracted_DRACS"]
-    hdr = fits.getheader(fname)
-    datetime = hdr["DATE-OBS"]
+
+    # Wavelength bounds to select the telluric spectra
+    wl_lower = np.min(wl)/1.0001
+    wl_upper = np.max(wl)*1.0001
 
     # Get airmass for entire observation
-    airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
-    airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
-    obs_airmass = (airmass_start + airmass_end) / 2
-
-
-    print("1st observation Starting Airmass", airmass_start, "\tEnding Airmass", airmass_end)
-
-    print("\nWorking directory", homedir)
-    if homedir[-13:] is not "Combined_Nods":
-        print("Not running telluric removal from Combined_Nods folder \n Crashing")
-
-    # Need airmass for the entire observation not just the first nod!!!!!!
-    Rawdir = homedir[:-13] + "Raw_files/"
+    #airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
+    #airmass_end = hdr["HIERARCH ESO TEL AIRM END"]
+    #obs_airmass = (airmass_start + airmass_end) / 2
     Average_airmass, average_time = get_observation_averages(homedir)
-    """ When using averaged airmass need almost no airmass scalling of model as it is at almost the correct time/airmass"""
+    """ When using averaged airmass need almost no airmass scalling of
+            model as it is almost the airmass given by tapas """
     obs_airmass = Average_airmass
-    print("Average_airmass", Average_airmass, "\nAverage_time", average_time)
+    print("From all 8 raw spectra: \nAverage_airmass", Average_airmass,
+          "\nAverage_time", average_time)
 
+    # Calculate Resolving Power.
+    # Using the rule of thumb equation from the CRIRES manual.
+    # Check for adaptive optics use.
+    horder_loop = hdr["HIERARCH ESO AOS RTC LOOP HORDER"]   # High order loop on or off
+    lgs_loop = hdr["HIERARCH ESO AOS RTC LOOP LGS"]         # LGS jitter loop on or off
+    loopstate = hdr["HIERARCH ESO AOS RTC LOOP STATE"]      # Loop state, open or closed
+    tiptilt_loop = hdr["HIERARCH ESO AOS RTC LOOP TIPTILT"] # Tip Tilt loop on or off
+    slit_width = hdr["HIERARCH ESO INS SLIT1 WID"]          # Slit width
 
-    obsdate, obstime = datetime.split("T")
-    obstime, __ = obstime.split(".")
-    print("tellpath before", tellpath)
-
-    if tellpath:
-        tellname = obt.get_telluric_name(tellpath, obsdate, obstime)
+    if any([horder_loop, loopstate, tiptilt_loop]) and (loopstate != "OPEN"):
+        print("Adaptive optics was used - Rule of thumb for Resolution is not good enough")
     else:
-        tellpath = "/home/jneal/Phd/data/Tapas/"
-        tellname = obt.get_telluric_name(tellpath, obsdate, obstime)
-    print("Returned Mathching filenames", tellname)
+        R = int(100000 * 0.2 / slit_width)
 
-    print("tellpath after", tellpath)
-    assert len(tellname) < 2, "Multiple tapas filenames match"
+ #################################################  NEW METHOD section ############################
+    if new_method:
+        # Changing for new telluric line location defaults (inside the Combined_nods)
+        if h2o_scaling:
+            # load separated H20 tapas datasets
 
+            tapas_h20 = get_filenames("./","tapas_*","*_ReqId_12_No_Ifunction*")
+            if len(tapas_h20) >1:
+                print("Warning Too many h20 tapas files returned")
+            tapas_not_h20 = get_filenames("./","tapas_*","*_ReqId_18_R-*")
+            if len(tapas_not_h20) >1:
+                print("Warning Too many h20 tapas files returned")
+            #tapas_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_12_No_Ifunction_barydone-NO.ipac"
+            #tapas_not_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_18_R-50000_sratio-10_barydone-NO.ipac"
+            tapas_h20_data, tapas_h20_hdr = obt.load_telluric("", tapas_h20[0])
+            tapas_not_h20_data, tapas_not_h20_hdr = obt.load_telluric("", tapas_not_h20[0])
+            tapas_airmass = float(tapas_h20_hdr["airmass"])
 
-    tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
-    #print("Telluric Header ", tell_hdr)
-    tell_airmass = float(tell_hdr["airmass"])
-    print("Observation Airmass ", obs_airmass)
-    print("Telluric Airmass ", tell_airmass)
-    tell_respower = int(float((tell_hdr["respower"])))
-    print("Telluric Resolution Power =", tell_respower)
+            # Select section by wavelength
+            tapas_h20_section = wav_selector(tapas_h20_data[0], tapas_h20_data[1], wl_lower,
+                wl_upper)
+            tapas_not_h20_section = wav_selector(tapas_not_h20_data[0], tapas_not_h20_data[1],
+                wl_lower, wl_upper)
 
-    wl_lower = np.min(wl / 1.0001)
-    wl_upper = np.max(wl * 1.0001)
-    tell_data = wav_selector(tell_data[0], tell_data[1], wl_lower, wl_upper)
+            #no h20 correction
+            non_h20_correct_I, tell_used, b_used = telluric_correction(wl, I, obs_airmass,
+                tapas_not_h20_section[0], tapas_not_h20_section[1], tapas_airmass)
+            # h20 correction and
 
-    # Telluric Normalization (use first 50 points below 1.2 as constant continuum)
-    I_tell = tell_data[1]
-    maxes = I_tell[(I_tell < 1.2)].argsort()[-50:][::-1]
-    tell_data = (tell_data[0], tell_data[1] / np.median(I_tell[maxes]))
-    print("Telluric normaliztion value", np.median(I_tell[maxes]))
+            h20_corrected_obs, h20tell_used, out, outreport = h2o_telluric_correction(wl, non_h20_correct_I,
+                tapas_h20_section[0], tapas_h20_section[1], R)
 
-    # print("After slice spectra")
-    # plt.figure()
-    # plt.plot(wl, I, label="Spectra")
-    # plt.plot(tell_data[0], tell_data[1], label="Telluric lines")
-    # plt.legend()
-    # plt.show()
+            I_corr = h20_corrected_obs
+            correction_used = tell_used * h20tell_used   # Combined corrections
 
-    # Loaded in the data
-    # Now perform the telluric removal
+        else:
+            # load combined dataset only
+            tapas_all = get_filenames("./","tapas_*","*_ReqId_10_R-*")
+            if len(tapas_all) >1:
+                print("Warning Too many h20 tapas files returned")
+            #tapas_all = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
+            tapas_all_data, tapas_all_hdr = obt.load_telluric("", tapas_all[0])
+            tapas_airmass = float(tapas_all_hdr["airmass"])
 
-    Corrections, Correction_tells, Correction_Bs, Correction_labels = telluric_correct(wl, I, tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
-    if show:
-        plt.figure()  # Tellurics
-        plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
-        for corr, tell, B, label in zip(Corrections, Correction_tells, Correction_Bs, Correction_labels):
-            # plt.plot(wl, corr, "--", label=(label + ", B = {0:.2f}".format(B)))
-            plt.plot(wl, tell, linewidth=2, label=("Telluric " + label + ", B = {0:.3f}".format(B)))
-            plt.plot(wl, np.ones_like(wl), "-.")
+            # Select section by wavelength
+            tapas_all_section = wav_selector(tapas_all_data[0], tapas_all_data[1], wl_lower, wl_upper)
+
+            I_corr, tell_used, b_used = telluric_correction(wl, I, obs_airmass,
+                tapas_all_data[0], tapas_all_data[1], tapas_airmass)
+
+        if show:
+            plt.figure() # Corrections
+            plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
+            plt.plot(wl, I_corr, linewidth=2, label=("Corrected spectra"))
+                #plt.plot(wl, tell, label=("Telluric " + label + ", B = {0:.2f}".format(B)))
+            plt.hlines(1, wl[0], wl[-1], color="grey", linestyles='dashed')
             plt.legend(loc="best")
-            plt.title("Telluric Scaling with Tapas Resolution power = {}".format(tell_respower))
+            plt.title("Telluric Corrections")
 
-        plt.figure() # Corrections
-        plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
-        for corr, tell, B, label in zip(Corrections, Correction_tells, Correction_Bs, Correction_labels):
-            plt.plot(wl, corr, linewidth=2, label=(label + ", B = {0:.3f}".format(B)))
-            # plt.plot(wl, tell, label=("Telluric " + label + ", B = {0:.2f}".format(B)))
-            plt.plot(wl, np.ones_like(wl), "-.")
-            plt.legend(loc="best")
-            plt.title("Telluric Corrections with tapas Resolution power = {}".format(tell_respower))
+            plt.show()
 
-        plt.show()
+    ################## REPLACING this / or if still given different location for tapas files#######
+    else:   # old method
 
-    # B corr is almost not needed but include here for now 31/3/16 to make a correction
-    print(Correction_labels)
-    print(Corrections)
-    I_corr = Corrections[1]  # using B scaling
-    Tell_interp = Correction_tells[1]
+        obs_datetime = hdr["DATE-OBS"]
+        obsdate, obstime = obs_datetime.split("T")
+        obstime, __ = obstime.split(".")
+        print("tellpath before", tellpath)
 
-    #print("After telluric_correct")
-    # plt.figure()
-    # plt.plot(wl, I, "k", label="Observed Spectra")
-    # plt.plot(wl, Tell_interp, label="Telluric")
-    # plt.plot(wl, bad_correction, label="Base Correction")
-    # plt.plot(wl, I_corr, label="Corrected B")
-    # plt.plot(wl, tell_Amass_corr, label="Telluric ** B")
-    # plt.plot(wl, I_corr_min, label="Corrected minimized B")
-    # plt.plot(wl, tell_Amass_corr_min, label="Telluric minimized B")
-    # plt.plot(wl, I_corr_minpeaks, label="Corrected minimized peaks B")
-    # plt.plot(wl, new_tell_minpeaks, label="Telluric minimized peaks B")
-    # plt.plot(wl, I_corr_slopes, label="Corrected minimized slopes B")
-    # plt.plot(wl, new_tell_slopes, label="Tell minimized slopes B")
-    # plt.plot(wl, np.ones_like(wl), "--")
-    # plt.legend(loc="best")
-    # plt.show()
+        if tellpath:
+            tellname = obt.get_telluric_name(tellpath, obsdate, obstime)
+        else:
+            tellpath = "/home/jneal/Phd/data/Tapas/"
+            tellname = obt.get_telluric_name(tellpath, obsdate, obstime)
+        print("Returned Mathching filenames", tellname)
 
+        print("tellpath after", tellpath)
+        assert len(tellname) < 2, "Multiple tapas filenames match"
+
+        tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
+        #print("Telluric Header ", tell_hdr)
+        tell_airmass = float(tell_hdr["airmass"])
+        print("Observation Airmass ", obs_airmass)
+        print("Telluric Airmass ", tell_airmass)
+        tell_respower = int(float((tell_hdr["respower"])))
+        print("Telluric Resolution Power =", tell_respower)
+
+        #wl_lower = np.min(wl)/1.0001
+        #wl_upper = np.max(wl)*1.0001
+        tell_data = wav_selector(tell_data[0], tell_data[1], wl_lower, wl_upper)
+
+        # Telluric Normalization (use first 50 points below 1.2 as constant continuum)
+        # For selected section
+        I_tell = tell_data[1]
+        maxes = I_tell[(I_tell < 1.2)].argsort()[-50:][::-1]
+        tell_data = (tell_data[0], tell_data[1] / np.median(I_tell[maxes]))
+        print("Telluric normaliztion value", np.median(I_tell[maxes]))
+
+
+        Corrections, Correction_tells, Correction_Bs, Correction_labels = telluric_correct(wl, I,
+                           tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
+
+        if show:
+            plt.figure()  # Tellurics
+            plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
+            for corr, tell, B, label in zip(Corrections, Correction_tells, Correction_Bs, Correction_labels):
+                #plt.plot(wl, corr, "--", label=(label + ", B = {0:.2f}".format(B)))
+                plt.plot(wl, tell, linewidth=2, label=("Telluric " + label + ", B = {0:.3f}".format(B)))
+                plt.plot(wl, np.ones_like(wl), "-.")
+                plt.legend(loc="best")
+                plt.title("Telluric Scaling with Tapas Resolution power = {}".format(tell_respower))
+
+            plt.figure() # Corrections
+            plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
+            for corr, tell, B, label in zip(Corrections, Correction_tells, Correction_Bs, Correction_labels):
+                plt.plot(wl, corr, linewidth=2, label=(label + ", B = {0:.3f}".format(B)))
+                #plt.plot(wl, tell, label=("Telluric " + label + ", B = {0:.2f}".format(B)))
+                plt.plot(wl, np.ones_like(wl), "-.")
+                plt.legend(loc="best")
+                plt.title("Telluric Corrections with tapas Resolution power = {}".format(tell_respower))
+
+            plt.show()
+
+        # B corr is almost not needed but include here for now 31/3/16 to make a correction
+        print(Correction_labels)
+        print(Corrections)
+        I_corr = Corrections[1]  # using B scaling
+        tell_used = Correction_tells[1]
+        b_used = Correction_Bs[1]
+
+    #######################################   Ends  HERE ##########################################
 
     ### SAVING Telluric Corrected Spectra ###
     # PROBABALY NEED TO HARDCODE IN THE HEADER LINES...
     os.chdir(homedir)   # to make sure saving where running
+
+    ### TO DO add mutually exclusive flag (with output) to add extra suffixs on end by .tellcorr.
     if output:
-            Output_filename = output
+            output_filename = output
     else:
-            Output_filename = fname.replace(".fits", ".tellcorr.fits")
-    hdrkeys = ["Correction", "Tapas Interpolation method", "Interpolation kind", "Correction Params A, B"]
-    hdrvals = [("Tapas divion", "Spectra Correction"), (method, "numpy or scipy"), (kind, "linear, slinear, quadratic, cubic"), ("Blankety ", "Blank")]
-    tellhdr = False   ### need to correctly get this from obtain telluric
+        if h2o_scaling:
+            output_filename = fname.replace(".fits", ".h2otellcorr.fits")
+        else:
+           output_filename = fname.replace(".fits", ".tellcorr.fits")
+
+    # Work out values for FITS header
+    b_used = round(b_used, 4)
+    if new_method:
+        if h2o_scaling:
+            h2o_scale_val = out.params["scale_factor"].value
+        else:
+            h2o_scale_val = None
+
+
+        # Keys and values for Fits header file
+        hdrkeys = ["Correction", "Tapas Interpolation method",
+                   "Interpolation kind", "B PARAM",
+                   "H20 Scaling", "H20 Scaling Value", "Calculated R"]
+        hdrvals = [("Tapas division", "Spectral Correction"),
+                   (method, "numpy or scipy"),
+                   (kind, "linear,slinear,quadratic,cubic"),
+                   (b_used, "Airmass scaling parameter"),
+                   (h2o_scaling, "Was separate H20 scaling 1 = Yes"),
+                   (h2o_scale_val, "H20 scale value used"),
+                   (R, "Observation resolution calculated by rule of thumb")]
+        tellhdr = False   ### need to correctly get this from obtain telluric
+    else:   # Old method
+        # Keys and values for Fits header file
+        hdrkeys = ["Correction", "Tapas Interpolation method",
+                   "Interpolation kind", "B PARAM",
+                   "H20 Scaling", "Calculated R"]
+        hdrvals = [("Tapas division", "Spectral Correction"),
+                   (method, "numpy or scipy"),
+                   (kind, "linear,slinear,quadratic,cubic"),
+                   (b_used, "Airmass scaling parameter"),
+                   (h2o_scaling, "Was separate H20 scaling Done 1 = Yes"),
+                   (R, "Observation resolution calculated by rule of thumb")]
+        tellhdr = False   ### need to correctly get this from obtain telluric
 
     if export:
-        export_correction_2fits(Output_filename, wl, I_corr, I, Tell_interp, hdr, hdrkeys, hdrvals, tellhdr)
-        print("Saved coorected telluric spectra to " + str(Output_filename))
+        export_correction_2fits(output_filename, wl, I_corr, I, tell_used,
+                                hdr, hdrkeys, hdrvals, tellhdr)
+        print("Saved corected telluric spectra to " + str(output_filename))
     else:
-        print("Skipped Saving coorected telluric spectra ")
+        print("Skipped Saving corected telluric spectra ")
 
 
 if __name__ == "__main__":
@@ -470,22 +520,3 @@ if __name__ == "__main__":
     opts = {k: args[k] for k in args}
 
     main(fname, **opts)
-
-
-
-    # """ Some test code for testing functions """
-    # sze = 20
-    # x2 = range(sze)
-    # y2 = np.random.randn(len(x2)) + np.ones_like(x2)
-    # y2 = 0.5 * np.ones_like(x2)
-    # x1 = np.linspace(1, sze-1.5, 9)
-    # y1 = np.random.randn(len(x1)) + np.ones_like(x1)
-    # y1 = np.ones_like(x1)
-    # print(x1)
-    # print(x2)
-    # #print(y1)
-    # #print(y2)
-    # y1_cor = telluric_correct(x1, y1, x2, y2)
-    # print(x1)
-    # print(y1)
-    # print(y1_cor)

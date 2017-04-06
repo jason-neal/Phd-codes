@@ -12035,6 +12035,19 @@ div#notebook {
 </div>
 
 </div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Test affect of normalizing tapas data</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
@@ -13001,11 +13014,26 @@ All the scaling values are all over the place. Something like 0.5, 0.9, 0.8, 0.2
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Normailizing-tapas-effect">Normailizing tapas effect<a class="anchor-link" href="#Normailizing-tapas-effect">&#182;</a></h1>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tell_all_data</span><span class="p">,</span> <span class="n">tell_all_hdr</span> <span class="o">=</span> <span class="n">obt</span><span class="o">.</span><span class="n">load_telluric</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">tapas_all</span><span class="p">)</span>
+
+<span class="n">I_tell</span> <span class="o">=</span> <span class="n">tapas_all_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">maxes</span> <span class="o">=</span> <span class="n">I_tell</span><span class="p">[(</span><span class="n">I_tell</span> <span class="o">&lt;</span> <span class="mf">1.2</span><span class="p">)]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[</span><span class="o">-</span><span class="mi">50</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">norm_tell_all_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">tell_all_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tell_all_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">I_tell</span><span class="p">[</span><span class="n">maxes</span><span class="p">]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Telluric normaliztion value&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">I_tell</span><span class="p">[</span><span class="n">maxes</span><span class="p">]))</span>
 <div class=" highlight hl-ipython3"><pre><span></span> 
 </pre></div>
 
@@ -13019,7 +13047,12 @@ All the scaling values are all over the place. Something like 0.5, 0.9, 0.8, 0.2
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tell_all_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tell_all_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">norm_tell_all_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">norm_tell_all_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Normilizing tapas spectra&quot;</span><span class="p">)</span>
+
+<span class="c1"># Make it interactive with Bokeh</span>
+<span class="n">bokeh</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">bokeh</span><span class="o">.</span><span class="n">mpl</span><span class="o">.</span><span class="n">to_bokeh</span><span class="p">())</span>
 </pre></div>
 
 </div>
@@ -13032,7 +13065,11 @@ All the scaling values are all over the place. Something like 0.5, 0.9, 0.8, 0.2
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tell_all_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">norm_tell_all_data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">tell_all_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Differences between Normilizing tapas spectra&quot;</span><span class="p">)</span>
+
+<span class="c1"># Make it interactive with Bokeh</span>
+<span class="n">bokeh</span><span class="o">.</span><span class="n">plotting</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">bokeh</span><span class="o">.</span><span class="n">mpl</span><span class="o">.</span><span class="n">to_bokeh</span><span class="p">())</span>
 </pre></div>
 
 </div>

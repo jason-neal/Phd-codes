@@ -504,7 +504,8 @@ def convolution_nir(wav, flux, chip_limits, R, FWHM_lim=5.0, plot=True, verbose=
     
     for n, wav in enumerate(wav_chip):
         # put value directly into the array
-        flux_conv_res[n] = fast_convolve(wav, R, wav_extended, flux_extended, FWHM_lim)
+        flux_conv_res[n] = 
+        (wav, R, wav_extended, flux_extended, FWHM_lim)
         if(n%base_val== 0) and verbose:
             counter = counter+5
             print("Resolution Convolution at {}%%...".format(counter))
@@ -855,20 +856,33 @@ Mask = tapas_all
 
 
 
+tell_all_data, tell_all_hdr = obt.load_telluric("", tapas_all)
 
-# In[ ]:
-
-
-
-
-# In[ ]:
-
+I_tell = tapas_all_data[1]
+maxes = I_tell[(I_tell < 1.2)].argsort()[-50:][::-1]
+norm_tell_all_data = (tell_all_data[0], tell_all_data[1] / np.median(I_tell[maxes]))
+print("Telluric normaliztion value", np.median(I_tell[maxes]))
 
 
 
 # In[ ]:
 
+plt.plot(tell_all_data[0], tell_all_data[1])
+plt.plot(norm_tell_all_data[0], norm_tell_all_data[1])
+plt.title("Normilizing tapas spectra")
 
+# Make it interactive with Bokeh
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
+
+
+
+# In[ ]:
+
+plt.plot(tell_all_data[0], norm_tell_all_data[1]-tell_all_data[1])
+plt.title("Differences between Normilizing tapas spectra")
+
+# Make it interactive with Bokeh
+bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # In[ ]:
