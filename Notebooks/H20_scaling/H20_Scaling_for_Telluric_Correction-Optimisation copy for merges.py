@@ -10,7 +10,7 @@
 # Fit to the observed data (Probably with the other lines removed) to fnd the best x to apply for the correction. (Gives flatest result or zero linewidth.) 
 # 
 
-# In[31]:
+# In[ ]:
 
 ### Load modules and Bokeh
 # Imports from __future__ in case we're running Python 2
@@ -51,7 +51,7 @@ sns.set_style('darkgrid', rc=rc)
 bokeh.io.output_notebook()
 
 
-# In[56]:
+# In[ ]:
 
 # Define Faster functions to try
 def fast_wav_selector(wav, flux, wav_min, wav_max):
@@ -78,7 +78,7 @@ def fast_wav_selector(wav, flux, wav_min, wav_max):
 
 # ### Load in Observed Data
 
-# In[33]:
+# In[ ]:
 
 # Need to update these to the vacuum with no berv corrections
 chip1 = "CRIRE.2012-04-07T00-08-29.976_1.nod.ms.norm.sum.wavecal.fits"
@@ -114,12 +114,12 @@ obs_airmass = (start_airmass + end_airmass) / 2
 print("Data from Detectors is now loaded")
 
 
-# In[16]:
+# In[ ]:
 
 ## Rough berv correction until input calibrated file is calibrated with non berv tapas 
 
 
-# In[34]:
+# In[ ]:
 
 wl1 = wl1-.5   #including rough berv correction
 wl2 = wl2-.54  #including rough berv correction
@@ -129,7 +129,7 @@ wl4 = wl4-.7
 
 # ### Load in the tapas data
 
-# In[35]:
+# In[ ]:
 
 import Obtain_Telluric as obt
 tapas_all = "tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
@@ -163,7 +163,7 @@ print("Telluric Resolution Power =", tapas_not_h20_respower)
 #print(tapas_all_hdr)
 
 
-# In[36]:
+# In[ ]:
 
 type(tapas_h20_data)
 
@@ -172,7 +172,7 @@ type(tapas_h20_data)
 # Including the 3 tapas models to show they align well and are consistent.
 # 
 
-# In[6]:
+# In[ ]:
 
 plt.plot(wl1, I1_uncorr, 'b') #including rough berv correction
 plt.plot(wl2, I2_uncorr, 'b') #including rough berv correction
@@ -192,7 +192,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # (Use telluric removal modules)
 # And plot the result.  
 
-# In[37]:
+# In[ ]:
 
 from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
 
@@ -221,7 +221,7 @@ I4_not_h20_corr = correction(wl4, I4_uncorr, tapas_not_h20_data[0], tapas_not_h2
         
 
 
-# In[38]:
+# In[ ]:
 
 # Need to remove print statement from iterpolation timing to run this again.
 #%timeit correction(wl1, I1_uncorr, tapas_not_h20_data[0], tapas_not_h20_data[1], obs_airmass, tapas_not_h20_airmass, kind="linear", method="scipy")
@@ -251,7 +251,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # ### Convole instrument profile function:
 # To use inside fit
 
-# In[40]:
+# In[ ]:
 
 ## USEFUL functions from pedros code:
 # This is pedros slow selector
@@ -332,7 +332,7 @@ def chip_selector(wav, flux, chip):
 # 
 # The Pyastronomy convolution needs equidistant points to work. This involves performing an interpolation. We prefer not to use this method as it losses information.
 
-# In[41]:
+# In[ ]:
 
 # Just to my CRIRES range 
 from PyAstronomy import pyasl    
@@ -379,7 +379,7 @@ Conv_flux_pysal = pyasl.instrBroadGaussFast(new_wav, new_flux, 50000, edgeHandli
 print("done")
 
 
-# In[13]:
+# In[ ]:
 
 # PLot Pyasl convolution
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
@@ -395,7 +395,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # # No interpolation convolution 
 # Speed up with numpy mask instead of comprehnsion list
 
-# In[57]:
+# In[ ]:
 
 def fast_convolve(wav_val, R, wav_extended, flux_extended, FWHM_lim):
     """IP convolution multiplication step for a single wavelength value"""
@@ -461,14 +461,14 @@ print("Done")
 
 # ## Test convolution runtime
 
-# In[58]:
+# In[ ]:
 
 # 10 seconds per loop for chip "1" and plotting   (down from 900s)
 #timeit x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
 x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)
 
 
-# In[49]:
+# In[ ]:
 
 get_ipython().magic('prun x, y = convolution_nir(tapas_h20_data[0], tapas_h20_data[1], "1", 50000, FWHM_lim=5.0, plot=True)')
  
@@ -476,7 +476,7 @@ get_ipython().magic('prun x, y = convolution_nir(tapas_h20_data[0], tapas_h20_da
 
 # Time on work comp - 188.6781919 s  
 
-# In[51]:
+# In[ ]:
 
 plt.plot(tapas_h20_data[0], tapas_h20_data[1],"b")
 plt.plot(x, y, "r")
@@ -502,13 +502,13 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # Does each chip need a differnet scaling power?
 # 
 
-# In[59]:
+# In[ ]:
 
 from lmfit import minimize, Parameters
 import lmfit
 
 
-# In[60]:
+# In[ ]:
 
 from scipy.interpolate import interp1d
 #from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
@@ -534,7 +534,7 @@ def match_wl(wl, spec, ref_wl, method="scipy", kind="linear"):
 
 
 
-# In[30]:
+# In[ ]:
 
 ### Fit using lmfit
 
@@ -565,7 +565,7 @@ def h20_residual(params, obs_data, telluric_data):
 
 
 
-# In[1]:
+# In[ ]:
 
 # Set up parameters 
 params = Parameters()
@@ -596,17 +596,17 @@ print(outreport)
                
 
 
-# In[55]:
+# In[ ]:
 
 
 
 
-# In[54]:
+# In[ ]:
 
 
 
 
-# In[30]:
+# In[ ]:
 
 1.9*1000/.831
 
@@ -843,7 +843,7 @@ np.savetxt("Convolved_50000_tapas_transmitance_allchips.txt", parallel_y)
 # 
 # My conclusion is that joblib does a great job and increase the convolution speed for this task on linux. Threading is not good for this instance.
 
-# In[26]:
+# In[ ]:
 
 plt.plot(tapas_h20_data[0], tapas_h20_data[1], "b")
 #plt.plot(x,y/np.max(y), "r")

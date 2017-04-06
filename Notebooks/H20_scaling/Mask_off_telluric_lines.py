@@ -6,7 +6,7 @@
 # Grey out regions when telluric lines are deeper than 5%.
 # 
 
-# In[29]:
+# In[ ]:
 
 ### Load modules and Bokeh
 # Imports from __future__ in case we're running Python 2
@@ -15,22 +15,22 @@ from __future__ import absolute_import, unicode_literals
 
 import numpy as np
 import matplotlib.pyplot as plt
-get_ipython().magic(u'matplotlib inline')
+get_ipython().magic('matplotlib inline')
 # Import Bokeh modules for interactive plotting
 import bokeh.io
 import bokeh.mpl
 import bokeh.plotting
-get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
+get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
 # Set up Bokeh for inline viewing
 bokeh.io.output_notebook()
 
 
-# In[30]:
+# In[ ]:
 
 import Obtain_Telluric as obt
 
 
-# In[89]:
+# In[ ]:
 
 
 tapas_all = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
@@ -43,7 +43,7 @@ new_wl = tapas_all_data[0][deep_mask]
 new_data = tapas_all_data[1][deep_mask] 
 
 
-# In[90]:
+# In[ ]:
 
 def line_edges(wl, I, lim=0.995):
     print(wl[1]-wl[0])
@@ -62,13 +62,13 @@ print(len(vals))
 print(starts, ends)
 
 
-# In[91]:
+# In[ ]:
 
 plt.plot(new_wl[:-1], new_wl[1:]-new_wl[:-1],".")
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
-# In[92]:
+# In[ ]:
 
 plt.plot(tapas_all_data[0], tapas_all_data[1], "-r", label="all")
 #plt.plot(new_wl, new_data, "-k", label="all")
@@ -84,7 +84,7 @@ print("done")
 
 
 
-# In[94]:
+# In[ ]:
 
 # Bokeh example
 from bokeh.plotting import figure, show, output_file
@@ -116,7 +116,7 @@ show(p)
 
 # ## Define functions that can be used elseware
 
-# In[101]:
+# In[ ]:
 
 def bokeh_telluric_mask(fig, wl, I, mask_limit=0.9):
     """ For use with bokeh"""
@@ -144,7 +144,7 @@ def mask_edges(wl, mean_step):
     return beginings, ends
 
 
-# In[102]:
+# In[ ]:
 
 # Bokeh example with new function
 from bokeh.plotting import figure, show, output_file
@@ -169,7 +169,7 @@ p.yaxis.axis_label = 'Transmittance'
 show(p)
 
 
-# In[108]:
+# In[ ]:
 
 plt.plot(tapas_all_data[0], tapas_all_data[1], "-r", label="all")
 #plt.plot(new_wl, new_data, "-k", label="all")
