@@ -12,7 +12,7 @@ import os
 import argparse
 import numpy as np
 # import scipy as sp
-from scipy.interpolate import interp1d
+# from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from lmfit import minimize, Parameters
@@ -331,7 +331,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     # Using the rule of thumb equation from the CRIRES manual.
     # Check for adaptive optics use.
     horder_loop = hdr["HIERARCH ESO AOS RTC LOOP HORDER"]    # High order loop on or off
-    lgs_loop = hdr["HIERARCH ESO AOS RTC LOOP LGS"]          # LGS jitter loop on or off
+    # lgs_loop = hdr["HIERARCH ESO AOS RTC LOOP LGS"]          # LGS jitter loop on or off
     loopstate = hdr["HIERARCH ESO AOS RTC LOOP STATE"]       # Loop state, open or closed
     tiptilt_loop = hdr["HIERARCH ESO AOS RTC LOOP TIPTILT"]  # Tip Tilt loop on or off
     slit_width = hdr["HIERARCH ESO INS SLIT1 WID"]           # Slit width
