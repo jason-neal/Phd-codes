@@ -428,6 +428,12 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 
         print("tellpath after", tellpath)
         debug(pv("tellname"))
+        if len(tellname) > 1:
+            suitable_index = [i for i, name in enumerate(tellname) if "ReqId_10" in name]
+            if len(suitable_index) == 1:
+                tellname = [tellname[suitable_index[0]]]
+            else:
+                raise(ValueError("Issue with Tapas filenames"))
         assert len(tellname) < 2, "Multiple tapas filenames match"
 
         tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
