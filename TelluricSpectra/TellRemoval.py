@@ -344,16 +344,19 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     # ################################################  NEW METHOD section ############################
     if new_method:
         # Changing for new telluric line location defaults (inside the Combined_nods)
+        if not tellpath:
+            tellpath = "./"
+
         debug(pv("tellpath"))
         if h2o_scaling:
             # load separated H20 tapas datasets
 
-            tapas_h20 = get_filenames("./", "tapas_*", "*_ReqId_12_No_Ifunction*")
+            tapas_h20 = get_filenames(tellpath, "tapas_*", "*_ReqId_12_No_Ifunction*")
             debug(pv("tapas_h20"))
 
             if len(tapas_h20) > 1:
                 print("Warning Too many h20 tapas files returned")
-            tapas_not_h20 = get_filenames("./", "tapas_*", "*_ReqId_18_R-*")
+            tapas_not_h20 = get_filenames(tellpath, "tapas_*", "*_ReqId_18_R-*")
             debug(pv("tapas_not_h20"))
             if len(tapas_not_h20) > 1:
                 print("Warning Too many h20 tapas files returned")
@@ -382,7 +385,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 
         else:
             # load combined dataset only
-            tapas_all = get_filenames("./", "tapas_*", "*_ReqId_10_R-*")
+            tapas_all = get_filenames(tellpath, "tapas_*", "*_ReqId_10_R-*")
             debug(pv("tapas_all"))
 
             if len(tapas_all) > 1:
