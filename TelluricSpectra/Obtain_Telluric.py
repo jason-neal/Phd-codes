@@ -20,18 +20,18 @@ def get_telluric_name(path, date, time, ext="*"):
     print("Hour of observation, ", tapas_time)
     str1 = "tapas_*" + date + "*"
     if int(tapas_time) > 9:
-        str2 = "*" + tapas_time + ":*:*"
+        str2 = "*T" + tapas_time + "*"
     else:
-        str2 = "*T0" + tapas_time + ":*:*" + ext
+        str2 = "*T0" + tapas_time + "*" + ext
     print("Match Filenames to", str1, "and", str2)
     match = get_filenames(path, str1, str2)
     if not match and int(time[3:5]) > 40:   # Check without an hour specification
 
         tapas_time = str(int(tapas_time) + 1)
         if int(tapas_time) > 9:
-            str2 = "*" + tapas_time + ":*:*"
+            str2 = "*T" + tapas_time + "*"
         else:
-            str2 = "*T0" + tapas_time + ":*:*" + ext
+            str2 = "*T0" + tapas_time + "*" + ext
         print("Match Filenames to", str1, "and", str2)
         match = get_filenames(path, str1, str2)
     return match
