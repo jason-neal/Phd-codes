@@ -17,10 +17,22 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 from lmfit import minimize, Parameters
 import lmfit
+import logging
+from logging import debug
 # import GaussianFitting as gf
 import Obtain_Telluric as obt
 from Get_filenames import get_filenames
 from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
+from debug_utils import pv
+
+
+def setup_debug(debug_val):
+    """Set debug level."""
+    if debug_val:
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+    else:
+        logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(levelname)s %(message)s')
+    return None
 
 
 def divide_spectra(spec_a, spec_b):
@@ -278,6 +290,8 @@ def _parser():
                         help="Perform separate H20 scaling")
     parser.add_argument("-n", "--new_method", action='store_true',
                         help="Use new code method")
+    parser.add_argument("-d", "--debug", action='store_true',
+                        help="Include debug statements.")
     args = parser.parse_args()
     return args
 
@@ -330,13 +344,17 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     # ################################################  NEW METHOD section ############################
     if new_method:
         # Changing for new telluric line location defaults (inside the Combined_nods)
+        debug(pv("tellpath"))
         if h2o_scaling:
             # load separated H20 tapas datasets
 
             tapas_h20 = get_filenames("./", "tapas_*", "*_ReqId_12_No_Ifunction*")
+            debug(pv("tapas_h20"))
+
             if len(tapas_h20) > 1:
                 print("Warning Too many h20 tapas files returned")
             tapas_not_h20 = get_filenames("./", "tapas_*", "*_ReqId_18_R-*")
+            debug(pv("tapas_not_h20"))
             if len(tapas_not_h20) > 1:
                 print("Warning Too many h20 tapas files returned")
             # tapas_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_12_No_Ifunction_barydone-NO.ipac"
@@ -365,6 +383,8 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         else:
             # load combined dataset only
             tapas_all = get_filenames("./", "tapas_*", "*_ReqId_10_R-*")
+            debug(pv("tapas_all"))
+
             if len(tapas_all) > 1:
                 print("Warning Too many h20 tapas files returned")
             # tapas_all = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
@@ -404,6 +424,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         print("Returned Mathching filenames", tellname)
 
         print("tellpath after", tellpath)
+        debug(pv("tellname"))
         assert len(tellname) < 2, "Multiple tapas filenames match"
 
         tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
@@ -518,6 +539,8 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 if __name__ == "__main__":
     args = vars(_parser())
     fname = args.pop('fname')
+    debug_bool = args.pop('debug')
     opts = {k: args[k] for k in args}
 
+    setup_debug(debug_bool)
     main(fname, **opts)
