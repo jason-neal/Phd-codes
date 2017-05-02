@@ -384,9 +384,9 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             tapas_not_h20_section = wav_selector(tapas_not_h20_data[0], tapas_not_h20_data[1], wl_lower, wl_upper)
 
             # no h20 correction
-            non_h20_correct_I, tell_used, b_used = telluric_correction(wl, I, obs_airmass,
-                                                                       tapas_not_h20_section[0],
-                                                                       tapas_not_h20_section[1], tapas_airmass)
+            non_h20_correct_I, noh20tell_used, b_used = telluric_correction(wl, I, obs_airmass,
+                                                                            tapas_not_h20_section[0],
+                                                                            tapas_not_h20_section[1], tapas_airmass)
             # h20 correction and
 
             (h20_corrected_obs, h20tell_used, out,
@@ -394,7 +394,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
                                                      tapas_h20_section[1], R)
 
             I_corr = h20_corrected_obs
-            correction_used = tell_used * h20tell_used   # Combined corrections
+            tell_used = noh20tell_used * h20tell_used   # Combined corrections
 
         else:
             # load combined dataset only
@@ -408,7 +408,8 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             tapas_airmass = float(tapas_all_hdr["airmass"])
 
             # Select section by wavelength
-            tapas_all_section = wav_selector(tapas_all_data[0], tapas_all_data[1], wl_lower, wl_upper)
+            # tapas_all_section = wav_selector(tapas_all_data[0], tapas_all_data[1], wl_lower, wl_upper)
+            # Unneeded due to interpolation
 
             I_corr, tell_used, b_used = telluric_correction(wl, I, obs_airmass, tapas_all_data[0],
                                                             tapas_all_data[1], tapas_airmass)
