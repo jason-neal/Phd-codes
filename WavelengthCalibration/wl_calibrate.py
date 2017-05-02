@@ -142,6 +142,16 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
     return None
 
 
+def convert_labels_to_rv(x, labels):
+    """Convert ytick labels to rv.
+
+    Relative to middle of wavelenght axis."""
+    x_mid = np.mean(x)
+    c = 299792.458   # km/s
+    transform = ["{0:3.1f}".format((label / x_mid) * c) for label in labels]
+    return transform
+
+
 def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, use_rough=True):
     homedir = os.getcwd()
     print("Input name", fname)
@@ -330,14 +340,23 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     plt.ylabel("Normalized Intensity")
     plt.legend()
 
-    plt.subplot(2, 1, 2)
+    ax2 = plt.subplot(2, 1, 2)
     plt.plot(uncalib_data[0], calibrated_wl - lin_calibrated_wl, "+", label="Quad Calibrated spectra")
     plt.plot(uncalib_data[0], cube_calibrated_wl - lin_calibrated_wl, "x", label="Cube Calibrated spectra")
     # plt.plot(uncalib_data[0], quartic_calibrated_wl - lin_calibrated_wl, "o", label="Quartic Calibrated spectra")
-    ax2 = plt.gca()
+    # ax2 = plt.gca()
     ax2.get_xaxis().get_major_formatter().set_useOffset(False)
+    # RV Scale
+    ax3 = ax2.twinx()
+    ax3.plot(uncalib_data[0], calibrated_wl - lin_calibrated_wl, "+", label="Quad Calibrated spectra")
+    ax3.plot(uncalib_data[0], cube_calibrated_wl - lin_calibrated_wl, "x", label="Cube Calibrated spectra")
+    tick_labels = [item for item in ax3.get_yticks()]
+    new_ticklabels = convert_labels_to_rv(calib_data[0], tick_labels)
+    ax3.set_yticklabels(new_ticklabels)
+    ax3.set_ylabel("Relative RV (km/s)")
+
     plt.xlabel("Pixel number")
-    plt.ylabel("Delta lambda(nm)\nfrom Linear Fit")
+    ax2.set_ylabel("Delta lambda(nm)\nfrom Linear Fit")
     plt.title("Wavelength Differences of Models")
     plt.legend()
     plt.show(block=False)
