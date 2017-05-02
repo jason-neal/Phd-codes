@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
-""" Codes for Telluric contamination removal
-    Interpolates telluric spectra to the observed spectra.
-    Divides spectra telluric spectra
-    can plot result
+"""Telluric Removal.
+
+Removes the telluric contimination useing tapas spectra.
+
+Codes for Telluric contamination removal
+Interpolates telluric spectra to the observed spectra.
+Divides spectra telluric spectra
+can plot result.
 
 """
 from __future__ import division, print_function
@@ -514,37 +518,25 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 
     # Work out values for FITS header
     b_used = round(b_used, 4)
-    if new_method:
-        if h2o_scaling:
+
+    if new_method & h2o_scaling:
             h2o_scale_val = out.params["scale_factor"].value
-        else:
-            h2o_scale_val = None
+    else:
+        h2o_scale_val = None
 
+    # Keys and values for Fits header file
+    hdrkeys = ["Correction", "Tapas Interpolation method",
+               "Interpolation kind", "B PARAM",
+               "H20 Scaling", "H20 Scaling Value", "Calculated R"]
+    hdrvals = [("Tapas division", "Spectral Correction"),
+               (method, "numpy or scipy"),
+               (kind, "linear,slinear,quadratic,cubic"),
+               (b_used, "Airmass scaling parameter"),
+               (h2o_scaling, "Was separate H20 scaling 1 = Yes"),
+               (h2o_scale_val, "H20 scale value used"),
+               (R, "Observation resolution calculated by rule of thumb")]
+    tellhdr = False   # need to correctly get this from obtain telluric
 
-        # Keys and values for Fits header file
-        hdrkeys = ["Correction", "Tapas Interpolation method",
-                   "Interpolation kind", "B PARAM",
-                   "H20 Scaling", "H20 Scaling Value", "Calculated R"]
-        hdrvals = [("Tapas division", "Spectral Correction"),
-                   (method, "numpy or scipy"),
-                   (kind, "linear,slinear,quadratic,cubic"),
-                   (b_used, "Airmass scaling parameter"),
-                   (h2o_scaling, "Was separate H20 scaling 1 = Yes"),
-                   (h2o_scale_val, "H20 scale value used"),
-                   (R, "Observation resolution calculated by rule of thumb")]
-        tellhdr = False   # need to correctly get this from obtain telluric
-    else:   # Old method
-        # Keys and values for Fits header file
-        hdrkeys = ["Correction", "Tapas Interpolation method",
-                   "Interpolation kind", "B PARAM",
-                   "H20 Scaling", "Calculated R"]
-        hdrvals = [("Tapas division", "Spectral Correction"),
-                   (method, "numpy or scipy"),
-                   (kind, "linear,slinear,quadratic,cubic"),
-                   (b_used, "Airmass scaling parameter"),
-                   (h2o_scaling, "Was separate H20 scaling Done 1 = Yes"),
-                   (R, "Observation resolution calculated by rule of thumb")]
-        tellhdr = False   # need to correctly get this from obtain telluric
 
     if export:
         export_correction_2fits(output_filename, wl, I_corr, I, tell_used,
