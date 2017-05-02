@@ -32,6 +32,10 @@ from IP_multi_Convolution import ip_convolution
 from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
 
 
+from eniric.IOmodule import pdwrite_cols
+from eniric.atmosphere import barycenter_shift
+
+
 def setup_debug(debug_val):
     """Set debug level."""
     if debug_val:
@@ -305,12 +309,87 @@ def _parser():
                         help="Use new code method")
     parser.add_argument("-d", "--debug", action='store_true',
                         help="Include debug statements.")
+    parser.add_argument("--mask", default=False, action="store_true", help=("Store atmopsheric masks and calculate"
+                        " percentage saved."))
     args = parser.parse_args()
     return args
 
 
+def mask_flux(flux, depth: float=2):
+    """depth = percentage depth."""
+    depth /= 100.         # turn into fraction.
+    if depth < 0 or depth > 1:
+        raise ValueError("Depth outside range [0,1]")
+    return flux > (1 - depth)
+
+
+def mask_and_baryshift(tell_wav, tell_trans, depth: float=2):
+    """Mask out telluric lines above a given depth,
+
+    Inlcude effect of barycentric shift +-30km/s.
+    """
+    masked_tell = mask_flux(tell_trans, depth)
+    mask_tell_bary = barycenter_shift(tell_wav, masked_tell, consecutive_test=False)
+
+    assert np.all(tell_trans[masked_tell] > (1 - (depth / 100.)))
+    assert np.all(tell_trans[mask_tell_bary] > (1 - (depth / 100.)))
+    debug(pv("depth"))
+    debug(pv("len(tell_trans[masked_tell])"))
+    debug(pv("sum(masked_tell)"))
+
+    return masked_tell, mask_tell_bary
+
+
+def telluric_rv_masks(wav_obs, tell_wav, tell_trans, save_name=False, h20=False):
+    """Masks for pixels affected by telluric spectrum.
+
+    Assumes tell_trans is the transmission, i.e 1 = no absorption.
+
+    h20: bool
+       Bool for if H20 scalling was used.
+    """
+    mask_2, masked_bary_2 = mask_and_baryshift(tell_wav, tell_trans, depth=2)
+    mask_5, masked_bary_5 = mask_and_baryshift(tell_wav, tell_trans, depth=5)
+
+    #obs_mask_2 = wl_interpolation(tell_wav, mask_2_percent, wav_obs)
+    #obs_mask_2_30 = wl_interpolation(tell_wav, mask_2per_30km, wav_obs)
+    #obs_mask_5 = wl_interpolation(tell_wav, mask_5_percent, wav_obs)
+    #obs_mask_5_30 = wl_interpolation(tell_wav, mask_5per_30km, wav_obs)
+    obs_data = [wl_interpolation(tell_wav, mask, wav_obs) for mask in [mask_2, masked_bary_2, mask_5, masked_bary_5]]
+    debug(pv("obs_data"))
+    # Save as a csv
+    if save_name:
+        if h20:
+            mask_name = save_name.replace(".fits", ".h20tellmasks.txt")
+            percent_name = save_name.split(".nod.")[0][:-2] + ".h20tellpercentages.txt"
+        else:
+            mask_name = save_name.replace(".fits", ".tellmasks.txt")
+            percent_name = save_name.split(".nod.")[0][:-2] + ".tellpercentages.txt"
+        cols = ["wav_nm", r"depth>2% masked", r"depth>2%+baryshift", r"depth>5% masked", r"depth>5%+baryshift"]
+        # pdwrite_cols(filename, *data, **kwargs)
+        data = [wav_obs, *obs_data]
+        debug(pv("data"))
+        pdwrite_cols(mask_name, *data, header=cols)
+
+        # Based on names
+        # CRIRE.2012-04-07T00-08-29.976_2.nod.ms.norm.sum.fits
+        with open(percent_name, "a") as f:
+            f.write("Percentage of spectra covered by deep lines.\n")
+            f.write("Detector Chip = {}\n".format(save_name.split(".nod.")[0][-1]))
+            for m, n in zip(data[1:], cols[1:]):
+                num_good = np.sum(m)
+                num_tell = len(m) - num_good
+
+                correct_frac = num_tell / len(m)  # m has
+
+                f.write("{!s:16}\t{:6.02%}\n".format(n, correct_frac))
+        debug("Should have saved values to {!s}".format(percent_name))
+
+    return obs_data  # obs_mask_2, obs_mask_2_30, obs_mask_5, obs_mask_5_30
+
+
 def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy",
-         show=False, h2o_scaling=False, new_method=False):
+         show=False, h2o_scaling=False, new_method=False, mask=False):
     # Set and test homedir
     homedir = os.getcwd()
     if homedir[-13:] != "Combined_Nods":
@@ -503,6 +582,17 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         b_used = Correction_Bs[1]
 
     # ######################################   Ends  HERE ##########################################
+
+    if mask:
+        if h2o_scaling:
+            telluric_rv_masks(wl, wl, tell_used, save_name=os.path.join(homedir, fname), h20=True)  # tell_used wavelength in this
+            #                                                                               case is the same length due to
+            #                                                                               interpolation.
+        else:
+            telluric_rv_masks(wl, wl, tell_used, save_name=os.path.join(homedir, fname))  # tell_used wavelength in this
+        #                                                                               case is the same length due to
+        #                                                                               interpolation.
+
 
     # ## SAVING Telluric Corrected Spectra ###
     # PROBABALY NEED TO HARDCODE IN THE HEADER LINES...
