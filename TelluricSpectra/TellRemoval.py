@@ -29,7 +29,7 @@ from lmfit import minimize, Parameters
 from Get_filenames import get_filenames
 # from scipy.interpolate import interp1d
 from IP_multi_Convolution import ip_convolution
-from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
+from SpectralTools import wav_selector, wl_interpolation
 
 
 from eniric.IOmodule import pdwrite_cols
@@ -196,7 +196,7 @@ def h20_residual(params, obs_data, telluric_data):
     fwhm_lim = params["fwhm_lim"].value
     # n_jobs = params["n_jobs"].value  # parallel implementaiton
     # chip_select = params["chip_select"].value
-    verbose = params["verbose"].value
+    # verbose = params["verbose"].value
     fit_lines = params["fit_lines"].value  # if true only fit areas deeper than 0.995
 
     # Data
@@ -218,7 +218,7 @@ def h20_residual(params, obs_data, telluric_data):
     # conv_tell_wl, conv_tell_I = instrument_convolution(telluric_wl, scaled_telluric_I, chip_limits,
     #                                                    R, fwhm_lim=fwhm_lim, plot=False, verbose=verbose)
     conv_tell_wl, conv_tell_I = ip_convolution(telluric_wl, scaled_telluric_I, chip_limits,
-                                               R, fwhm_lim=fwhm_lim, plot=False, verbose=verbose)
+                                               R, fwhm_lim=fwhm_lim, plot=False, progbar=False)
 
     # print("Obs wl- Min ", np.min(obs_wl)," Max ", np.max(obs_wl))
     # print("Input telluic wl- Min ", np.min(telluric_wl)," Max ", np.max(telluric_wl))
@@ -247,8 +247,9 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
     params.add('R', value=R, vary=False)
     params.add('fwhm_lim', value=5, vary=False)
     params.add('fit_lines', value=True, vary=False)   # only fit the peaks of lines < 0.995
-    params.add("verbose", value=False, vary=False)
+    # params.add("verbose", value=False, vary=False)
 
+    # lmfit Optimization
     out = minimize(h20_residual, params, args=([obs_wl, obs_I], [h20_wl, h20_I]))
 
     outreport = lmfit.fit_report(out)
@@ -260,7 +261,7 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
     # Convolved_h20_wl, Convolved_h20_I = instrument_convolution(h20_wl, Scaled_h20_I, [h20_wl[0], h20_wl[-1]],
     #                                                           R, fwhm_lim=5, plot=False, verbose=True)
     Convolved_h20_wl, Convolved_h20_I = ip_convolution(h20_wl, Scaled_h20_I, [h20_wl[0], h20_wl[-1]],
-                                                       R, fwhm_lim=5, plot=False, verbose=True)
+                                                       R, fwhm_lim=5, plot=False)
 
     # assert np.allclose(Convolved_h20_I_2, Convolved_h20_I)
     # print("Convolution Methods give the same result")
