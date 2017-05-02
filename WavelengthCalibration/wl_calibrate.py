@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
-""" Script to run wavelength calibration on input fits file"""
+"""wl_calibrate.py
+
+Script to run wavelength calibration on input crires fits file.
+
+Uses telluric modeling from TAPAS.
+"""
 # from __future__ import division, print_function
 
 import os
@@ -9,22 +14,18 @@ import pickle
 import logging
 import argparse
 import numpy as np
+from astropy.io import fits
+import GaussianFitting as gf
+from PyAstronomy import pyasl
 import matplotlib.pyplot as plt
 
-from astropy.io import fits
-# from gooey import Gooey, GooeyParser
-import IOmodule
-import GaussianFitting as gf
-from Gaussian_fit_testing import Get_DRACS
 import Obtain_Telluric as obt
-from TellRemoval import airmass_scaling
-import XCorrWaveCalScript as XCorrWaveCal
-
-from SpectralTools import wav_selector
 # from plot_fits import get_wavelength
-
+from SpectralTools import wav_selector
+from TellRemoval import airmass_scaling
 from Tapas_Berv_corr import tapas_helcorr
-from PyAstronomy import pyasl
+import XCorrWaveCalScript as XCorrWaveCal
+from Gaussian_fit_testing import Get_DRACS
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -32,13 +33,11 @@ logging.basicConfig(level=logging.DEBUG,
 debug = logging.debug
 
 
-# @Gooey(program_name='Plot fits - Easy 1D fits plotting', default_size=(610, 730))
 def _parser():
     """Take care of all the argparse stuff.
 
     :returns: the args
     """
-    # parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
     parser = argparse.ArgumentParser(description='Wavelength Calibrate CRIRES \
                                     Spectra')
     parser.add_argument('fname', help='Input fits file')
@@ -54,21 +53,6 @@ def _parser():
                         help='Apply Berv corr to plot limits if using berv corrected tapas')
     parser.add_argument('-u', '--use_rough', default=True, action="store_false",
                         help=" Get rough coordinates from stored pickle file, (if present).")
-    # parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
-    # parser.add_argument('fname',
-    #                    action='store',
-    #                    widget='FileChooser',
-    #                    help='Input fits file')
-    # parser.add_argument('-o', '--output',
-    #                    default=False,
-    #                    action='store',
-    #                    widget='FileChooser',
-    #                    help='Ouput Filename')
-    # parser.add_argument('-t', '--telluric',
-    #                    default=False,
-    #                    action='store',
-    #                    widget='FileChooser',
-    #                    help='Telluric line Calibrator')
 
     args = parser.parse_args()
     return args
