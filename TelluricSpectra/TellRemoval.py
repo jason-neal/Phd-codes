@@ -8,22 +8,24 @@
 """
 from __future__ import division, print_function
 import os
+import lmfit
 # import time
+import logging
 import argparse
 import numpy as np
+# import pandas as pd
 # import scipy as sp
-# from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
-from astropy.io import fits
-from lmfit import minimize, Parameters
-import lmfit
-import logging
 from logging import debug
-# import GaussianFitting as gf
-import Obtain_Telluric as obt
-from Get_filenames import get_filenames
-from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
 from debug_utils import pv
+from astropy.io import fits
+import Obtain_Telluric as obt
+# import GaussianFitting as gf
+import matplotlib.pyplot as plt
+from lmfit import minimize, Parameters
+from Get_filenames import get_filenames
+# from scipy.interpolate import interp1d
+from IP_multi_Convolution import ip_convolution
+from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
 
 
 def setup_debug(debug_val):
@@ -205,14 +207,16 @@ def h20_residual(params, obs_data, telluric_data):
     # Convolution
     # def convolution_nir(wav, flux, chip, R, fwhm_lim=5.0, plot=True):
     #    return [wav_chip, flux_conv_res]
-    conv_tell_wl, conv_tell_I = instrument_convolution(telluric_wl, scaled_telluric_I, chip_limits,
-                                                       R, fwhm_lim=fwhm_lim, plot=False, verbose=verbose)
+    # conv_tell_wl, conv_tell_I = instrument_convolution(telluric_wl, scaled_telluric_I, chip_limits,
+    #                                                    R, fwhm_lim=fwhm_lim, plot=False, verbose=verbose)
+    conv_tell_wl, conv_tell_I = ip_convolution(telluric_wl, scaled_telluric_I, chip_limits,
+                                               R, fwhm_lim=fwhm_lim, plot=False, verbose=verbose)
 
     # print("Obs wl- Min ", np.min(obs_wl)," Max ", np.max(obs_wl))
     # print("Input telluic wl- Min ", np.min(telluric_wl)," Max ", np.max(telluric_wl))
     # print("conv tell wl- Min ", np.min(conv_tell_wl)," Max ", np.max(conv_tell_wl))
     interped_conv_tell = wl_interpolation(conv_tell_wl, conv_tell_I, obs_wl)
-    print("Convolution and interpolation inside residual function was done")
+    logging.info("Convolution and interpolation inside residual function was done")
 
     # Mask fit to peaks in telluric data
     if fit_lines:
@@ -245,8 +249,13 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
     # Telluric scaling T ** x
     Scaled_h20_I = h20_I ** out.params["scale_factor"].value
 
-    Convolved_h20_wl, Convolved_h20_I = instrument_convolution(h20_wl, Scaled_h20_I, [h20_wl[0], h20_wl[-1]],
-                                                               R, fwhm_lim=5, plot=False, verbose=True)
+    # Convolved_h20_wl, Convolved_h20_I = instrument_convolution(h20_wl, Scaled_h20_I, [h20_wl[0], h20_wl[-1]],
+    #                                                           R, fwhm_lim=5, plot=False, verbose=True)
+    Convolved_h20_wl, Convolved_h20_I = ip_convolution(h20_wl, Scaled_h20_I, [h20_wl[0], h20_wl[-1]],
+                                                       R, fwhm_lim=5, plot=False, verbose=True)
+
+    # assert np.allclose(Convolved_h20_I_2, Convolved_h20_I)
+    # print("Convolution Methods give the same result")
 
     # Interpolation to obs positions
     interp_conv_h20_I = wl_interpolation(Convolved_h20_wl, Convolved_h20_I, obs_wl)
