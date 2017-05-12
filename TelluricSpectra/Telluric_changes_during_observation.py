@@ -100,7 +100,7 @@ def do_change_calculations(CriresPath, crires_file, tapas_filename):
     
     plt.figure()
     for jj in range(8):
-        plt.plot(tapas_data[0], scaled_tapas_data[jj], label="spectra {}".format(jj))
+        plt.plot(tapas_data[0], scaled_tapas_data[jj], label="spectra {0}".format(jj))
     plt.show()
 
     # Percentage of absorbtion
@@ -126,7 +126,7 @@ def do_change_calculations(CriresPath, crires_file, tapas_filename):
 
 
     print("Maximum transmittance difference between combined and averaged", max(Tapas_difference))
-    print("Maximum percentage change between combined and averaged = {} %".format(max(percentage_of_absorption)))
+    print("Maximum percentage change between combined and averaged = {0} %".format(max(percentage_of_absorption)))
     print("Maximum difference between first and last telluric spectra", max(first_last_diff))
     
 

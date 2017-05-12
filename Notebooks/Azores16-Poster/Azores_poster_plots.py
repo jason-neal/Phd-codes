@@ -45,7 +45,7 @@ if target == reference_target:
 dracs_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/".format(target)
 #dracs_path = "C:/Users/Jason/Documents/PhD/Phd-codes/Notebooks/HD30501_data/{0}/".format(obs_num)
 #dracs_path = "../HD30501_data/{0}".format(obs_num)
-dracs_name = get_filenames(dracs_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.fits".format(chip_num))
+dracs_name = get_filenames(dracs_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.fits".format(chip_num))
 
 dracs_name = dracs_path + dracs_name[0]
 
@@ -94,8 +94,8 @@ tell_I = tell_I[wlmask]
 #dracs_path = "../HD30501_data/{0}".format(obs_num)
 #dracs_path = "C:/Users/Jason/Documents/PhD/Phd-codes/Notebooks/HD30501_data/{0}/".format(obs_num)
 
-tellcorr_name = get_filenames(dracs_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
-h20tellcorr_name = get_filenames(dracs_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.h2otellcorr.fits".format(chip_num))
+tellcorr_name = get_filenames(dracs_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
+h20tellcorr_name = get_filenames(dracs_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.h2otellcorr.fits".format(chip_num))
 print(tellcorr_name)
 tellcorr_name = dracs_path + tellcorr_name[0]
 h20tellcorr_name = dracs_path + h20tellcorr_name[0]
@@ -123,8 +123,8 @@ h20tellcorr_I = h20tellcorr_data["Corrected_DRACS"]
 # Same as above just a different target
 reference_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/".format(reference_target)
 #reference_path = "C:/Users/Jason/Documents/PhD/Phd-codes/Notebooks/HD30501_data/{0}/".format(ref_num)
-reftellcorr_name = get_filenames(reference_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
-refh20tellcorr_name = get_filenames(reference_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.h2otellcorr.fits".format(chip_num))
+reftellcorr_name = get_filenames(reference_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
+refh20tellcorr_name = get_filenames(reference_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.h2otellcorr.fits".format(chip_num))
 
 ######################################3 TESTING only
 #reference_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/Bervcorrected_tapas/".format(reference_target)

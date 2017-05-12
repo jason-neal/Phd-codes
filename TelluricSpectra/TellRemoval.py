@@ -434,7 +434,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
                 plt.plot(wl, tell, linewidth=2, label=("Telluric " + label + ", B = {0:.3f}".format(B)))
                 plt.plot(wl, np.ones_like(wl), "-.")
                 plt.legend(loc="best")
-                plt.title("Telluric Scaling with Tapas Resolution power = {}".format(tell_respower))
+                plt.title("Telluric Scaling with Tapas Resolution power = {0}".format(tell_respower))
 
             plt.figure() # Corrections
             plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
@@ -443,7 +443,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
                 #plt.plot(wl, tell, label=("Telluric " + label + ", B = {0:.2f}".format(B)))
                 plt.plot(wl, np.ones_like(wl), "-.")
                 plt.legend(loc="best")
-                plt.title("Telluric Corrections with tapas Resolution power = {}".format(tell_respower))
+                plt.title("Telluric Corrections with tapas Resolution power = {0}".format(tell_respower))
 
             plt.show()
 

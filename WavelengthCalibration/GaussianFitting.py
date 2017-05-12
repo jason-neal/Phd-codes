@@ -359,7 +359,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                 coord_b = fitted_coords_b[i]
                 # include = input("Use Peak #" + str(i+1) +" corresponding to" + 
                 #                    str([coord_a[0],'pxls', coord_b[0],'nm']) + " y/N?")
-                include = input("Use Peak # {} ".format(i+1) + "corresponding to" +
+                include = input("Use Peak # {0} ".format(i+1) + "corresponding to" +
                              " [a-{0:.2f}, b-{1:.2f}]? y/N?".format(coord_a[0], coord_b[0]))
                 if include.lower() == "y" or include.lower() == "yes":
                     best_a_coords.append(coord_a[0])

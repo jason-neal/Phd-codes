@@ -122,7 +122,7 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
     with open(filename,"w") as f:
         f.write("# Pixels  \t Obs Depths \t Obs STD \t Wavelengths \t Tell depths \t Tell STD\n")
         for pixel, obs_depth, obs_std, wl, wl_depth, wl_std in zip(obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
-           f.write("{} \t {} \t {} \t {} \t {} \t {} \n".format(round(pixel, 4), round(1-obs_depth, 4), round(obs_std, 4), round(wl, 4), round(1-wl_depth, 4), round(wl_std, 4)))
+           f.write("{0} \t {1} \t {2} \t {3} \t {4} \t {5} \n".format(round(pixel, 4), round(1-obs_depth, 4), round(obs_std, 4), round(wl, 4), round(1-wl_depth, 4), round(wl_std, 4)))
     return None
 
 def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False):
@@ -385,7 +385,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         with open(linedepthpath + "New_Telluric_linedepths.txt","a") as f:
             for peak in peaks_b:
                 f.write(str(peak) + "\n")
-        print("Saved line depths to New_xxxx_linedepths.txt in {}".format(linedepthpath))
+        print("Saved line depths to New_xxxx_linedepths.txt in {0}".format(linedepthpath))
 
 if __name__ == '__main__':
     args = vars(_parser())

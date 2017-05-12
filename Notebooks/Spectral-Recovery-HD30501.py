@@ -92,7 +92,7 @@ hdr3 = fits.getheader(path + name3_chips[detector])
 Obs4 = fits.getdata(path + name4_chips[detector])
 hdr4 = fits.getheader(path + name4_chips[detector])
 print("Names of the different data vectors in the fits file")
-print("Obs1 Column names = {}".format(Obs1.columns.names))
+print("Obs1 Column names = {0}".format(Obs1.columns.names))
 wl1 = Obs1["Wavelength"]
 I1_uncorr = Obs1["Extracted_DRACS"]
 I1 = Obs1["Corrected_DRACS"]
@@ -228,7 +228,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 plt.figure()
-plt.suptitle("Subtraction of different observations from detector {}".format(detector), fontsize=16)
+plt.suptitle("Subtraction of different observations from detector {0}".format(detector), fontsize=16)
 plt.subplot(711)
 plt.plot(wl, I1_interp-I2_interp, label="Obs 1 - Obs 2")
 plt.title("Observation 1 - Observation 2")
