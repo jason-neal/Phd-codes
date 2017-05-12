@@ -103,7 +103,7 @@ def get_Coordfile_name(path, chipnum):
         print("Double path add -hack")
         path = path + "../../"
         print(path)
-    coord_name = get_filenames(path, "Coordinates_CRIRE.*","*{}.nod.ms.norm.sum*".format(chipnum))
+    coord_name = get_filenames(path, "Coordinates_CRIRE.*","*{0}.nod.ms.norm.sum*".format(chipnum))
     return path + coord_name[0]
 
 
@@ -799,11 +799,11 @@ for num, cname in enumerate(Wavecalfiles):
     
     if num == 0:
         plt.plot(used_wl, I, "m", label="used WL")
-        plt.plot(Chip_polyval_wl_individual, I, "b--", label="Individual Map Chip {}".format(num+1))
-        plt.plot(Chip_polyval_wl_combined, I, "r:", label="Combined Map Chip {}".format(num+1))
-        plt.plot(Chip_lmfit_wl_individual, I, "g-", label="lmfit Individual Map Chip {}".format(num+1))
-        plt.plot(Chip_lmfit_wl_combined, I, "k-.", label="lmfit Combined Map Chip {}".format(num+1))
-        plt.plot(Chip_lmfit_wl_weighted_combined, I, "c-o", label="lmfit weighted Map Chip {}".format(num+1))
+        plt.plot(Chip_polyval_wl_individual, I, "b--", label="Individual Map Chip {0}".format(num+1))
+        plt.plot(Chip_polyval_wl_combined, I, "r:", label="Combined Map Chip {0}".format(num+1))
+        plt.plot(Chip_lmfit_wl_individual, I, "g-", label="lmfit Individual Map Chip {0}".format(num+1))
+        plt.plot(Chip_lmfit_wl_combined, I, "k-.", label="lmfit Combined Map Chip {0}".format(num+1))
+        plt.plot(Chip_lmfit_wl_weighted_combined, I, "c-o", label="lmfit weighted Map Chip {0}".format(num+1))
     else:
         plt.plot(used_wl, I, "m")
         plt.plot(Chip_polyval_wl_individual, I, "b--")
@@ -1020,9 +1020,9 @@ X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 # extract from X the parameters m and b
 b, m, q = X 
 
-print('b= {} +- {}'.format(b, np.sqrt(cov2[0,0])))
-print('m= {} +- {}'.format(m, np.sqrt(cov2[1,1])))
-print('q= {} +- {}'.format(q, np.sqrt(cov2[2,2])))
+print('b= {0} +- {1}'.format(b, np.sqrt(cov2[0,0])))
+print('m= {0} +- {1}'.format(m, np.sqrt(cov2[1,1])))
+print('q= {0} +- {1}'.format(q, np.sqrt(cov2[2,2])))
 
 # plot the data (with errorbars) and the best-fit line
 plt.figure()
@@ -1056,10 +1056,10 @@ while False:#Third order regression
 	# extract from X the parameters m and b
 	b3, m3, q3 , r3 = X 
 
-	print('b= {} +- {}'.format(b3, np.sqrt(cov2[0,0])))
-	print('m= {} +- {}'.format(m3, np.sqrt(cov2[1,1])))
-	print('q= {} +- {}'.format(q3, np.sqrt(cov2[2,2])))
-	print('r= {} +- {}'.format(r3, np.sqrt(cov2[3,3])))
+	print('b= {0} +- {1}'.format(b3, np.sqrt(cov2[0,0])))
+	print('m= {0} +- {1}'.format(m3, np.sqrt(cov2[1,1])))
+	print('q= {0} +- {1}'.format(q3, np.sqrt(cov2[2,2])))
+	print('r= {0} +- {1}'.format(r3, np.sqrt(cov2[3,3])))
 
 	# plot the data (with errorbars) and the best-fit line
 	plt.figure()
@@ -1117,11 +1117,11 @@ for num, cname in enumerate(Chipnames):
     
     Chip_wl_individual = np.polyval(wlmaps[num], chip_pixel)
     
-    plt.plot(Chip_wl_individual, Chip_data, "--", label="Individual Map Chip {}".format(num+1))
+    plt.plot(Chip_wl_individual, Chip_data, "--", label="Individual Map Chip {0}".format(num+1))
 
     Chip_wl_comb = np.polyval(Combined_map, chip_pixel)
     #Chip_wl = q*chip_pixel**2 + m*chip_pixel + b
-    plt.plot(Chip_wl_comb, Chip_data, label="Combined Map Chip {}".format(num+1))
+    plt.plot(Chip_wl_comb, Chip_data, label="Combined Map Chip {0}".format(num+1))
     
 
 
