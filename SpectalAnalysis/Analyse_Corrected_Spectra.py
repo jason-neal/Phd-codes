@@ -168,7 +168,7 @@ def main(fname, telluric=False, model=False):
     plt.figure()
     plt.plot(drvs, cc, '-k', lw=2)
     plt.plot(drvs, g, '--r', lw=2)
-    plt.title('CCF (mod): %s km/s' % int(RV))
+    plt.title('CCF (mod): {0!s} km/s'.format(int(RV)))
     #ax3.set_title('CCF (tel)')
     plt.xlabel('RV [km/s]')
     #ax3.set_xlabel('RV [km/s]')
