@@ -180,7 +180,7 @@ Combined_map = [out.params["q"].value, out.params["m"].value, out.params["b"].va
 Gap1 = out.params["Gap1"].value
 Gap2 = out.params["Gap2"].value
 Gap3 = out.params["Gap3"].value
-print("Fitted Gaps \n Gap1 = {}\nGap2 = {}\nGap3 = {}\n".format(Gap1, Gap2, Gap3))
+print("Fitted Gaps \n Gap1 = {0}\nGap2 = {1}\nGap3 = {2}\n".format(Gap1, Gap2, Gap3))
 
 ### Dividing by Depths
 
@@ -191,7 +191,7 @@ Combined_map_depths = [out.params["q"].value, out.params["m"].value, out.params[
 Gap1_depths = out_with_depths.params["Gap1"].value
 Gap2_depths = out_with_depths.params["Gap2"].value
 Gap3_depths = out_with_depths.params["Gap3"].value
-print("Fitted Gaps with Depths\n Gap1 = {}\nGap2 = {}\nGap3 = {}\n".format(Gap1_depths, Gap2_depths, Gap3_depths))
+print("Fitted Gaps with Depths\n Gap1 = {0}\nGap2 = {1}\nGap3 = {2}\n".format(Gap1_depths, Gap2_depths, Gap3_depths))
 
 
 
@@ -203,7 +203,7 @@ params_chip1.add('b', value=2110)
 out1 = minimize(residual_individual, params_chip1, args=(Test_pxl1, Test_wl1))
 outreport1 = lmfit.fit_report(out1)
 Chip1_params = [out1.params["q"].value, out1.params["m"].value, out1.params["b"].value]
-print("Chip1 Parameters = {}".format(Chip1_params))
+print("Chip1 Parameters = {0}".format(Chip1_params))
 
 params_chip2 = Parameters()
 params_chip2.add('q', value=0.0000001)
@@ -212,7 +212,7 @@ params_chip2.add('b', value=2110)
 out2 = minimize(residual_individual, params_chip2, args=(Test_pxl2, Test_wl2))
 outreport2 = lmfit.fit_report(out2)
 Chip2_params = [out2.params["q"].value, out2.params["m"].value, out2.params["b"].value]
-print("Chip2 Parameters = {}".format(Chip2_params))
+print("Chip2 Parameters = {0}".format(Chip2_params))
 
 params_chip3 = Parameters()
 params_chip3.add('q', value=0.0000001)
@@ -221,7 +221,7 @@ params_chip3.add('b', value=2110)
 out3 = minimize(residual_individual, params_chip3, args=(Test_pxl3, Test_wl3))
 outreport3 = lmfit.fit_report(out3)
 Chip3_params = [out3.params["q"].value, out3.params["m"].value, out3.params["b"].value]
-print("Chip3 Parameters = {}".format(Chip3_params))
+print("Chip3 Parameters = {0}".format(Chip3_params))
 
 params_chip4 = Parameters()
 params_chip4.add('q', value=0.0000001)
@@ -230,7 +230,7 @@ params_chip4.add('b', value=2110)
 out4 = minimize(residual_individual, params_chip4, args=(Test_pxl4, Test_wl4))
 outreport4 = lmfit.fit_report(out4)
 Chip4_params = [out4.params["q"].value, out4.params["m"].value, out4.params["b"].value]
-print("Chip4 Parameters = {}".format(Chip4_params))
+print("Chip4 Parameters = {0}".format(Chip4_params))
 
 
 
@@ -257,6 +257,7 @@ for num, cname in enumerate(Chipnames):
 
     Chip_wl_comb_depths = np.polyval(Combined_map_depths, chip_pixel_gapped_depths)
     plt.plot(Chip_wl_comb_depths, Chip_data, label="Combined depths Map Chip {}".format(num + 1))
+
 
 
 

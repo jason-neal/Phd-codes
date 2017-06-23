@@ -22,5 +22,5 @@ print("jd manual", jd_manual_red)
 
 # recently dicsocered ephem has a julian_date component.
 jd_ephem = ephem.julian_date(Time_manual)
-print("jd Time from ephem = {}".format(jd_ephem))
+print("jd Time from ephem = {0}".format(jd_ephem))
 # This is a much nicer option!

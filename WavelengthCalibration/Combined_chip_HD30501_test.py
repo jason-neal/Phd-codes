@@ -154,9 +154,9 @@ X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 # extract from X the parameters m and b
 b, m, q = X
 
-print('b= {} +- {}'.format(b, np.sqrt(cov2[0,0])))
-print('m= {} +- {}'.format(m, np.sqrt(cov2[1,1])))
-print('q= {} +- {}'.format(q, np.sqrt(cov2[2,2])))
+print('b= {0} +- {1}'.format(b, np.sqrt(cov2[0,0])))
+print('m= {0} +- {1}'.format(m, np.sqrt(cov2[1,1])))
+print('q= {0} +- {1}'.format(q, np.sqrt(cov2[2,2])))
 
 # plot the data (with errorbars) and the best-fit line
 plt.figure()
@@ -191,10 +191,10 @@ X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 # extract from X the parameters m and b
 b3, m3, q3 , r3 = X
 
-print('b= {} +- {}'.format(b3, np.sqrt(cov2[0,0])))
-print('m= {} +- {}'.format(m3, np.sqrt(cov2[1,1])))
-print('q= {} +- {}'.format(q3, np.sqrt(cov2[2,2])))
-print('r= {} +- {}'.format(r3, np.sqrt(cov2[3,3])))
+print('b= {0} +- {1}'.format(b3, np.sqrt(cov2[0,0])))
+print('m= {0} +- {1}'.format(m3, np.sqrt(cov2[1,1])))
+print('q= {0} +- {1}'.format(q3, np.sqrt(cov2[2,2])))
+print('r= {0} +- {1}'.format(r3, np.sqrt(cov2[3,3])))
 
 # plot the data (with errorbars) and the best-fit line
 plt.figure()

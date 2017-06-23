@@ -421,7 +421,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         with open(linedepthpath + "New_Telluric_linedepths.txt", "a") as f:
             for peak in peaks_b:
                 f.write(str(peak) + "\n")
-        print("Saved line depths to New_xxxx_linedepths.txt in {}".format(linedepthpath))
+        print("Saved line depths to New_xxxx_linedepths.txt in {0}".format(linedepthpath))
 
 
 if __name__ == '__main__':

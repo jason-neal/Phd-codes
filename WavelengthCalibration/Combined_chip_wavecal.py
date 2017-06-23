@@ -166,7 +166,7 @@ cov2 = np.linalg.inv(cov)
 X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 
 # extract from X the parameters m and b
-b3, m3, q3 , r3 = X
+b3, m3, q3, r3 = X
 
 print('b= {} +- {}'.format(b3, np.sqrt(cov2[0, 0])))
 print('m= {} +- {}'.format(m3, np.sqrt(cov2[1, 1])))
