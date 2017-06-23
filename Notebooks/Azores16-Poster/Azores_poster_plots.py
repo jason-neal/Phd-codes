@@ -6,26 +6,34 @@
 
 # In[ ]:
 
+
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
 import Obtain_Telluric as obt
 from Get_filenames import get_filenames
-get_ipython().magic(u'matplotlib inline')
+get_ipython().magic('matplotlib inline')
 
 
 # In[ ]:
+
 
 # Import Bokeh modules for interactive plotting
 import bokeh.io
 import bokeh.mpl
 import bokeh.plotting
-get_ipython().magic(u"config InlineBackend.figure_formats = {'svg',}")
+get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
+
+
+# In[ ]:
+
+
 # Set up Bokeh for inline viewing
 bokeh.io.output_notebook()
 
 
 # In[ ]:
+
 
 # Parameters to alter to change spectra seen
 chip_num = 1
@@ -41,16 +49,18 @@ if target == reference_target:
 # In[ ]:
 
 
+
 ### Dracs data
 dracs_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/".format(target)
 #dracs_path = "C:/Users/Jason/Documents/PhD/Phd-codes/Notebooks/HD30501_data/{0}/".format(obs_num)
 #dracs_path = "../HD30501_data/{0}".format(obs_num)
-dracs_name = get_filenames(dracs_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.fits".format(chip_num))
+dracs_name = get_filenames(dracs_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.fits".format(chip_num))
 
 dracs_name = dracs_path + dracs_name[0]
 
 
 # In[ ]:
+
 
 # Dracs data load
 
@@ -69,8 +79,9 @@ dracs_I = dracs_I / np.median(dracs_I[maxes])
 
 # In[ ]:
 
+
 # Load tapas file
-tapas_path = dracs_path
+tapas_path = dracs_path + "../Telluric_files/"
 tapas_name = get_filenames(tapas_path, "tapas_*","*ReqId_10*")[0]
 
 Tapas_data, Tapas_hdr = obt.load_telluric(tapas_path, tapas_name)
@@ -89,13 +100,14 @@ tell_I = tell_I[wlmask]
 
 # In[ ]:
 
+
 # Corrected values
 #dracs_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/".format(target)
 #dracs_path = "../HD30501_data/{0}".format(obs_num)
 #dracs_path = "C:/Users/Jason/Documents/PhD/Phd-codes/Notebooks/HD30501_data/{0}/".format(obs_num)
 
-tellcorr_name = get_filenames(dracs_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
-h20tellcorr_name = get_filenames(dracs_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.h2otellcorr.fits".format(chip_num))
+tellcorr_name = get_filenames(dracs_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
+h20tellcorr_name = get_filenames(dracs_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.h2otellcorr.fits".format(chip_num))
 print(tellcorr_name)
 tellcorr_name = dracs_path + tellcorr_name[0]
 h20tellcorr_name = dracs_path + h20tellcorr_name[0]
@@ -119,12 +131,13 @@ h20tellcorr_I = h20tellcorr_data["Corrected_DRACS"]
 
 # In[ ]:
 
+
 ### Reference data 
 # Same as above just a different target
 reference_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/".format(reference_target)
 #reference_path = "C:/Users/Jason/Documents/PhD/Phd-codes/Notebooks/HD30501_data/{0}/".format(ref_num)
-reftellcorr_name = get_filenames(reference_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
-refh20tellcorr_name = get_filenames(reference_path, "CRIRE.*","*{0}.nod.ms.norm.sum.wavecal.h2otellcorr.fits".format(chip_num))
+reftellcorr_name = get_filenames(reference_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
+refh20tellcorr_name = get_filenames(reference_path, "CRIRE.*","*{}.nod.ms.norm.sum.wavecal.h2otellcorr.fits".format(chip_num))
 
 ######################################3 TESTING only
 #reference_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/Bervcorrected_tapas/".format(reference_target)
@@ -155,7 +168,9 @@ refh20tellcorr_tell = h20tellcorr_data["Interpolated_Tapas"]  # for masking
 
 
 
+
 # In[ ]:
+
 
 # Make barycorr fucntion
 import time 
@@ -207,6 +222,7 @@ def barycorr_CRIRES(wavelength, flux, header, extra_offset=None):
 
 # In[ ]:
 
+
 manual_ofset_for_testing = 0
 
 target_nflux, target_wlprime = barycorr_CRIRES(tellcorr_wl, tellcorr_I, tellcorr_hdr, extra_offset=manual_ofset_for_testing)
@@ -222,6 +238,7 @@ ref_nfluxtell, __ = barycorr_CRIRES(reftellcorr_wl, reftellcorr_tell, reftellcor
 
 # In[ ]:
 
+
 plt.plot(reftellcorr_wl, reftellcorr_I, label="Reference" )
 plt.plot(tellcorr_wl, tellcorr_I, label="Target")
 
@@ -233,6 +250,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # In[ ]:
 
+
 plt.plot(reftellcorr_wl, ref_nflux, label="Reference" )
 plt.plot(tellcorr_wl, target_nflux, label="Target")
 
@@ -243,6 +261,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # In[ ]:
+
 
 
 # wavelength reference untill spectral tools is fixed 
@@ -272,6 +291,7 @@ def match_wl(wl, spec, ref_wl, method="scipy", kind="linear", bounds_error=False
 
 # In[ ]:
 
+
 # Shift to the reference wavelength scale for subtraction
 ### Old values
 matched_tellcorr_I = match_wl(tellcorr_wl, target_nflux, reftellcorr_wl)
@@ -297,8 +317,10 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # In[ ]:
 
+
 # Include masking
-from bokeh.plotting import figure, show, output_file, gridplot, vplot
+from bokeh.plotting import figure, show, output_file, gridplot
+from bokeh.layouts import column
 from bokeh.models import BoxAnnotation
 
 def bokeh_telluric_mask(fig, wl, I, mask_limit=0.9, fill_alpha=0.2, fill_color='red'):
@@ -342,6 +364,7 @@ show(p)
 
 
 # In[ ]:
+
 
 # Combine all 3 together
 from bokeh.models import Range1d
@@ -412,7 +435,7 @@ s3.legend.border_line_color = None
 # show the results
 #show(p)
 
-show(vplot(s1, s2, s3))
+show(column(s1, s2, s3))
 
 
 # In[ ]:
@@ -420,7 +443,9 @@ show(vplot(s1, s2, s3))
 
 
 
+
 # In[ ]:
+
 
 
 
@@ -430,6 +455,7 @@ show(vplot(s1, s2, s3))
 # ## This is unneed at present as I found a bug in my code so I was not doing the subtration with the berv corrected reference I. It is fixed now!!! 11/7/16
 
 # In[ ]:
+
 
 from lmfit import minimize, Parameters
 import lmfit
@@ -501,6 +527,7 @@ print("Done")
 
 # In[ ]:
 
+
 # Set up parameters 
 params = Parameters()
 params.add("rv_offset", value=-0)   # add min and max values ?
@@ -509,6 +536,7 @@ params.add('wl_max', value=2117.4, vary=False)
 
 
 # In[ ]:
+
 
 out = minimize(stellar_line_residuals, params, args=([tellcorr_wl, target_nflux], [reftellcorr_wl, ref_nflux]))
 outreport = lmfit.fit_report(out)
@@ -520,7 +548,9 @@ print(outreport)
 
 
 
+
 # In[ ]:
+
 
 
 
