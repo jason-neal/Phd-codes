@@ -354,21 +354,9 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
 
         if fit_worked:
             # Seperate back out the stellar/telluric lines
-            if (num_stellar is not 0) and (num_extra is not 0):
-                fit_line_params_a, fit_stell_params, fit_extra_params = split_telluric_stellar_telluric(fit_params_a, num_stellar, num_extra)
+            fit_line_params_a, fit_stell_params, fit_extra_params = split_telluric_stellar_telluric(fit_params_a, num_stellar, num_extra)
 
-            elif num_stellar is not 0:
-                fit_line_params_a, fit_stell_params = split_telluric_stellar(fit_params_a, num_stellar)
-                fit_extra_params = []
-            else:
-                fit_line_params_a = fit_params_a
-                fit_stell_params, fit_extra_params = [], []
-
-            if num_telluric is not 0:
-                fit_line_params_b, fit_tell_params = split_telluric_stellar(fit_params_b, num_telluric)
-            else:
-                fit_line_params_b = fit_params_b
-                fit_stell_params = []
+            fit_line_params_b, fit_tell_params = split_telluric_stellar(fit_params_b, num_telluric)
 
             fitted_coords_a = params2coords(fit_line_params_a)      # Spectra
             fitted_coords_b = params2coords(fit_line_params_b)      # Tellruic spectrum
