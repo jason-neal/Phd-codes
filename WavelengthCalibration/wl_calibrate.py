@@ -26,10 +26,17 @@ from SpectralTools import wav_selector
 from Tapas_Berv_corr import tapas_helcorr
 from PyAstronomy import pyasl
 
-
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(message)s')
 debug = logging.debug
+
+
+def config_debug(enable):
+
+    if enable:
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(asctime)s %(levelname)s %(message)s')
+    else:
+        logging.basicConfig(level=logging.WARNING,
+                            format='%(asctime)s %(levelname)s %(message)s')
 
 
 # @Gooey(program_name='Plot fits - Easy 1D fits plotting', default_size=(610, 730))
@@ -54,6 +61,10 @@ def _parser():
                         help='Apply Berv corr to plot limits if using berv corrected tapas')
     parser.add_argument('-u', '--use_rough', default=True, action="store_false",
                         help=" Get rough coordinates from stored pickle file, (if present).")
+    parser.add_argument('--old', default=False, action="store_true",
+                        help="Use the old file format (wave, Extracted Dracs, pixel num).")
+    parser.add_argument('--debug', default=False, action="store_true",
+                        help="Enable Debuging output.")
     # parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
     # parser.add_argument('fname',
     #                    action='store',
@@ -142,7 +153,8 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
     return None
 
 
-def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, use_rough=True):
+def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, use_rough=True, old=False, debug=False):
+    config_debug(debug)
     homedir = os.getcwd()
     print("Input name", fname)
     print("Output name", output)
@@ -405,7 +417,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
 
     ans = input("Do you want to observe the line depths?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
-        # observe heights of fitted peaks
+        # Observe heights of fitted peaks
         plt.figure
         plt.plot(peaks_a, label="Specta line depths")
         plt.plot(peaks_b, label="Telluric line depths")
