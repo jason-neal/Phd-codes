@@ -542,26 +542,29 @@ def func_for_plotting(x, params):
 #                        # i.e. type conversions, slicing             #
 #                                                                     #
 #######################################################################
-def split_telluric_stellar(params, num_stellar):
+def split_telluric_stellar(params: List[float], num_stellar: int) -> (List[float], List[float]):
     """Split up the array of lines into the telluric and stellar parts
     input np.array(teluric lines, stellar lines)
     num_stellar is the number of stellar lines at the end
     output telluric lines, stellar lines
 
     """
-    first_stel = -3 * num_stellar  # index of first stellar line (from end)
+    par_len = len(params)
+    # Tests on input
+    assert isinstance(num_stellar, int), "num_stellar must be an integer."
+    assert num_stellar >= 0, "Number of stellar lines must be positive."
+    assert 3 * num_stellar <= par_len, "There is more stellar lines '{}' than number of parameters '{}'".format(num_stellar, par_len)
+
+    first_stel = -3 * num_stellar if num_stellar != 0 else par_len   # index of first stellar line (from end)
     line_params = params[:first_stel]
     stellar_params = params[first_stel:]
-    # print("line_params in func", line_params)
-    # print("stellar_params in func", stellar_params)
-    # print("len linelist", len(line_params), "len stellar line params",
-    # len(stellar_params), "params length", len(params))
+
     assert len(line_params) % 3 is 0, "Line list is not correct length"
     assert len(stellar_params) % 3 is 0, "Stellar line list not correct length"
     return line_params, stellar_params,
 
 
-def split_telluric_stellar_telluric(params: List[float], num_stellar: int, num_telluric: int):
+def split_telluric_stellar_telluric(params: List[float], num_stellar: int, num_telluric: int) -> (List[float], List[float], List[float]):
     """Split up the array of lines into the telluric and stellar parts
     input np.array(teluric lines, stellar lines)
     num_stellar is the number of stellar lines at the end
@@ -570,22 +573,25 @@ def split_telluric_stellar_telluric(params: List[float], num_stellar: int, num_t
     To add extra smaller telluric lines that you do not want to calibrate with.
 
     """
-    first_tell = int(-3 * num_telluric)  # index of first stellar line (from end)
-    first_stel = int(-3 * num_stellar + first_tell)  # index of first stellar line (from end)
-    debug(pv("first_tell"))
-    debug(pv("first_stel"))
-    debug(pv("len(params)"))
+    par_len = len(params)
+    # Tests on input
+    assert isinstance(num_stellar, int), "num_stellar must be an integer."
+    assert isinstance(num_telluric, int), "num_telluric must be an integer."
+    assert num_stellar >= 0, "Number of stellar lines must be positive"
+    assert num_telluric >= 0, "Number of telluric lines must be positive"
+    assert 3 * (num_stellar + num_telluric) <= par_len, "Number of stellar and telluric lines > lenght of parameters."
+
+    first_tell = int(-3 * num_telluric) if num_telluric != 0 else par_len  # index of first telluric line
+
+    first_stel = int(-3 * num_stellar + first_tell) if num_stellar != 0 else first_tell  # index of first stellar line (from end)
 
     line_params = params[:first_stel]
     stellar_params = params[first_stel:first_tell]
     telluric_params = params[first_tell:]
 
-    debug(pv("params"))
-    debug(pv("line_params"))
-    debug(pv("stellar_params"))
-    debug(pv("telluric_params"))
     assert len(line_params) % 3 is 0, "Line list is not correct length"
     assert len(stellar_params) % 3 is 0, "Stellar line list not correct length"
+    assert sum([len(line_params), len(stellar_params), len(telluric_params)]) == par_len, "Parameter split length error"
     return line_params, stellar_params, telluric_params
 
 
