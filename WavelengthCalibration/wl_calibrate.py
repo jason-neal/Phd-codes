@@ -25,6 +25,8 @@ from SpectralTools import wav_selector
 
 from Tapas_Berv_corr import tapas_helcorr
 from PyAstronomy import pyasl
+from utilities import append_hdr
+
 
 debug = logging.debug
 
@@ -149,23 +151,6 @@ def new_export_wavecal_2fits(filename, wavelength, spectrum, hdr, hdrkeys=None, 
     return None
 
 
-# could make new module for fits handlers like this
-def append_hdr(hdr, keys=None, values=None, item=0):
-    ''' Apend/change parameters to fits hdr,
-    can take list or tuple as input of keywords
-    and values to change in the header
-    Defaults at changing the header in the 0th item
-    unless the number the index is givien,
-    If a key is not found it adds it to the header'''
-    if keys is not None and values is not None:
-        if type(keys) == str:           # To handle single value
-            hdr[keys] = values
-        else:
-            assert len(keys) == len(values), 'Not the same number of keys as values'
-            for i in range(len(keys)):
-                hdr[keys[i]] = values[i]
-                print(repr(hdr[-2:10]))
-    return hdr
 
 
 def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):

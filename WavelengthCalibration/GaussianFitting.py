@@ -134,7 +134,7 @@ def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
 
         if textloc and text:
             """Display text on the plot"""
-            print("text location", textloc)
+            # print("text location", textloc)
             ax1.text(textloc[0], textloc[1] - 0.005, text, fontsize=20, color='red',
                      fontweight='bold', horizontalalignment='center')
             ax2.text(textloc[0], textloc[1] - 0.005, text, fontsize=20, color='red',
@@ -779,7 +779,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
 
     if textloc and text:
         """display text on the plot"""
-        print("text location", textloc)
+        # print("text location", textloc)
         ax1.text(textloc[0], textloc[1] - 0.005, text, fontsize=20, color='red',
                  fontweight='bold', horizontalalignment='center')
         ax2.text(textloc[0], textloc[1] - 0.005, text, fontsize=20, color='red',

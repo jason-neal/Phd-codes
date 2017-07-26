@@ -21,6 +21,7 @@ import lmfit
 import Obtain_Telluric as obt
 from Get_filenames import get_filenames
 from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
+from utilities import append_hdr
 
 
 def divide_spectra(spec_a, spec_b):
@@ -113,24 +114,6 @@ def export_correction_2fits(filename, wavelength, corrected, original, telluric,
     return None
 
 
-# could make new module for fits handlers like this
-def append_hdr(hdr, keys, values, item=0):
-    """Apend/change parameters to fits hdr,
-    can take list or tuple as input of keywords
-    and values to change in the header
-    Defaults at changing the header in the 0th item
-    unless the number the index is givien,
-    If a key is not found it adds it to the header.
-    """
-
-    if type(keys) == str:           # To handle single value
-        hdr[keys] = values
-    else:
-        assert len(keys) == len(values), 'Not the same number of keys as values'
-        for i in range(len(keys)):
-            hdr[keys[i]] = values[i]
-            print(repr(hdr[-2:10]))
-    return hdr
 
 
 def get_observation_averages(homedir):
