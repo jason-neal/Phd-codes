@@ -191,22 +191,11 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         debug(data)
 
     test0 = ".ms.norm.comb.fits" in fname  # from python combination
-    test1 = ".ms.sum.norm.fits" in fname
-    test2 = ".ms.Apos.norm.fits" in fname
-    test3 = ".ms.Bpos.norm.fits" in fname
-    test4 = ".ms.norm.sum.fits" in fname
-    test5 = ".ms.norm.Apos.fits" in fname
-    test6 = ".ms.norm.Bpos.fits" in fname
+
     if test0:
         uncalib_combined = np.array(data["Combined"], dtype="float64")
-        # uncalib_noda = uncalib_data["Nod A"]
-        # uncalib_nodb = uncalib_data["Nod B"]
-    elif test1 or test2 or test3 or test4 or test5 or test6:
-        uncalib_combined = np.array(data, dtype="float64")
     else:
-        print("Unrecgonized input filename. Can take ouput from sumnormnodcycle8jn.cl, "
-              "normalizeobsrsum.cl or Combine_nod_spectra.py")
-        raise("Spectra_Error", "Unrecgonized input filename type")
+        uncalib_combined = np.array(data, dtype="float64")
 
     # uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
     uncalib_data = [np.arange(len(uncalib_combined)) + 1, uncalib_combined]
@@ -224,7 +213,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         tellpath = os.getcwd() + "/"
         tell_data, tell_header = obt.load_telluric(tellpath, telluric)
     else:
-        raise("Please specify the telluric line model to calibrate against.")
+        raise Exception("Please specify the telluric line model to calibrate against.")
     #    tellpath = "/home/jneal/Phd/data/Tapas/"
     #    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
     #    tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
