@@ -125,22 +125,46 @@ def export_wavecal_2fits(filename, wavelength, spectrum, pixelpos, hdr, hdrkeys,
     return None
 
 
+def new_export_wavecal_2fits(filename, wavelength, spectrum, hdr, hdrkeys=None, hdrvals=None):
+    """ Write Combined DRACS CRIRES NOD Spectra to a fits table file"""
+    col1 = fits.Column(name="wavelength", format="E", array=wavelength)  # colums of data
+    col2 = fits.Column(name="flux", format="E", array=spectrum)
+    cols = fits.ColDefs([col1, col2])
+    tbhdu = fits.BinTableHDU.from_columns(cols)  # binary table hdu
+    prihdr = append_hdr(hdr, hdrkeys, hdrvals)
+    prihdu = fits.PrimaryHDU(header=prihdr)
+    thdulist = fits.HDUList([prihdu, tbhdu])
+    try:
+        thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
+    except IOError:
+        print("A calibration already exists. What do you want to do?")
+        ans = input(" o-Overwrite, a-append number")
+        if ans.lower() == "o":
+            os.rename(filename, filename + "_old")
+            thdulist.writeto(filename, output_verify="silentfix")
+        elif ans.lower() == "a":
+            thdulist.writeto(filename + "_new", output_verify="silentfix")
+        else:
+            print("Did not append to name or overwrite fits file")
+    return None
+
+
 # could make new module for fits handlers like this
-def append_hdr(hdr, keys, values, item=0):
+def append_hdr(hdr, keys=None, values=None, item=0):
     ''' Apend/change parameters to fits hdr,
     can take list or tuple as input of keywords
     and values to change in the header
     Defaults at changing the header in the 0th item
     unless the number the index is givien,
     If a key is not found it adds it to the header'''
-
-    if type(keys) == str:           # To handle single value
-        hdr[keys] = values
-    else:
-        assert len(keys) == len(values), 'Not the same number of keys as values'
-        for i in range(len(keys)):
-            hdr[keys[i]] = values[i]
-            print(repr(hdr[-2:10]))
+    if keys is not None and values is not None:
+        if type(keys) == str:           # To handle single value
+            hdr[keys] = values
+        else:
+            assert len(keys) == len(values), 'Not the same number of keys as values'
+            for i in range(len(keys)):
+                hdr[keys[i]] = values[i]
+                print(repr(hdr[-2:10]))
     return hdr
 
 
@@ -404,15 +428,18 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
                    (tell_header["barydone"], "Barycenter correction done by Tapas"),
                    (tell_header["WAVSCALE"], "Either air, vacuum, or wavenumber")]
         # # ADD OTHER parameter need to store above - estimated errors of fitting?
-
-        export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], uncalib_data[0], hdr, hdrkeys, hdrvals)
+        if old:
+            export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], uncalib_data[0], hdr, hdrkeys, hdrvals)
+        else:
+            # New (wavelenght, flux) format
+            new_export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], hdr, hdrkeys, hdrvals)
 
         # Save calibration values to a txt file
         coord_txt_fname = "Coordinates_" + fname[:-5] + ".txt"
 
         save_calibration_coords(coord_txt_fname, good_a, std_a, peaks_a, good_b, peaks_b, std_a)
         # save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs)
-        print("Succesfully saved calibration to file -".format(Output_filename))
+        print("Succesfully saved calibration to file - {}".format(Output_filename))
     else:
         print("Did not save calibration to file.")
 
