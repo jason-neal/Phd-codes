@@ -156,8 +156,8 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
 def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, use_rough=True, old=False, debug=False):
     config_debug(debug)
     homedir = os.getcwd()
-    print("Input name", fname)
-    print("Output name", output)
+    # print("Input name", fname)
+    # print("Output name", output)
 
     data = fits.getdata(fname)
     if data.shape[0] == 3:   # used extras
@@ -354,31 +354,33 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     plt.legend()
     plt.show(block=False)
 
-    # Save output now
-    # Do you want to fine turn this calibration?
-    ans = input("Do you want to finetune the calibtration?\n")
-    if ans in ['yes', 'y', 'Yes', 'YES']:
-        print("\n\nFinetune with XCORR WAVECAL using this result as the guess wavelength\n")
-        Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((calibrated_wl, uncalib_data[1]),
-                                                               (tell_data[0], tell_data[1]), increment=0.1)
-        fig = plt.figure()
-        plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
-        plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
-        plt.plot(Finetuned_wl, uncalib_data[1], label="Finetuned Wl spectra")
-        plt.title("Wavelength Calibrated Output with Finetuneing")
-        # Stopping scientific notation offset in wavelength
-        ax = plt.gca()
-        ax.get_xaxis().get_major_formatter().set_useOffset(False)
-        plt.xlabel("Wavelength (nm)")
-        plt.ylabel("Normalized Intensity")
-        plt.legend()
-        plt.show(fig, block=True)
+    # FINE TUNING
 
-        print("Warning - at this stage the fine tuning does not get saved.")
-    # This to possible tune,  sample_num, ratio, increment
-    else:
-        print("Did not fine tune calibration with Xcorr")
-    # Do you want to save this output?
+    # Do you want to fine turn this calibration?
+    # ans = input("Do you want to finetune the calibtration?\n")
+    # if ans in ['yes', 'y', 'Yes', 'YES']:
+    #     print("\n\nFinetune with XCORR WAVECAL using this result as the guess wavelength\n")
+    #     Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((calibrated_wl, uncalib_data[1]),
+    #                                                            (tell_data[0], tell_data[1]), increment=0.1)
+    #     fig = plt.figure()
+    #     plt.plot(calibrated_wl, uncalib_data[1], label="Calibrated spectra")
+    #     plt.plot(calib_data[0], calib_data[1], label="Telluric spectra")
+    #     plt.plot(Finetuned_wl, uncalib_data[1], label="Finetuned Wl spectra")
+    #     plt.title("Wavelength Calibrated Output with Finetuneing")
+    #     # Stopping scientific notation offset in wavelength
+    #     ax = plt.gca()
+    #     ax.get_xaxis().get_major_formatter().set_useOffset(False)
+    #     plt.xlabel("Wavelength (nm)")
+    #     plt.ylabel("Normalized Intensity")
+    #     plt.legend()
+    #     plt.show(fig, block=True)
+    #
+    #     print("Warning - at this stage the fine tuning does not get saved.")
+    # # This to possible tune,  sample_num, ratio, increment
+    # else:
+    #     print("Did not fine tune calibration with Xcorr")
+
+    # SAVING
     ans = input("Do you want to save the calibration?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         os.chdir(homedir)   # to make sure saving where running

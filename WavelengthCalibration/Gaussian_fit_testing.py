@@ -23,7 +23,7 @@ def onclick(event):
         return
     ix, iy = event.xdata, event.ydata
     coords.append((ix, iy))
-    print("Click position", [ix, iy])
+    # print("Click position", [ix, iy])
     return
 
 
@@ -61,8 +61,8 @@ def func4(x, *params):
 def Get_DRACS(filepath, chip):
     """Filepath needs to point object"""
     filename = get_filenames(filepath, "CRIRE*.norm.comb.fits", "*_" + str(chip + 1) + ".*")
-    print("Filename =", filepath + filename[0])
-    print("length filename", len(filename))
+    # print("Filename =", filepath + filename[0])
+    # print("length filename", len(filename))
     assert len(filename) is 1   # Check only one filename found
     hdr = fits.getheader(filepath + filename[0])
     data = fits.getdata(filepath + filename[0])
@@ -131,8 +131,8 @@ if __name__=="__main__":
     for chip in range(4):
 
         hdr, DracsUncalibdata = Get_DRACS(objpath, chip)
-        print("Dracs hdr", hdr)
-        print("Dracs data ", DracsUncalibdata)
+        # print("Dracs hdr", hdr)
+        # print("Dracs data ", DracsUncalibdata)
         UnCalibdata_comb = DracsUncalibdata["Combined"]
         UnCalibdata_noda = DracsUncalibdata["Nod A"]
         UnCalibdata_nodb = DracsUncalibdata["Nod B"]
@@ -169,7 +169,7 @@ if __name__=="__main__":
             cid = fig.canvas.mpl_connect('button_press_event', onclick)
             print("Left click on the maximum of each Spectra line peak (Red) that you want to fit from left to right. \nThen right click to close and perform fit")
             plt.show()
-            print("coords found for first plot", coords)
+            # print("coords found for first plot", coords)
             coords_pxl = coords
             xpos = []
             ypos = []
@@ -194,9 +194,9 @@ if __name__=="__main__":
                 cid = fig.canvas.mpl_connect('button_press_event', onclick)
                 print("Left click on the maximum of each Telluric line peak (Blue) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit")
                 plt.show()
-                print("coords found for second plot", coords)
+                # print("coords found for second plot", coords)
                 coords_wl = coords
-                print("coords lengths", "wl", len(coords_wl), "pxl", len(coords_pxl))
+                # print("coords lengths", "wl", len(coords_wl), "pxl", len(coords_pxl))
                 # assert len(coords_wl) == len(coords_pxl), " Choosen points were not the same so retry"
                 if len(coords_wl) == len(coords_pxl):
                     break  # continue on outside while loop
@@ -209,10 +209,10 @@ if __name__=="__main__":
                 cal_ypos.append(1 - tup[1])
 
             # ratio = (xpos - np.min(UnCalibdata)) / (np.max(UnCalibdata) - np.min(UnCalibdata))
-            print("xpositions", xpos)
-            print("y positions", ypos)
-            print("cal_x wl positions", cal_xpos)
-            print("cal y pos", cal_ypos)
+            # print("xpositions", xpos)
+            # print("y positions", ypos)
+            # print("cal_x wl positions", cal_xpos)
+            # print("cal y pos", cal_ypos)
 
             # cal_xpos = ratio * (np.max(Calibdata[0]) - np.min(Calibdata[0])) + np.min(Calibdata[0])
             # print("calibration xpos cal_xpos", cal_xpos)
@@ -249,15 +249,15 @@ if __name__=="__main__":
             fit_params_calib = []
 
             for jj in range(0, len(init_params_uncalib), param_nums):
-                print("jj", jj)
-                print("type jj", type(jj))
+                # print("jj", jj)
+                # print("type jj", type(jj))
 
-                print(type([jj, jj + 1, jj + 2]))
-                print("[jj, jj + 1, jj + 2]", [jj, jj + param_nums])
+                # print(type([jj, jj + 1, jj + 2]))
+                # print("[jj, jj + 1, jj + 2]", [jj, jj + param_nums])
                 this_params_uncalib = init_params_uncalib[jj:jj + param_nums]
-                print("this_params_uncalib", this_params_uncalib)
+                # print("this_params_uncalib", this_params_uncalib)
                 this_params_calib = init_params_calib[jj:jj + param_nums]
-                print("this_params_calib", this_params_calib)
+                # print("this_params_calib", this_params_calib)
                 this_fit_uncalib, covar = opt.curve_fit(func, UnCalibdata[0], UnCalibdata[1], this_params_uncalib)
                 this_fit_calib, covar_cal = opt.curve_fit(func, Calibdata[0], Calibdata[1], this_params_calib)
                 # save parameters
@@ -267,8 +267,8 @@ if __name__=="__main__":
                 # leastsq_uncalib, covar = opt.curve_fit(func, UnCalibdata[0], UnCalibdata[1], params_uncalib)
                 # leastsq_calib, covar_cal = opt.curve_fit(func, Calibdata[0], Calibdata[1], params_calib)
 
-            print("fit params individual", fit_params_uncalib, fit_params_calib) # , "covar", covar)
-            print("init_params_uncalib", init_params_uncalib)
+            # print("fit params individual", fit_params_uncalib, fit_params_calib) # , "covar", covar)
+            # print("init_params_uncalib", init_params_uncalib)
 
             Fitted_uncalib = func(UnCalibdata[0], *fit_params_uncalib)
             Fitted_calib = func(Calibdata[0], *fit_params_calib)
