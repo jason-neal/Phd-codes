@@ -52,7 +52,7 @@ def airmass_scaling(spectra, spec_airmass, obs_airmass):
     return new_spec
 
 
-def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_airmass, kind="linear", method="scipy"):
+def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_airmass, kind="cubic", method="scipy"):
     """Code to contain other functions in this file
 
      1. Interpolate spectra to same wavelengths with wl_interpolation()
@@ -113,7 +113,22 @@ def export_correction_2fits(filename, wavelength, corrected, original, telluric,
     thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
     return None
 
+def new_export_correction_2fits(filename, wavelength, corrected, hdr, hdrkeys, hdrvals, tellhdr):
+    """ Write Telluric Corrected spectra to a fits table file"""
+    col1 = fits.Column(name="wavelength", format="E", array=wavelength) # colums of data
+    col2 = fits.Column(name="flux", format="E", array=corrected)
+    # col3 = fits.Column(name="Extracted_DRACS", format="E", array=original)
+    # col4 = fits.Column(name="Interpolated_Tapas", format="E", array=telluric)
+    cols = fits.ColDefs([col1, col2])
+    tbhdu = fits.BinTableHDU.from_columns(cols) # binary tbale hdu
+    prihdr = append_hdr(hdr, hdrkeys, hdrvals)
+    prihdu = fits.PrimaryHDU(header=prihdr)
+    thdulist = fits.HDUList([prihdu, tbhdu])
+    # telluric head to go as a second extension !!!
 
+    #print("Writing to fits file")
+    thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
+    return None
 
 
 def get_observation_averages(homedir):
@@ -250,7 +265,7 @@ def _parser():
                         help='Ouput Filename')
     parser.add_argument('-t', '--tellpath', default=False,
                         help='Path to find the telluric spectra to use.')
-    parser.add_argument('-k', '--kind', default="linear",
+    parser.add_argument('-k', '--kind', default="cubic",
                         help='Interpolation order, linear, quadratic or cubic')
     parser.add_argument('-m', '--method', default="scipy",
                         help='Interpolation method numpy or scipy')
@@ -260,13 +275,15 @@ def _parser():
     parser.add_argument("-c", "--h2o_scaling", action='store_true',
                         help="Perform separate H20 scaling")
     parser.add_argument("-n", "--new_method", action='store_true',
-                        help="Use new code method")
+                        help="Use new code method !!!!")
+    parser.add_argument("--old", action='store_true',
+                        help="Use old saving scheme.")
     args = parser.parse_args()
     return args
 
 
 def main(fname, export=False, output=False, tellpath=False, kind="linear", method="scipy",
-         show=False, h2o_scaling=False, new_method=False):
+         show=False, h2o_scaling=False, new_method=False, old=False):
     # Set and test homedir
     homedir = os.getcwd()
     if homedir[-13:] != "Combined_Nods":
@@ -278,8 +295,17 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     data = fits.getdata(fname)
     hdr = fits.getheader(fname)
 
-    wl = data["Wavelength"]
-    I = data["Extracted_DRACS"]
+    if old:
+        wl = data["Wavelength"]
+        I = data["Extracted_DRACS"]
+    else:
+        try:
+            wl = data["wavelength"]
+            I = data["flux"]
+        except:
+            print("This file is using the old setting.")
+            wl = data["Wavelength"]
+            I = data["Extracted_DRACS"]
 
     # Wavelength bounds to select the telluric spectra
     wl_lower = np.min(wl)/1.0001
@@ -316,7 +342,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         if h2o_scaling:
             # load separated H20 tapas datasets
 
-            tapas_h20 = get_filenames("./","tapas_*","*_ReqId_12_No_Ifunction*")
+            tapas_h20 = get_filenames(tellpath, "tapas_*","*_ReqId_12_No_Ifunction*")
             if len(tapas_h20) >1:
                 print("Warning Too many h20 tapas files returned")
             tapas_not_h20 = get_filenames("./","tapas_*","*_ReqId_18_R-*")
@@ -347,7 +373,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 
         else:
             # load combined dataset only
-            tapas_all = get_filenames("./","tapas_*","*_ReqId_10_R-*")
+            tapas_all = get_filenames(tellpath, "tapas_*","*_ReqId_10_R-*")
             if len(tapas_all) >1:
                 print("Warning Too many h20 tapas files returned")
             #tapas_all = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
@@ -463,7 +489,6 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         else:
             h2o_scale_val = None
 
-
         # Keys and values for Fits header file
         hdrkeys = ["Correction", "Tapas Interpolation method",
                    "Interpolation kind", "B PARAM",
@@ -490,8 +515,10 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         tellhdr = False   ### need to correctly get this from obtain telluric
 
     if export:
-        export_correction_2fits(output_filename, wl, I_corr, I, tell_used,
-                                hdr, hdrkeys, hdrvals, tellhdr)
+        if old:
+            export_correction_2fits(output_filename, wl, I_corr, I, tell_used, hdr, hdrkeys, hdrvals, tellhdr)
+        else:
+            new_export_correction_2fits(output_filename, wl, I_corr, hdr, hdrkeys, hdrvals, tellhdr)
         print("Saved corected telluric spectra to " + str(output_filename))
     else:
         print("Skipped Saving corected telluric spectra ")
