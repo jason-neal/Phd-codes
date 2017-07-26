@@ -224,7 +224,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
     delta_a = np.abs(np.mean(wl_a[1:] - wl_a[:-1]))   # average wl step
     delta_b = np.abs(np.mean(wl_b[1:] - wl_b[:-1]))
 
-    assert len(AxCoords) is len(BxCoords), "Lenght of Coords do not match"
+    assert len(AxCoords) is len(BxCoords), "Lenght of Coords do not match {}, {}".format(len(AxCoords), len(BxCoords))
     for i in range(len(AxCoords)):
         print("A coords Axcoords", AxCoords)
         print(i, " ith value in Axcoords", AxCoords[i])
@@ -765,7 +765,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     print("fit coords a", fitcoords_a, "fit coords b", fitcoords_b)
     print("fit a", fita, "fit b", fitb)
     if fita and fitb:
-        assert len(fitcoords_a) is len(fitcoords_b), " Coords not same length"
+        assert len(fitcoords_a) is len(fitcoords_b), "Coords not same length. {}, {}".format(len(fitcoords_a), len(fitcoords_b))
         for i in range(0, len(fitcoords_a)):
             coord_a = fitcoords_a[i]
             coord_b = fitcoords_b[i]
