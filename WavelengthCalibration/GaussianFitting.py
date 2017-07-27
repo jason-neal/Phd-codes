@@ -226,8 +226,8 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
 
     assert len(AxCoords) is len(BxCoords), "Lenght of Coords do not match {}, {}".format(len(AxCoords), len(BxCoords))
     for i in range(len(AxCoords)):
-        print("A coords Axcoords", AxCoords)
-        print(i, " ith value in Axcoords", AxCoords[i])
+        # print("A coords Axcoords", AxCoords)
+        # print(i, " ith value in Axcoords", AxCoords[i])
         wl_a_sec, sect_a = slice_percentage(wl_a, spec_a, AxCoords[i])
         wl_b_sec, sect_b = slice_percentage(wl_b, spec_b, BxCoords[i])
 
@@ -370,10 +370,9 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             for i in range(0, len(fitted_coords_a)):
                 coord_a = fitted_coords_a[i]
                 coord_b = fitted_coords_b[i]
-                # include = input("Use Peak # " + str(i + 1) +" corresponding to" +
-                #                    str([coord_a[0], 'pxls', coord_b[0], 'nm']) + " y/N?")
                 include = input("Use Peak # {} ".format(i + 1) + "corresponding to" +
-                                " [a-{0:.2f}, b-{1:.2f}]? y/N?".format(coord_a[0], coord_b[0]))
+                                " [a-({0:.2f}, {1:.2f}), b-({2:.2f}, {3:.2f})]? y/N?".format(coord_a[0], coord_a[1],
+                                                                                             coord_b[0], coord_b[1]))
                 if include.lower() == "y" or include.lower() == "yes":
                     best_a_coords.append(coord_a[0])
                     best_b_coords.append(coord_b[0])
@@ -389,8 +388,8 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             # if include.lower() == "y" or include.lower() == "yes":
             #   best_a_coords.append(CoordsA[i]) # tempry filler for return
             #    best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
-            print("best_a_coords", best_a_coords)
-            print("best_b_coords", best_b_coords)
+            # print("best_a_coords", best_a_coords)
+            # print("best_b_coords", best_b_coords)
             plt.close(fig)
     return best_a_coords, best_a_peaks, best_a_std, best_b_coords, best_b_peaks, best_b_std
 
@@ -733,7 +732,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         """Mark peaks that have already been added to cood fitted peaks
         list to prevent doubleing up """
         for xpos in best_b:
-            print("Xpos", xpos)
+            # print("Xpos", xpos)
             ax1.plot(xpos, 1, "kx", ms=20, label="already picked", lw=4)
             ax1.vlines(xpos, .9, 1, colors="k", lw=4)
 
@@ -772,7 +771,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
         """Mark peaks that have already been added to cood fitted peaks
         list to prevent doubling up """
         for xpos in best_a:
-            print("Xpos", xpos)
+            # print("Xpos", xpos)
             ax2.plot(xpos, 1, "kx", ms=20, lw=5, label="Already picked line")
             ax2.vlines(xpos, .9, 1, colors="k", lw=4)
     # ax1.legend(loc="best")
