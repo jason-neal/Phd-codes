@@ -30,6 +30,9 @@ from utilities import append_hdr
 
 debug = logging.debug
 
+# Use raw_input if running on python 2.x
+if hasattr(__builtins__, 'raw_input'):
+    input = raw_input
 
 def config_debug(enable):
 

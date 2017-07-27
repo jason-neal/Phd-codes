@@ -10,8 +10,11 @@ import scipy as sp
 from Get_filenames import get_filenames
 import matplotlib.pyplot as plt
 
-
 import scipy.optimize as opt
+
+# Use raw_input if running on python 2.x
+if hasattr(__builtins__, 'raw_input'):
+    input = raw_input
 
 
 def onclick(event):
@@ -97,10 +100,10 @@ def RV_Calc(Lambda, deltalambda):
 
 #     # if spectral lines do a fit with spectral lines multiplied to telluric lines
 
-#     stel= raw_input("Are there any Stellar lines to include in the fit y/N") == y
+#     stel= input("Are there any Stellar lines to include in the fit y/N") == y
 #     if stel.lower() == "y" or stel.lower()== "yes" : # Are there any spectral lines you want to add?
 #         # Select the stellar lines for the spectral fit
-#         #
+#
 #   # perform the stellar line fitting version
 #         pass
 #     else:
@@ -298,7 +301,7 @@ if __name__=="__main__":
             plt.show()
 
             try:
-                Reply = raw_input(" Is this a good fit, y/n?")
+                Reply = input(" Is this a good fit, y/n?")
             except:
                 pass
             # try:
@@ -311,7 +314,7 @@ if __name__=="__main__":
             # Goodfit = input(" Is this a good fit")  # python 3
         # after good fit
 
-        #### pixel map creation
+        # ### pixel map creation
 
         # plot positions verse wavelength
         fig4 = plt.figure()
@@ -337,10 +340,10 @@ if __name__=="__main__":
         linvals = np.polyval(linfit, range(1, 1025))
         quadvals = np.polyval(quadfit, range(1, 1025))
 
-        plt.plot(range(1, 1025), linvals , label="linearfit")
+        plt.plot(range(1, 1025), linvals, label="linearfit")
         plt.plot(range(1, 1025), quadvals, "-.r", label="quadfit")
         plt.legend(loc="best")
-        print("quad fit vals" , quadvals)
+        print("quad fit vals", quadvals)
         plt.show()
 
         lin_pointvals = np.polyval(linfit, pixel_pos)
@@ -365,9 +368,9 @@ if __name__=="__main__":
         plt.legend(loc="best")
         plt.show()
 
-        ## Velocity error of fits
+        # # Velocity error of fits
         Verrors_lin = RV_Calc(wl_pos, diff_lin)
-        Verrors_quad= RV_Calc(wl_pos, diff_quad)
+        Verrors_quad = RV_Calc(wl_pos, diff_quad)
         Verrors_ends = RV_Calc(linvals[[0, -1]], fit_diffs[[0, -1]])
         plt.plot(wl_pos, Verrors_lin, "*", label="linearfit")
         plt.plot(wl_pos, Verrors_quad, "s", label="quadfit")
@@ -377,7 +380,6 @@ if __name__=="__main__":
         plt.title("Velocity errors due to fits")
         plt.legend()
         plt.show()
-
 
         # Perform calibration on the spectrum
         Calibrated_lin = np.polyval(linfit, UnCalibdata[0])
@@ -398,4 +400,4 @@ if __name__=="__main__":
         plt.legend(loc="best")
         plt.show()
 
-        CalibratedSpectra = [Calibrated_lin, UnCalibdata[1]] ## Justa test for now
+        CalibratedSpectra = [Calibrated_lin, UnCalibdata[1]]  # Just a test for now
