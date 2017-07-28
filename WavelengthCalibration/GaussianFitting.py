@@ -262,6 +262,9 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                                       text="Choose lines to calibrate with", model=model, ref=ref)
                 # print("Returned a_coords = ", a_coords)
                 # print("Returned b_coords = ", b_coords)
+                if len(a_coords) != len(b_coords):
+                    print("You need to choose the matching points!")
+                    continue
 
                 # Turn Coords of peaks into init params for fit
                 init_params_a = coords2gaussian_params(a_coords, delta_a)

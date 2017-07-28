@@ -294,17 +294,24 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
             model = False
 
     rough_coord_name = fname.split(".fits")[0] + "_rough_cords.pickle"
-    try:
-        if use_rough:
-            rough_a, rough_b = pickle.load(open(rough_coord_name, "rb"))
-        else:
-            raise
-    except:
-        rough_a, rough_b = gf.get_rough_peaks(uncalib_data[0], uncalib_data[1], calib_data[0], calib_data[1])
-        pickle.dump((rough_a, rough_b), open(rough_coord_name, "wb"))
+    while True:
+        try:
+            if use_rough:
+                rough_a, rough_b = pickle.load(open(rough_coord_name, "rb"))
+            else:
+                raise Exception  # To break try
+        except:
+            rough_a, rough_b = gf.get_rough_peaks(uncalib_data[0], uncalib_data[1], calib_data[0], calib_data[1])
+            pickle.dump((rough_a, rough_b), open(rough_coord_name, "wb"))
 
-    rough_x_a = [coord[0] for coord in rough_a]
-    rough_x_b = [coord[0] for coord in rough_b]
+        rough_x_a = [coord[0] for coord in rough_a]
+        rough_x_b = [coord[0] for coord in rough_b]
+        if len(rough_x_a) == len(rough_x_b):
+            break
+        else:
+            print("You need to match the coordiantes.")
+            continue
+
     if model:
         fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1],
                                                 rough_x_a, calib_data[0], calib_data[1],
