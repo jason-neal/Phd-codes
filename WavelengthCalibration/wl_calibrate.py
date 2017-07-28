@@ -34,8 +34,8 @@ debug = logging.debug
 if hasattr(__builtins__, 'raw_input'):
     input = raw_input
 
-def config_debug(enable):
 
+def config_debug(enable):
     if enable:
         logging.basicConfig(level=logging.DEBUG,
                             format='%(asctime)s %(levelname)s %(message)s')
@@ -206,9 +206,9 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     #    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
     #    tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
 
-    print("obs data 0 type", type(uncalib_data[0]), "dtype", uncalib_data[0].dtype)
-    print("obs data 1 type", type(uncalib_data[1]), "dtype", uncalib_data[1].dtype)
-    print("telluric type", type(tell_data[1]), "dtype", tell_data[0].dtype, tell_data[1].dtype)
+    # print("obs data 0 type", type(uncalib_data[0]), "dtype", uncalib_data[0].dtype)
+    # print("obs data 1 type", type(uncalib_data[1]), "dtype", uncalib_data[1].dtype)
+    # print("telluric type", type(tell_data[1]), "dtype", tell_data[0].dtype, tell_data[1].dtype)
 
     # Scale telluric lines to airmass
     # ###### this needs t be corrected to middle of hole obs. Not just first observation
@@ -230,7 +230,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         wl_lower = wlprime[0]
         wl_upper = wlprime[1]
         # print("Old detector limits", [old_wl_lower, old_wl_upper])
-        print("New Berv shifted detector limits", [wl_lower, wl_upper])
+    #    print("New Berv shifted detector limits", [wl_lower, wl_upper])
     elif berv_corr:
         print("Berv_corr flag given but tapas data was not berv corrected. Not adjusting limits")
 
@@ -434,7 +434,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     if ans in ['yes', 'y', 'Yes', 'YES']:
         with open(linedepthpath + "New_Spectral_linedepths.txt", "a") as f:
             for peak in peaks_a:
-                print(peak)
+            #    print(peak)
                 f.write(str(peak) + "\n")
         with open(linedepthpath + "New_Telluric_linedepths.txt", "a") as f:
             for peak in peaks_b:

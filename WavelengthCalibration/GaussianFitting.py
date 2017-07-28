@@ -167,7 +167,7 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
     if (stel is not None) & (tell is not None):
         debug(pv("stel"))
         debug(pv("tell"))
-        print("init params", init_params, "stellar params", stel)
+        # print("init params", init_params, "stellar params", stel)
         assert len(stel) % 3 is 0, "stel parameters not multiple of 3"
         assert len(tell) % 3 is 0, "Telluric parameters not multiple of 3"
         stelnum = int(len(stel) / 3)  # number of stellar lines
@@ -176,32 +176,32 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
         debug(pv("tellnum"))
 
         init_params = np.concatenate((init_params, stel, tell), axis=0)
-        print("appended array with stellar lines and telluric lines",)
+        # print("appended array with stellar lines and telluric lines",)
         debug(pv("init_params"))
         params, __ = opt.curve_fit(lambda x, *params: func_with_stellar_and_tell(x, stelnum, tellnum, params), wl, spec, init_params)
         # raise NotImplementedError("Need to finish adding this")
     elif stel is not None:
         # use lambda instead here
         # __ is junk parameter to take the covar returned by curve_fit
-        print("init params", init_params, "stellar params", stel)
+        # print("init params", init_params, "stellar params", stel)
         assert len(stel) % 3 is 0, "stel parameters not multiple of 3"
         stelnum = int(len(stel) / 3)  # number of stellar lines
-        print("number of stellar lines ", stelnum)
+        # print("number of stellar lines ", stelnum)
         init_params = np.concatenate((init_params, stel), axis=0)
-        print("appended array with stellar lines", init_params)
+        # print("appended array with stellar lines", init_params)
         params, __ = opt.curve_fit(lambda x, *params: func_with_stellar(x, stelnum, params), wl, spec, init_params)
     elif tell is not None:
         """Don't need all this as telluric lines are just added"""
-        print("init params", init_params, "telluric params", tell)
+        # print("init params", init_params, "telluric params", tell)
         assert len(tell) % 3 is 0, "Telluric parameters not multiple of 3"
         tellnum = int(len(tell) / 3)  # number of stellar lines
-        print("number of telluric lines ", tellnum)
+        # print("number of telluric lines ", tellnum)
         init_params = np.concatenate((init_params, tell), axis=0)
-        print("appended array with telluric lines", init_params)
+        # print("appended array with telluric lines", init_params)
         # params, __ = opt.curve_fit(lambda x, *params: func_with_telluric(x,
         #                            tellnum, params), wl, spec, init_params)
         params, __ = opt.curve_fit(func, wl, spec, init_params)
-        print("returned tell params", params)
+        # print("returned tell params", params)
     else:
         params, __ = opt.curve_fit(func, wl, spec, init_params)
 
@@ -260,8 +260,8 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                                       points_b=a_coords,
                                       textloc=(np.median(wl_b_sec), np.max([np.min(sect_b), 0.5])),
                                       text="Choose lines to calibrate with", model=model, ref=ref)
-                print("Returned a_coords = ", a_coords)
-                print("Returned b_coords = ", b_coords)
+                # print("Returned a_coords = ", a_coords)
+                # print("Returned b_coords = ", b_coords)
 
                 # Turn Coords of peaks into init params for fit
                 init_params_a = coords2gaussian_params(a_coords, delta_a)
@@ -753,8 +753,8 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
 
     fita = fitcoords_a is not None
     fitb = fitcoords_b is not None
-    print("fit coords a", fitcoords_a, "fit coords b", fitcoords_b)
-    print("fit a", fita, "fit b", fitb)
+    # print("fit coords a", fitcoords_a, "fit coords b", fitcoords_b)
+    # print("fit a", fita, "fit b", fitb)
     if fita and fitb:
         assert len(fitcoords_a) is len(fitcoords_b), "Coords not same length. {}, {}".format(len(fitcoords_a), len(fitcoords_b))
         for i in range(0, len(fitcoords_a)):
@@ -854,7 +854,7 @@ def print_fit_instructions():
         \nYou will be now shown a snapshot zoomed in view around the first main peak you selected.
 
 
-        More instrustions to go here.
+        More instructions to go here.
         """
     print(instructions)
     return None
@@ -873,7 +873,7 @@ def wavelength_mapping(pixels, wavelengths, order=2):
 
     """
     wl_map = np.polyfit(pixels, wavelengths, order)
-    print("\nwl_map params\t", wl_map)
+    # print("\nwl_map params\t", wl_map)
     wlvals = np.polyval(wl_map, range(1, 1025))
 
     plt.plot(pixels, wavelengths, 'ko', lw=4, ms=7, label="Points")
@@ -941,9 +941,9 @@ if __name__ == "__main__":
     good_coords_b = [2112.5013784537928, 2112.7671666575789, 2114.0161400469569, 2118.5337956108197,
                      2119.5747945058301, 2119.7372298600226, 2120.0462545073347, 2120.3424115686403,
                      2120.505718389647, 2122.9485968267259]
-    print("Skipping ahead to wavelength mapping part")
-    print("Good coords vals A= ", good_coords_a)
-    print("Good coords vals B = ", good_coords_b)
+    # print("Skipping ahead to wavelength mapping part")
+    # print("Good coords vals A= ", good_coords_a)
+    # print("Good coords vals B = ", good_coords_b)
     wlmap, __, __ = wavelength_mapping(good_coords_a, good_coords_b)
     # """Generate the wavelenght map
     #  fit polynomial (use pedros code)
