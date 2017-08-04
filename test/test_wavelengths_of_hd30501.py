@@ -2,17 +2,23 @@
 
 # to try identify the issue with the wavelength solution
 
-from spectrum_overload.Spectrum import Spectrum
-from astropy.io import fits
-import Obtain_Telluric as ot
+import os
+import sys
+
+import ephem
 import matplotlib.pyplot as plt
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(sys.path[0]),'Simulations'))
+import numpy as np
+# Add vac to air
+import PyAstronomy.pyasl as pyasl
+from astropy.io import fits
+
+import Obtain_Telluric as ot
+from ajplanet import pl_rv_array
 from crires_utilities import barycorr_crires_spectrum
 from Planet_spectral_simulations import simple_normalization
-import numpy as np
-import ephem
-from ajplanet import pl_rv_array
+from spectrum_overload.Spectrum import Spectrum
+
+sys.path.append(os.path.join(os.path.dirname(sys.path[0]),'Simulations'))
 
 
 def load_data():
@@ -72,8 +78,6 @@ print("mean_val + RV_star", (mean_val + RV_star))
 
 corr_spec = barycorr_crires_spectrum(obs_spec, extra_offset=-Host_RV[0])
 
-# Add vac to air
-import PyAstronomy.pyasl as pyasl
 # Try correct for the mean motion of the star
 
 # air_wav = pyasl.vactoair(corr_spec.xaxis * 10) / 10

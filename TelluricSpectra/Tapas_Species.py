@@ -5,13 +5,13 @@
 # Want to plot all 4 chips to see what liens are present.
 # Not many lines of 02 to calibrate against. only in chip 1 mainly.
 
+import matplotlib.pyplot as plt
 import numpy as np
+from astropy.io import fits
+
 import GaussianFitting as gf
 import Obtain_Telluric as obt
 from TellRemoval import airmass_scaling
-import matplotlib.pyplot as plt
-from astropy.io import fits
-
 
 tapas_path = "/home/jason/Phd/data/Tapas/Tapas_march2016/HD30501_1_separated/"
 

@@ -1,10 +1,11 @@
 #!/usr/lib/python3
+import matplotlib.pyplot as plt
 import numpy as np
+from astropy.io import fits
+
 import GaussianFitting as gf
 import Obtain_Telluric as obt
 from TellRemoval import airmass_scaling
-import matplotlib.pyplot as plt
-from astropy.io import fits
 
 ESO_path = "/home/jneal/Phd/data/ESO-Skydata/"
 tapas_path = "/home/jneal/Phd/data/tapas-testing/"

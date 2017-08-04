@@ -9,17 +9,20 @@ to obtain a wavelenght calibration from pixel to wavelength.
 
 # GaussainFitting.py
 from __future__ import division
+
 # from astropy.io import fits
 # import Obtain_Telluric
 import copy
 import math
-import IOmodule
-import numpy as np
-from typing import List
 from logging import debug
-from debug_utils import pv
-import scipy.optimize as opt
+from typing import List
+
 import matplotlib.pyplot as plt
+import numpy as np
+import scipy.optimize as opt
+
+import IOmodule
+from debug_utils import pv
 # from Get_filenames import get_filenames
 from Gaussian_fit_testing import Get_DRACS
 

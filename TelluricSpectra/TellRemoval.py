@@ -8,18 +8,20 @@ can plot result
 
 """
 from __future__ import division, print_function
-import os
+
 import argparse
-import numpy as np
+import os
 
 import matplotlib.pyplot as plt
+import numpy as np
 from astropy.io import fits
-from lmfit import minimize, Parameters
-import lmfit
 
+import lmfit
 import Obtain_Telluric as obt
 from Get_filenames import get_filenames
-from SpectralTools import wav_selector, wl_interpolation, instrument_convolution
+from lmfit import Parameters, minimize
+from SpectralTools import (instrument_convolution, wav_selector,
+                           wl_interpolation)
 from utilities import append_hdr
 
 
