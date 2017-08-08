@@ -6,15 +6,17 @@
     can plot result
 
 """
+import argparse
 import os
 import time
+
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
-import matplotlib.pyplot as plt
+from astropy.io import fits
 from scipy import interpolate
 from scipy.interpolate import interp1d
-from astropy.io import fits
-import argparse
+
 import GaussianFitting as gf
 import Obtain_Telluric as obt
 

@@ -1,8 +1,8 @@
 #!/usr/lib/python3
 
+import matplotlib.pyplot as plt
 # Testing the affectof using all 3 cips with the known offset between them to wave length calibrate the spectra
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def gen_map(x, a, b, c, noise):

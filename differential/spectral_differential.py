@@ -2,10 +2,12 @@
 
 import argparse
 import logging
+
 from astropy.io import fits
+
 from Get_filenames import get_filenames
-from spectrum_overload.Spectrum import Spectrum
 from spectrum_overload.Differential import DifferentialSpectrum as DiffSpec
+from spectrum_overload.Spectrum import Spectrum
 
 debug = logging.debug
 

@@ -1,7 +1,8 @@
 ## Berv correction from Tapas
 
-import time
 import datetime
+import time
+
 from PyAstronomy import pyasl
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
-import sys
 import subprocess
+import sys
 
 handy_location = "/home/jneal/.handy_spectra/"
 

@@ -4,11 +4,16 @@
 # Non-Linear Wavelength Mapping:
 
 import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
-from lmfit import minimize, Parameters
+
+import GaussianFitting as gf
 import lmfit
+import Obtain_Telluric as obt
+from lmfit import Parameters, minimize
+from TellRemoval import airmass_scaling
 
 
 def residual(params, pixels, wl_data):
@@ -95,10 +100,6 @@ pix4, wlen4, dpth4 = np.loadtxt(PATH + Chipnames[3], skiprows=1, unpack=True)
 
 #### Plot  telluric line First
 
-import Obtain_Telluric as obt
-from astropy.io import fits
-import GaussianFitting as gf
-from TellRemoval import airmass_scaling
 Path = "/home/jneal/Phd/data/Crires/BDs-DRACS/HD30501-1/Fullreductionr-test-1dec2015/Combined_Nods/"
 
 Chipnames = ["CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_2.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_3.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_4.nod.ms.norm.sum.fits"]
