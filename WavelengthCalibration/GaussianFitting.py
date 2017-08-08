@@ -79,7 +79,7 @@ def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
     while True:
         coords = []
 
-        fig = plt.figure(figsize=(15, 15))
+        fig = plt.figure(figsize=(10, 10))
         fig.suptitle(title)
         plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)  # remove edge space
         # fig.set_size_inches(25, 15, forward=False)
@@ -688,7 +688,7 @@ def inputer(question):
 #                                                                     #
 #######################################################################
 def plot_fit(wl, Spec, params, init_params=None, title=None):
-    fig = plt.figure(figsize=(15, 10))
+    fig = plt.figure(figsize=(10, 10))
     # http://stackoverflow.com/questions/332289/how-do-you-change-the-size-of-figures-drawn-with-matplotlib
     plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95)  # remove edge space ?
     plt.plot(wl, Spec, label="Spectrum")
@@ -713,7 +713,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
                    textloc=False, text=False):
     """Plotting both together, many kwargs for different parts of code."""
     """hor for add horizontal line"""
-    fig2 = plt.figure(figsize=(12, 12))
+    fig2 = plt.figure(figsize=(10, 10))
     ax1 = fig2.add_subplot(111)
     ax2 = ax1.twiny()
 
@@ -807,7 +807,7 @@ def overlay_fitting(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     fitted_a = func_for_plotting(wl_a, paramsA)
     fitted_b = func_for_plotting(wl_b, paramsB)
 
-    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(12, 8))
+    fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(10, 10))
 
     if hor is not None:
         ax1.plot(wl_a, hor * np.ones_like(wl_a), "k-.")
