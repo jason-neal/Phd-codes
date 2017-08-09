@@ -26,6 +26,12 @@ from debug_utils import pv
 # from Get_filenames import get_filenames
 from Gaussian_fit_testing import Get_DRACS
 
+# Use raw_input comptibility for python 2.x and 3.x (doesn't overwrite seperate input in py2.x)
+try:
+    raw_input
+except NameError:
+    raw_input = input
+
 # Gaussian Fitting Module
 # Develop the advanced fitting routine that fits slices of spectra
 # with potentailly multiple gausians.
@@ -48,9 +54,6 @@ from Gaussian_fit_testing import Get_DRACS
 # print("Click position", [ix, iy])
 #     return
 
-# Use raw_input if running on python 2.x
-if hasattr(__builtins__, 'raw_input'):
-    input = raw_input
 
 
 def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
@@ -380,9 +383,9 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             for i in range(0, len(fitted_coords_a)):
                 coord_a = fitted_coords_a[i]
                 coord_b = fitted_coords_b[i]
-                include = input("Use Peak # {} ".format(i + 1) + "corresponding to" +
-                                " [a-({0:.2f}, {1:.2f}), b-({2:.2f}, {3:.2f})]? y/N?".format(coord_a[0], coord_a[1],
-                                                                                             coord_b[0], coord_b[1]))
+                include = raw_input("Use Peak # {} ".format(i + 1) + "corresponding to" +
+                                    " [a-({0:.2f}, {1:.2f}), b-({2:.2f}, {3:.2f})]? y/N?".format(coord_a[0], coord_a[1],
+                                                                                                 coord_b[0], coord_b[1]))
                 if include.lower() == "y" or include.lower() == "yes":
                     best_a_coords.append(coord_a[0])
                     best_b_coords.append(coord_b[0])
@@ -394,7 +397,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
             # no - individually ask if want want each line included and append if yes
             # probably plot each individually to identify
-            # include = input(" Use Coordinate point" + str([CoordsA[i], CoordsB[i]]) + " y/N?")
+            # include = raw_input(" Use Coordinate point" + str([CoordsA[i], CoordsB[i]]) + " y/N?")
             # if include.lower() == "y" or include.lower() == "yes":
             #   best_a_coords.append(CoordsA[i]) # tempry filler for return
             #    best_b_coords.append(CoordsB[i]) # tempry filler to return same as inputs
@@ -680,7 +683,7 @@ def inputer(question):
     To enable questions to appear when using Gooey
     """
     print(question)
-    ans = input("")
+    ans = raw_input("")
     return ans
 
 
