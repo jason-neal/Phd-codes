@@ -12,11 +12,13 @@
 
 # In[8]:
 
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
-import matplotlib.pyplot as plt
 from astropy.io import fits
+
 import Obtain_Telluric as obt
+
 get_ipython().magic('matplotlib inline')
 
 # Load in telluric line model 
@@ -179,4 +181,3 @@ HD30501_3_Path = "/home/jneal/Phd/data/Crires/BDs-DRACS/HD30501-3/Raw_files/"
 HD30501_3_tapas = "tapas_HD30501_3_R50000_2012-08-02T09:01:00.ipac"
 
 do_change_calculations(HD30501_3_Path, HD30501_3_files, HD30501_3_tapas)
-

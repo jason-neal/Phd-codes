@@ -4,10 +4,11 @@
 ## Module that has a function that can obtain the telluric spectra relevant to the observations we have
 ## ie. match date, time, RA/DEC
 import matplotlib.pyplot as plt
-from Get_filenames import get_filenames
-import IOmodule
-from astropy.io import fits
 import numpy as np
+from astropy.io import fits
+
+import IOmodule
+from Get_filenames import get_filenames
 
 
 def get_telluric_name(path, date, time, ext="*"):

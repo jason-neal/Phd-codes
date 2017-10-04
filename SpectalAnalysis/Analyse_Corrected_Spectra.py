@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 
-#" Analyse Telluric Corrected spectra"
+#Find RV of host:
 #from gooey import Gooey, GooeyParser
 #from plot_fits import astro_ccf
 import argparse
+#" Analyse Telluric Corrected spectra"
 import os
-import numpy as np
-import matplotlib.pyplot as plt
+
 import matplotlib
-from astropy.io import fits
+import matplotlib.pyplot as plt
+import numpy as np
 import scipy.interpolate as sci
+from astropy.io import fits
+
 import GaussianFitting as gf
-#Find RV of host:
+
 
 #@Gooey(program_name='Plot fits - Easy 1D fits plotting', default_size=(610, 730))
 def _parser():

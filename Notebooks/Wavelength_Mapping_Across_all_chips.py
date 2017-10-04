@@ -15,18 +15,29 @@
 # In[ ]:
 
 # Imports from __future__ in case we're running Python 2
-from __future__ import division, print_function
-from __future__ import absolute_import, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-import numpy as np
+import os
+
+# Import Bokeh modules for interactive plotting
+import bokeh.io
+import bokeh.mpl
+import bokeh.plotting
 import matplotlib.pyplot as plt
-from astropy.io import fits
-import Obtain_Telluric as obt
-from Get_filenames import get_filenames
-
+import numpy as np
 # Seaborn, useful for graphics
 import seaborn as sns
+from astropy.io import fits
+from bokeh.models import BoxAnnotation, Range1d
+from bokeh.plotting import figure, gridplot, output_file, show, vplot
 
+import GaussianFitting as gf
+import lmfit
+import Obtain_Telluric as obt
+from Get_filenames import get_filenames
+from lmfit import Parameters, minimize
+from TellRemoval import airmass_scaling
 
 # Magic function to make matplotlib inline; other style specs must come AFTER
 get_ipython().magic('matplotlib inline')
@@ -34,14 +45,7 @@ get_ipython().magic('matplotlib inline')
 
 # In[ ]:
 
-# Import Bokeh modules for interactive plotting
-import bokeh.io
-import bokeh.mpl
-import bokeh.plotting
 
-from bokeh.plotting import figure, show, output_file, gridplot, vplot
-from bokeh.models import BoxAnnotation
-from bokeh.models import Range1d
 # This enables SVG graphics inline.  There is a bug, so uncomment if it works.
 get_ipython().magic("config InlineBackend.figure_formats = {'svg',}")
 
@@ -61,7 +65,6 @@ sns.set_style('darkgrid', rc=rc)
 bokeh.io.output_notebook()
 
 
-import os
 here = os.getcwd()
 print(here)
 
@@ -268,8 +271,6 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # In[ ]:
 
-from lmfit import minimize, Parameters
-import lmfit
 
 
 # Create the residual functions to minimize
@@ -731,10 +732,6 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 # In[ ]:
 
 
-import Obtain_Telluric as obt
-from astropy.io import fits
-import GaussianFitting as gf
-from TellRemoval import airmass_scaling
 #Path = "/home/jneal/Phd/data/Crires/BDs-DRACS/HD30501-1/Fullreductionr-test-1dec2015/Combined_Nods/"
 #Chipnames = ["CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_2.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_3.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_4.nod.ms.norm.sum.fits"]
 
@@ -1092,10 +1089,6 @@ while False:#Third order regression
 ## Load in Chip data and plot telluric lines each chip with the two corrections
 
 
-import Obtain_Telluric as obt
-from astropy.io import fits
-import GaussianFitting as gf
-from TellRemoval import airmass_scaling
 Path = "/home/jneal/Phd/data/Crires/BDs-DRACS/HD30501-1/Fullreductionr-test-1dec2015/Combined_Nods/"
 
 Chipnames = ["CRIRE.2012-04-07T00:08:29.976_1.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_2.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_3.nod.ms.norm.sum.fits", "CRIRE.2012-04-07T00:08:29.976_4.nod.ms.norm.sum.fits"]
@@ -1162,6 +1155,3 @@ plt.legend(loc=0)
 plt.show()
 
 # In[ ]:
-
-
-

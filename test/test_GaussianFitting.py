@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
-import pytest
-
-from hypothesis import given
 import hypothesis.strategies as st
+import pytest
+from hypothesis import given
 
-import GaussianFitting as gf 
-
+import GaussianFitting as gf
 
 
 @given(st.tuples(st.float(), st.float()), st.float())

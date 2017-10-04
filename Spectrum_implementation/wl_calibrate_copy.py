@@ -3,26 +3,28 @@
 """ Script to run wavelength calibration on input fits file"""
 #from __future__ import division, print_function
 
+import argparse
 import os
 import time
-import argparse
-import numpy as np
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import numpy as np
 from astropy.io import fits
+from PyAstronomy import pyasl
+
+import GaussianFitting as gf
 #from gooey import Gooey, GooeyParser
 import IOmodule
-import GaussianFitting as gf
-from Gaussian_fit_testing import Get_DRACS
 import Obtain_Telluric as obt
-from TellRemoval import airmass_scaling
 import XCorrWaveCalScript as XCorrWaveCal
-
+from Gaussian_fit_testing import Get_DRACS
 from SpectralTools import wav_selector
+from Tapas_Berv_corr import tapas_helcorr
+from TellRemoval import airmass_scaling
+
+
 #from plot_fits import get_wavelength
 
-from Tapas_Berv_corr import tapas_helcorr
-from PyAstronomy import pyasl
 #@Gooey(program_name='Plot fits - Easy 1D fits plotting', default_size=(610, 730))
 def _parser():
     """Take care of all the argparse stuff.

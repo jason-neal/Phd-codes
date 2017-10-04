@@ -9,17 +9,17 @@ The script will quickly find the files automatically and plot them together.
 TODO - Add a argparse flag/fname to save the plot?
 """
 
-from __future__ import division, print_function
-from __future__ import absolute_import, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import os
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 from astropy.io import fits
 
-from Get_filenames import get_filenames
 import Obtain_Telluric as obt
-
+from Get_filenames import get_filenames
 
 cwd = os.getcwd() + "/"
 

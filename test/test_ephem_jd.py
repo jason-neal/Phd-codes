@@ -3,10 +3,11 @@
 # Jason Neal
 # December 7, 2016
 
-import ephem
-import numpy as np
 import datetime
 import time
+
+import ephem
+import numpy as np
 import PyAstronomy.pyasl as pyasl
 
 # For tapas berv correction I was testing using this code

@@ -2,21 +2,25 @@
 # -*- coding: utf8 -*-
 """ This code shows that the tapas correction is equavalent
  to using Pyastronomy helcorr correction and doppler shift functions"""
+import argparse
 import os
+
 # import time
 import ephem
-# import datetime
-
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
-import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d
 from astropy.io import fits
-import argparse
+from PyAstronomy import pyasl
+from scipy.interpolate import interp1d
+
 import GaussianFitting as gf
 import Obtain_Telluric as obt
 
-from PyAstronomy import pyasl
+
+# import datetime
+
+
 
 def ra2deg(ra):
     split = ra.split(":")
