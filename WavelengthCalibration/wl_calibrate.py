@@ -14,15 +14,15 @@ import numpy as np
 from astropy.io import fits
 from PyAstronomy import pyasl
 
-import GaussianFitting as gf
+import WavelengthCalibration.GaussianFitting as gf
 # from gooey import Gooey, GooeyParser
 import IOmodule
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 import XCorrWaveCalScript as XCorrWaveCal
-from Gaussian_fit_testing import Get_DRACS
+from WavelengthCalibration.Gaussian_fit_testing import Get_DRACS
 from SpectralTools import wav_selector
 from Tapas_Berv_corr import tapas_helcorr
-from TellRemoval import airmass_scaling
+from TelluricSpectra.TellRemoval import airmass_scaling
 from utilities import append_hdr
 
 # from plot_fits import get_wavelength

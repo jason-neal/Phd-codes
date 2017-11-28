@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
 
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 from Get_filenames import get_filenames
 
 cwd = os.getcwd() + "/"

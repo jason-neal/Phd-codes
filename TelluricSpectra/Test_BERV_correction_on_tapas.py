@@ -14,8 +14,8 @@ from astropy.io import fits
 from PyAstronomy import pyasl
 from scipy.interpolate import interp1d
 
-import GaussianFitting as gf
-import Obtain_Telluric as obt
+import WavelengthCalibration.GaussianFitting as gf
+import TelluricSpectra.Obtain_Telluric as obt
 
 
 # import datetime

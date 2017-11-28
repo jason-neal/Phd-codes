@@ -10,7 +10,7 @@ import scipy.optimize as opt
 from astropy.io import fits
 
 import IOmodule
-import Obtain_Telluric
+import TelluricSpectra.Obtain_Telluric
 from Get_filenames import get_filenames
 
 # Use raw_input if running on python 2.x

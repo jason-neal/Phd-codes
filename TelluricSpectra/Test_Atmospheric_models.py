@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
 
-import GaussianFitting as gf
-import Obtain_Telluric as obt
-from TellRemoval import airmass_scaling
+import WavelengthCalibration.GaussianFitting as gf
+import TelluricSpectra.Obtain_Telluric as obt
+from TelluricSpectra.TellRemoval import airmass_scaling
 
 ESO_path = "/home/jneal/Phd/data/ESO-Skydata/"
 tapas_path = "/home/jneal/Phd/data/tapas-testing/"

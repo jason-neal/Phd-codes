@@ -1,10 +1,8 @@
 from __future__ import print_function, division
 
-import py.test
-
-from TellRemoval import divide_spectra, match_wl, airmass_scaling
-
 import numpy as np
+
+from TelluricSpectra.TellRemoval import divide_spectra, match_wl, airmass_scaling
 
 
 # Testing Telluric removal code

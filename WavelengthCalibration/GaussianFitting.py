@@ -11,7 +11,7 @@ to obtain a wavelenght calibration from pixel to wavelength.
 from __future__ import division
 
 # from astropy.io import fits
-# import Obtain_Telluric
+# import TelluricSpectra.Obtain_Telluric
 import copy
 import math
 from logging import debug
@@ -24,7 +24,7 @@ import scipy.optimize as opt
 import IOmodule
 from debug_utils import pv
 # from Get_filenames import get_filenames
-from Gaussian_fit_testing import Get_DRACS
+from WavelengthCalibration.Gaussian_fit_testing import Get_DRACS
 
 # Use raw_input comptibility for python 2.x and 3.x (doesn't overwrite seperate input in py2.x)
 try:

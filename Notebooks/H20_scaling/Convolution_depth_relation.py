@@ -50,7 +50,7 @@ bokeh.io.output_notebook()
 
 # In[ ]:
 
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 
 tapas_h20 = "tapas_2012-04-07T00-24-03_ReqId_12_No_Ifunction_barydone-NO.ipac"
 

@@ -32,12 +32,12 @@ from astropy.io import fits
 from bokeh.models import BoxAnnotation, Range1d
 from bokeh.plotting import figure, gridplot, output_file, show, vplot
 
-import GaussianFitting as gf
+import WavelengthCalibration.GaussianFitting as gf
 import lmfit
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 from Get_filenames import get_filenames
 from lmfit import Parameters, minimize
-from TellRemoval import airmass_scaling
+from TelluricSpectra.TellRemoval import airmass_scaling
 
 # Magic function to make matplotlib inline; other style specs must come AFTER
 get_ipython().magic('matplotlib inline')

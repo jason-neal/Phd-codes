@@ -17,12 +17,12 @@ import numpy as np
 from astropy.io import fits
 
 import lmfit
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 from Get_filenames import get_filenames
 from lmfit import Parameters, minimize
 from SpectralTools import (instrument_convolution, wav_selector,
                            wl_interpolation)
-from utilities import append_hdr
+from TelluricSpectra.utilities import append_hdr
 
 
 def divide_spectra(spec_a, spec_b):

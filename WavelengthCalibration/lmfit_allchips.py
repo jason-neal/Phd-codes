@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
 
-import GaussianFitting as gf
+import WavelengthCalibration.GaussianFitting as gf
 import lmfit
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 from lmfit import Parameters, minimize
-from TellRemoval import airmass_scaling
+from TelluricSpectra.TellRemoval import airmass_scaling
 
 
 def residual(params, pixels, wl_data):

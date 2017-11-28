@@ -4,19 +4,18 @@
 
 import os
 import sys
+from ajplanet import pl_rv_array
 
 import ephem
 import matplotlib.pyplot as plt
 import numpy as np
+from simulators.Planet_spectral_simulations import simple_normalization
 # Add vac to air
-import PyAstronomy.pyasl as pyasl
 from astropy.io import fits
+from mingle.utilities.crires_utilities import barycorr_crires_spectrum
+from spectrum_overload import Spectrum
 
-import Obtain_Telluric as ot
-from ajplanet import pl_rv_array
-from crires_utilities import barycorr_crires_spectrum
-from Planet_spectral_simulations import simple_normalization
-from spectrum_overload.Spectrum import Spectrum
+import TelluricSpectra.Obtain_Telluric as ot
 
 sys.path.append(os.path.join(os.path.dirname(sys.path[0]),'Simulations'))
 
@@ -24,14 +23,14 @@ sys.path.append(os.path.join(os.path.dirname(sys.path[0]),'Simulations'))
 def load_data():
     obsdata = fits.getdata("/home/jneal/Phd/data/Crires/BDs-DRACS/HD30501-1/Combined_Nods/CRIRE.2012-04-07T00-08-29.976_2.nod.ms.norm.sum.wavecal.fits")
     obsheader = fits.getheader("/home/jneal/Phd/data/Crires/BDs-DRACS/HD30501-1/Combined_Nods/CRIRE.2012-04-07T00-08-29.976_2.nod.ms.norm.sum.wavecal.fits")
-    obs_spec = Spectrum(obsdata["Extracted_DRACS"], obsdata["Wavelength"], header=obsheader, calibrated=True)
+    obs_spec = Spectrum(flux=obsdata["Extracted_DRACS"], xaxis=obsdata["Wavelength"], header=obsheader, calibrated=True)
 
     telldata, hdr = ot.load_telluric("/home/jneal/Phd/data/Crires/BDs-DRACS/HD30501-1/Telluric_files/", "tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac")
-    tell_spec = Spectrum(telldata[1], telldata[0], header=hdr, calibrated=True)
+    tell_spec = Spectrum(flux=telldata[1], xaxis=telldata[0], header=hdr, calibrated=True)
 
     wave = fits.getdata("/home/jneal/Phd/data/phoenixmodels/WAVE_PHOENIX-ACES-AGSS-COND-2011.fits")
     model = fits.getdata("/home/jneal/Phd/data/phoenixmodels/HD30501-lte05200-4.50-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits")
-    model_spec = Spectrum(model,wave/10, calibrated=True)
+    model_spec = Spectrum(flux=model, xaxis=wave/10, calibrated=True)
     model_spec.wav_select(2100, 2170)
     model_spec = simple_normalization(model_spec)
     return obs_spec, tell_spec, model_spec

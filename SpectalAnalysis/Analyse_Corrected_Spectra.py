@@ -13,7 +13,7 @@ import numpy as np
 import scipy.interpolate as sci
 from astropy.io import fits
 
-import GaussianFitting as gf
+import WavelengthCalibration.GaussianFitting as gf
 
 
 #@Gooey(program_name='Plot fits - Easy 1D fits plotting', default_size=(610, 730))

@@ -10,7 +10,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 from Get_filenames import get_filenames
 get_ipython().magic('matplotlib inline')
 

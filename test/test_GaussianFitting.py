@@ -4,7 +4,7 @@ import hypothesis.strategies as st
 import pytest
 from hypothesis import given
 
-import GaussianFitting as gf
+import WavelengthCalibration.GaussianFitting as gf
 
 
 @given(st.tuples(st.float(), st.float()), st.float())

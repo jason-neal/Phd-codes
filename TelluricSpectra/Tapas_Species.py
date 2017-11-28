@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
 
-import GaussianFitting as gf
-import Obtain_Telluric as obt
-from TellRemoval import airmass_scaling
+import WavelengthCalibration.GaussianFitting as gf
+import TelluricSpectra.Obtain_Telluric as obt
+from TelluricSpectra.TellRemoval import airmass_scaling
 
 tapas_path = "/home/jason/Phd/data/Tapas/Tapas_march2016/HD30501_1_separated/"
 

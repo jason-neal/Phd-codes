@@ -17,7 +17,7 @@ import numpy as np
 import scipy as sp
 from astropy.io import fits
 
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 
 get_ipython().magic('matplotlib inline')
 

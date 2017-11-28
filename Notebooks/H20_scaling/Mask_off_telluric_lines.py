@@ -27,7 +27,7 @@ bokeh.io.output_notebook()
 
 # In[ ]:
 
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 
 
 # In[ ]:

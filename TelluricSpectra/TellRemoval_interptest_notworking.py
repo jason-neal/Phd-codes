@@ -15,8 +15,8 @@ import scipy as sp
 from astropy.io import fits
 from scipy import interpolate
 
-import GaussianFitting as gf
-import Obtain_Telluric as obt
+import WavelengthCalibration.GaussianFitting as gf
+import TelluricSpectra.Obtain_Telluric as obt
 
 
 def divide_spectra(spec_a, spec_b):

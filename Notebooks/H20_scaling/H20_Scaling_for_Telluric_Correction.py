@@ -140,7 +140,7 @@ print("Data from Detectors is now loaded")
 
 # In[ ]:
 
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 tapas_all = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
 tapas_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_12_No_Ifunction_barydone-NO.ipac"
 tapas_not_h20 = "../HD30501_data/1/tapas_2012-04-07T00-24-03_ReqId_18_R-50000_sratio-10_barydone-NO.ipac"
@@ -198,7 +198,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # In[ ]:
 
-from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
+from TelluricSpectra.TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
 
 def correction(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_airmass, kind="linear", method="scipy"):
     interped_tell = match_wl(wl_tell, spec_tell, wl_obs)
@@ -582,7 +582,7 @@ import lmfit
 # In[ ]:
 
 from scipy.interpolate import interp1d
-#from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
+#from TelluricSpectra.TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
 def match_wl(wl, spec, ref_wl, method="scipy", kind="linear"):
     """Interpolate Wavelengths of spectra to common WL
     Most likely convert telluric to observed spectra wl after wl mapping performed"""
