@@ -55,7 +55,7 @@ bokeh.io.output_notebook()
 
 # Define Faster functions to try
 def fast_wav_selector(wav, flux, wav_min, wav_max):
-    """ Faster Wavelenght selector
+    """ Faster Wavelength selector
     
     If passed lists it will return lists.
     If passed np arrays it will return arrays
@@ -348,7 +348,7 @@ FWHM_max = wav_chip[-1]/R
 print("Min FWHM", FWHM_min)
 print("Max FWHM", FWHM_max)
 
-# pyasl needs equidistant wavelenghts 
+# pyasl needs equidistant wavelengths
 
 from Find_gcdt import gcdt
 greatest_common_divisor = gcdt(wav_chip, 4)

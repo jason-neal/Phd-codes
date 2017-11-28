@@ -1,4 +1,3 @@
-
 """Setup.py for phd-codes."""
 try:
     from setuptools import setup
@@ -8,7 +7,7 @@ except ImportError:
 from setuptools import find_packages
 
 config = {
-    'description': 'Phd Codes wavelenght calibration and telluric correction.',
+    'description': 'Phd Codes wavelength calibration and telluric correction.',
     'author': 'Jason Neal',
     'url': 'https://github.com/jason-neal/Phd-codes.git',
     'download_url': 'https://github.com/jason-neal/Phd-codes.git',

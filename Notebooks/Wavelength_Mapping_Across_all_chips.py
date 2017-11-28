@@ -1085,7 +1085,7 @@ while False:#Third order regression
 	print("x**3 Regression Equation = {0}*x**3 + {1}*x**2 + {2}*x + {3}".format(r3, q3, m3, b3))
 
 
-# Test how Wavelenght Calibration Compares
+# Test how Wavelength Calibration Compares
 ## Load in Chip data and plot telluric lines each chip with the two corrections
 
 

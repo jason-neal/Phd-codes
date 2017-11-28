@@ -55,7 +55,7 @@ bokeh.io.output_notebook()
 
 # Define Faster functions to try
 def fast_wav_selector(wav, flux, wav_min, wav_max, verbose=False):
-    """ Faster Wavelenght selector
+    """ Faster Wavelength selector
     
     If passed lists it will return lists.
     If passed np arrays it will return arrays
@@ -284,7 +284,7 @@ FWHM_max = wav_chip[-1]/R
 print("Min FWHM", FWHM_min)
 print("Max FWHM", FWHM_max)
 
-# pyasl needs equidistant wavelenghts 
+# pyasl needs equidistant wavelengths
 
 from Find_gcdt import gcdt
 greatest_common_divisor = gcdt(wav_chip, 4)
@@ -806,7 +806,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 
 # #### Remarks from 1June2016-
-# The scaling and convolving code does work now. Detector 2 looks okish but the others do not. I now need to fix up the wavelenght scaling to get the proper calibrated wavelenghts in here.
+# The scaling and convolving code does work now. Detector 2 looks okish but the others do not. I now need to fix up the wavelength scaling to get the proper calibrated wavelengths in here.
 # All the scaling values are all over the place. Something like 0.5, 0.9, 0.8, 0.25 in the first try on each detector.
 # 
 # 

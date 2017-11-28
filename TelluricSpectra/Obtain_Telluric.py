@@ -94,7 +94,7 @@ def load_telluric(tapas_path, filename):
     elif ext == "fits":
         i_tell = fits.getdata(file_, 1)
         tell_hdr = fits.getheader(file_, 1)
-        # TODO ... Need to get wavelenght scale (air/wavelenght) from fits file somehow...
+        # TODO ... Need to get wavelength scale (air/wavelength) from fits file somehow...
         col1 = i_tell["wavelength"]
         col2 = i_tell["transmittance"]
 

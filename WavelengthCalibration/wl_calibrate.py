@@ -416,7 +416,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         if old:
             export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], uncalib_data[0], hdr, hdrkeys, hdrvals)
         else:
-            # New (wavelenght, flux) format
+            # New (wavelength, flux) format
             new_export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], hdr, hdrkeys, hdrvals)
 
         # Save calibration values to a txt file

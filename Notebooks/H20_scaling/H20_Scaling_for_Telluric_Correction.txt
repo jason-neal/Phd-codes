@@ -41,7 +41,7 @@ wl2 = wl2-.54  #including rough berv correction
 wl3 = wl3-.55  #including rough berv correction
 wl4 = wl4-.7
 
-import Obtain_Telluric as obt
+import TelluricSpectra.Obtain_Telluric as obt
 tapas_all = "tapas_2012-04-07T00-24-03_ReqId_10_R-50000_sratio-10_barydone-NO.ipac"
 tapas_h20 = "tapas_2012-04-07T00-24-03_ReqId_12_No_Ifunction_barydone-NO.ipac"
 tapas_not_h20 = "tapas_2012-04-07T00-24-03_ReqId_18_R-50000_sratio-10_barydone-NO.ipac"
@@ -86,7 +86,7 @@ plt.plot(tapas_not_h20_data[0], tapas_not_h20_data[1], "-.g", label="Not H20")
 # Make it interactive with Bokeh
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
-from TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
+from TelluricSpectra.TellRemoval import divide_spectra, airmass_scaling, telluric_correct, match_wl
 
 def correction(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_airmass, kind="linear", method="scipy"):
     interped_tell = match_wl(wl_tell, spec_tell, wl_obs)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Testing difference between the norm.sum and sum.norm  wavelenght calcualations
+# Testing difference between the norm.sum and sum.norm  wavelength calcualations
 
 import matplotlib.pyplot as plt
 import numpy as np

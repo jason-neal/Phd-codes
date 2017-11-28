@@ -329,7 +329,7 @@ if __name__=="__main__":
         # plt.plot([min(pixel_pos), max(pixel_pos)], [min(wl_pos), max(wl_pos)], "k")
         # need to fit a linear fit to this from star to end values
 
-        # create wavelenght map
+        # create wavelength map
 
         # fit linear
         linfit = np.polyfit(pixel_pos, wl_pos, 1)

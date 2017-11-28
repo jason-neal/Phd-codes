@@ -3,7 +3,7 @@
 
 """CRIRES Wavelength Calibration.
 Fitting the Centroid positions of telluric lines with gausians
-to obtain a wavelenght calibration from pixel to wavelength.
+to obtain a wavelength calibration from pixel to wavelength.
 
 """
 
@@ -649,7 +649,7 @@ def upper_quartile(nums):
 
 
 def slice_percentage(wl, spectrum, pos, percent=0.20):
-    """Extract a section of a spectrum around a given wavelenght position.
+    """Extract a section of a spectrum around a given wavelength position.
         percnt is the percentage lenght of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
         """
@@ -850,7 +850,7 @@ def print_fit_instructions():
     instructions = """\nYou will be shown an overlay of the observed specrtra and
         a model of atmospheric transmission from tapas. A selection
         of the tapas model has been taken accoriding to the start and
-        end wavelenght given in the header of the observed spectrum. \n
+        end wavelength given in the header of the observed spectrum. \n
         The goal of this is to select absorbtion lines that are common
         to both spectra to create a mapping from pixels to wavelength. \n
         First select the peaks of the main telluric lines (left click) in the observed
@@ -876,7 +876,7 @@ def print_fit_instructions():
 #                                                                     #
 #######################################################################
 def wavelength_mapping(pixels, wavelengths, order=2):
-    """Generate the wavelenght map equation
+    """Generate the wavelength map equation
       fit polynomial
       default order of polynomial is 2
 
@@ -954,7 +954,7 @@ if __name__ == "__main__":
     # print("Good coords vals A= ", good_coords_a)
     # print("Good coords vals B = ", good_coords_b)
     wlmap, __, __ = wavelength_mapping(good_coords_a, good_coords_b)
-    # """Generate the wavelenght map
+    # """Generate the wavelength map
     #  fit polynomial (use pedros code)
 
     # """

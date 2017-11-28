@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# # Wavelenght Calibration Example for Azores poster.
+# # Wavelength Calibration Example for Azores poster.
 
 # In[ ]:
 
@@ -157,7 +157,7 @@ show(p)
 print("done")
 
 
-# # Wavelenght map for poster
+# # Wavelength map for poster
 
 # In[ ]:
 

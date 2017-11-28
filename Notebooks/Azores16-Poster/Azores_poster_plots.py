@@ -464,7 +464,7 @@ manual_ofset_for_testing = -8.5
 
 ### Fit using lmfit
 def wav_selector(wav, flux, wav_min, wav_max, verbose=False):
-    """ Faster Wavelenght selector
+    """ Faster Wavelength selector
     
     If passed lists it will return lists.
     If passed np arrays it will return arrays
