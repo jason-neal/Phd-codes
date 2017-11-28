@@ -22,11 +22,12 @@ for f in files:
         comb = ""
 
     if "h2otellcorr" in f:
-        tell = "tellcorr"
+        tell = "h20tellcorr"
     else:
-        tell = "h2otellcorr"
+        tell = "tellcorr"
 
     new_name = "{0}-{2}-{3}_{1}.fits".format(target_name, chip_num, comb, tell)
     # copy then move
     subprocess.call("cp {0} {0}_cp".format(f), shell=True)
     subprocess.call("mv {0}_cp {1}{2}".format(f, handy_location, new_name), shell=True)
+
