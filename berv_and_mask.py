@@ -64,6 +64,7 @@ def main(fname, apply_berv=False, export=False, show=False):
         observation.plot(label="obs")
         tell_spec.plot(label="telluric")
         maskedin_obs.plot(label="masked obs >5", color="r", linestyle="", marker=".")
+        plt.hlines(1-mask_value, tell_spec.xaxis[0], tell_spec.xaxis[-1], linestyles="--")
         plt.legend()
         plt.title("Masking Telluric lines deeper than {}".format(mask_value))
         plt.show()
