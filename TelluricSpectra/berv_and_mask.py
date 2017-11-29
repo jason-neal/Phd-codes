@@ -57,7 +57,7 @@ def main(fname, apply_berv=False, export=False, show=False):
     maskedin_obs = Spectrum(xaxis=observation.xaxis[~tell_mask], flux=observation.flux[~tell_mask])
     maskedin_tell = Spectrum(xaxis=tell_spec.xaxis[~tell_mask], flux=tell_spec.flux[~tell_mask])
 
-    pixels_removed = sum(tell_spec)
+    pixels_removed = sum(tell_mask)
     fraction_removed = pixels_removed / len(observation.xaxis)
 
     if show:
@@ -71,17 +71,17 @@ def main(fname, apply_berv=False, export=False, show=False):
     if export:
         obs_name = fname.replace(".fits", "_bervd.fits")
         new_export_correction_2fits(obs_name, observation.xaxis, observation.flux, observation.header, ["BervDone"],
-                                    [True])
+                                    [True],tellhdr=tell_spec.header)
 
-        tell_name = "{}-{}_berved_telluric_spec_{}.fits".format(star, obsnum, chip)
-        new_export_correction_2fits(tell_name, tell_spec.xaxis, tell_spec.flux, tell_spec.header, ["BervDone"], [True])
+        tell_name = "{}-{}_berved_telluric_model_{}.fits".format(star, obsnum, chip)
+        new_export_correction_2fits(tell_name, tell_spec.xaxis, tell_spec.flux, tell_spec.header, ["BervDone"], [True],tellhdr=tell_spec.header)
 
         obs_mask = fname.replace(".fits", "_bervd_tellmasked.fits")
         new_export_correction_2fits(obs_mask, maskedin_obs.xaxis, maskedin_obs.flux, observation.header,
                                     ["BervDone", "Tellmask", "pix_mask", "ratio_mask"],
                                     [True, (mask_value, "telluric line depth limit"),
                                      (pixels_removed, "Number of pixels masked out"),
-                                     (fraction_removed, "Fraction of pixels masked out")])
+                                     (fraction_removed, "Fraction of pixels masked out")],tellhdr=tell_spec.header)
 
 
 def parse_args(args):

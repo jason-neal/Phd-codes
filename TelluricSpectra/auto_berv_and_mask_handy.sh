@@ -7,6 +7,6 @@
 
 
 # Jason Neal November 2017
-for i in $( ls *.mixavg.*tellcorr_?.fits ); do
+for i in $( ls *-mixavg-*tellcorr_*.fits ); do
    berv_and_mask.py -b -e $i
 done
