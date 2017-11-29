@@ -12,16 +12,16 @@ from __future__ import division, print_function
 import argparse
 import os
 
+import lmfit
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy.io import fits
-
-import lmfit
-import TelluricSpectra.Obtain_Telluric as obt
-from Get_filenames import get_filenames
-from lmfit import Parameters, minimize
-from SpectralTools import (instrument_convolution, wav_selector,
+from octotribble.SpectralTools import (instrument_convolution, wav_selector,
                            wl_interpolation)
+from astropy.io import fits
+from lmfit import Parameters, minimize
+from octotribble.Get_filenames import get_filenames
+
+import TelluricSpectra.Obtain_Telluric as obt
 from TelluricSpectra.utilities import append_hdr
 
 

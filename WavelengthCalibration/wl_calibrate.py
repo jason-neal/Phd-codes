@@ -16,11 +16,11 @@ from PyAstronomy import pyasl
 
 import WavelengthCalibration.GaussianFitting as gf
 # from gooey import Gooey, GooeyParser
-import IOmodule
+from octotribble import IOmodule
 import TelluricSpectra.Obtain_Telluric as obt
 import XCorrWaveCalScript as XCorrWaveCal
 from WavelengthCalibration.Gaussian_fit_testing import Get_DRACS
-from SpectralTools import wav_selector
+from octotribble.SpectralTools import wav_selector
 from Tapas_Berv_corr import tapas_helcorr
 from TelluricSpectra.TellRemoval import airmass_scaling
 from utilities import append_hdr

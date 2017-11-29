@@ -1,17 +1,14 @@
 #!/usr/bin/env python
-#-*- coding: utf8 -*-
+# -*- coding: utf8 -*-
 
 from __future__ import division
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
 import scipy.optimize as opt
 from astropy.io import fits
-
-import IOmodule
-import TelluricSpectra.Obtain_Telluric
-from Get_filenames import get_filenames
+from octotribble import IOmodule
+from octotribble.Get_filenames import get_filenames
 
 # Use raw_input if running on python 2.x
 if hasattr(__builtins__, 'raw_input'):

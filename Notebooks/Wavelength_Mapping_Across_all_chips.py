@@ -35,7 +35,7 @@ from bokeh.plotting import figure, gridplot, output_file, show, vplot
 import WavelengthCalibration.GaussianFitting as gf
 import lmfit
 import TelluricSpectra.Obtain_Telluric as obt
-from Get_filenames import get_filenames
+from octotribble.Get_filenames import get_filenames
 from lmfit import Parameters, minimize
 from TelluricSpectra.TellRemoval import airmass_scaling
 

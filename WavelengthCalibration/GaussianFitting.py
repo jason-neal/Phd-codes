@@ -20,13 +20,13 @@ from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.optimize as opt
+from octotribble import IOmodule
+from octotribble.debug_utils import pv
 
-import IOmodule
-from debug_utils import pv
-# from Get_filenames import get_filenames
+# from octotribble.Get_filenames import get_filenames
 from WavelengthCalibration.Gaussian_fit_testing import Get_DRACS
 
-# Use raw_input comptibility for python 2.x and 3.x (doesn't overwrite seperate input in py2.x)
+# Use raw_input compatibility for python 2.x and 3.x (doesn't overwrite seperate input in py2.x)
 try:
     raw_input
 except NameError:

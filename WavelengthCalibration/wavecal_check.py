@@ -15,11 +15,10 @@ from __future__ import (absolute_import, division, print_function,
 import os
 
 import matplotlib.pyplot as plt
-import numpy as np
 from astropy.io import fits
+from octotribble.Get_filenames import get_filenames
 
 import TelluricSpectra.Obtain_Telluric as obt
-from Get_filenames import get_filenames
 
 cwd = os.getcwd() + "/"
 

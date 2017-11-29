@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from astropy.io import fits
 
-import IOmodule
-from Get_filenames import get_filenames
+from octotribble import IOmodule
+from octotribble.Get_filenames import get_filenames
 
 
 def get_telluric_name(path, date, time, ext="*"):

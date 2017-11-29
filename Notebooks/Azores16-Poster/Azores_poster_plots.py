@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
 import TelluricSpectra.Obtain_Telluric as obt
-from Get_filenames import get_filenames
+from octotribble.Get_filenames import get_filenames
 get_ipython().magic('matplotlib inline')
 
 
@@ -489,7 +489,7 @@ def wav_selector(wav, flux, wav_min, wav_max, verbose=False):
           raise TypeError("Unsupported input wav type")
     return [wav_sel, flux_sel]
 
-#from SpectralTools import wav_selector
+#from octotribble.SpectralTools import wav_selector
 
 def stellar_line_residuals(params, target_data, reference_data):
     # Parameters 
