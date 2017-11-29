@@ -36,9 +36,9 @@ plt.plot(tapas_data[0], tapas_data[1], label=" Tapas")
 
 for crires_name in crires_files:
     # extract Crires data
-    Obs_data  = fits.getdata(crires_name)
+    Obs_data = fits.getdata(crires_name)
     # Obs_hdr = fits.getheader(crires_name)  # Don't need header atm
-    label = "Detector " + crires_name[30]   # Chip # from the filename
+    label = "Detector " + crires_name[30]  # Chip # from the filename
     plt.plot(Obs_data["Wavelength"], Obs_data["Extracted_DRACS"], label=label)
 
 plt.legend(loc=0)  # best legend location

@@ -29,7 +29,6 @@ def main(fname, apply_berv=False, export=False, show=False):
     path = os.path.join(base_dir, "{0}-{1}".format(star, obsnum))
 
     # Find telluric file
-
     telluric_file = glob.glob(path + "/Telluric_files*/*_10_*.ipac")
     assert len(telluric_file) == 1
     teluric, tell_header = obt.load_telluric("", telluric_file[0])

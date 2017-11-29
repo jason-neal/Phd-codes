@@ -18,7 +18,7 @@ if hasattr(__builtins__, 'raw_input'):
 def onclick(event):
     global ix, iy, coords
     # Disconnect after right click
-    if event.button == 3:   # Right mouse click
+    if event.button == 3:  # Right mouse click
         fig.canvas.mpl_disconnect(cid)
         plt.close(1)
         return
@@ -29,15 +29,15 @@ def onclick(event):
 
 
 def func(x, *params):
-# """ Function to generate the multiple gaussian profiles.
-#    Adapted from http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python """
+    # """ Function to generate the multiple gaussian profiles.
+    #    Adapted from http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python """
     y = np.ones_like(x)
     for i in range(0, len(params), param_nums):
         # print("params", params, "length", len(params), "range", range(0, len(params), 3), " i", i)
         ctr = params[i]
-        amp = abs(params[i + 1]) # always positive so peaks are always downward
+        amp = abs(params[i + 1])  # always positive so peaks are always downward
         wid = params[i + 2]
-        y = y - amp * np.exp( -0.5 * ((x - ctr) / wid)**2)
+        y = y - amp * np.exp(-0.5 * ((x - ctr) / wid) ** 2)
     return y
 
 
@@ -48,14 +48,14 @@ def func4(x, *params):
     for i in range(0, len(params), param_nums):
         # print("params", params, "length", len(params), "range", range(0, len(params), 3), " i", i)
         ctr = params[i]
-        amp = abs(params[i + 1]) # always positive so peaks are always downward
+        amp = abs(params[i + 1])  # always positive so peaks are always downward
         wid = params[i + 2]
-        if param_nums == 4: # doesn't work well
+        if param_nums == 4:  # doesn't work well
             vert = params[i + 3]
             mask = (x > (ctr - 1.5 * wid)) * (x < (ctr + 1.5 * wid))
-            y = y - amp * np.exp(-0.5 * ((x - ctr) / wid)**2) + vert * mask
+            y = y - amp * np.exp(-0.5 * ((x - ctr) / wid) ** 2) + vert * mask
         else:
-            y = y - amp * np.exp(-0.5 * ((x - ctr) / wid)**2)
+            y = y - amp * np.exp(-0.5 * ((x - ctr) / wid) ** 2)
     return y
 
 
@@ -64,7 +64,7 @@ def Get_DRACS(filepath, chip):
     filename = get_filenames(filepath, "CRIRE*.norm.comb.fits", "*_" + str(chip + 1) + ".*")
     # print("Filename =", filepath + filename[0])
     # print("length filename", len(filename))
-    assert len(filename) is 1   # Check only one filename found
+    assert len(filename) is 1  # Check only one filename found
     hdr = fits.getheader(filepath + filename[0])
     data = fits.getdata(filepath + filename[0])
     return hdr, data
@@ -72,9 +72,9 @@ def Get_DRACS(filepath, chip):
 
 def RV_Calc(Lambda, deltalambda):
     """ Calcualte the Radial velocity associated to an error in wavelength calibrations"""
-    c = 299792458 # Speed of Light in m/s
+    c = 299792458  # Speed of Light in m/s
     assert len(Lambda) == len(deltalambda)
-    Verror =  [err / wl * c for err, wl in zip(deltalambda, Lambda)]
+    Verror = [err / wl * c for err, wl in zip(deltalambda, Lambda)]
     return Verror
 
 
@@ -117,7 +117,7 @@ def RV_Calc(Lambda, deltalambda):
 #     return BestCoordsA, BestCoordsB
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
 
     # path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
     path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
@@ -158,17 +158,18 @@ if __name__=="__main__":
             ax1 = fig.add_subplot(111)
             ax2 = ax1.twiny()
             ax1.plot(Calibdata[0], Calibdata[1], label="Calib")
-            ax1.plot(Calibdata[0], np.ones_like(Calibdata[1])) # horizontal line
+            ax1.plot(Calibdata[0], np.ones_like(Calibdata[1]))  # horizontal line
             ax1.set_ylabel('Transmittance')
             ax1.set_xlabel('Wavelength (nm)')
             ax1.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
 
-            ax2.plot(UnCalibdata[0], UnCalibdata[1], 'r', label="UnCalib")   # -0.03 * np.ones_like(UnCalibdata[1])
+            ax2.plot(UnCalibdata[0], UnCalibdata[1], 'r', label="UnCalib")  # -0.03 * np.ones_like(UnCalibdata[1])
             ax2.set_xlabel('Pixel vals')
             ax2.set_ylabel('Normalized ADU')
             ax2.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
             cid = fig.canvas.mpl_connect('button_press_event', onclick)
-            print("Left click on the maximum of each Spectra line peak (Red) that you want to fit from left to right. \nThen right click to close and perform fit")
+            print(
+                "Left click on the maximum of each Spectra line peak (Red) that you want to fit from left to right. \nThen right click to close and perform fit")
             plt.show()
             # print("coords found for first plot", coords)
             coords_pxl = coords
@@ -179,7 +180,7 @@ if __name__=="__main__":
                 ypos.append(1 - tup[1])
 
             while True:
-                coords =[]
+                coords = []
                 fig = plt.figure()
                 ax1 = fig.add_subplot(111)
                 ax2 = ax1.twiny()
@@ -193,7 +194,8 @@ if __name__=="__main__":
                 ax1.set_ylabel('Normalized ADU')
                 ax1.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
                 cid = fig.canvas.mpl_connect('button_press_event', onclick)
-                print("Left click on the maximum of each Telluric line peak (Blue) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit")
+                print(
+                    "Left click on the maximum of each Telluric line peak (Blue) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit")
                 plt.show()
                 # print("coords found for second plot", coords)
                 coords_wl = coords
@@ -231,14 +233,14 @@ if __name__=="__main__":
             init_params_calib = []
             for i in range(len(ypos)):
                 if param_nums == 3:
-                    init_params_uncalib += [xpos[i], ypos[i], 1.2]        # center , amplitude, std
+                    init_params_uncalib += [xpos[i], ypos[i], 1.2]  # center , amplitude, std
                 elif param_nums == 4:
-                    init_params_uncalib += [xpos[i], ypos[i], 1.2, 0.01]        # center , amplitude, std (vertshift)
+                    init_params_uncalib += [xpos[i], ypos[i], 1.2, 0.01]  # center , amplitude, std (vertshift)
             for i in range(len(cal_ypos)):
                 if param_nums == 3:
-                    init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04]    # center , amplitude, std
+                    init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04]  # center , amplitude, std
                 elif param_nums == 4:
-                    init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04, 0.004]    # center , amplitude, std (vertshift)
+                    init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04, 0.004]  # center , amplitude, std (vertshift)
 
             print("init_params_calib", init_params_calib)
             print("init_params_uncalib", init_params_uncalib)
@@ -265,8 +267,8 @@ if __name__=="__main__":
                 for par in range(param_nums):
                     fit_params_uncalib.append(this_fit_uncalib[par])
                     fit_params_calib.append(this_fit_calib[par])
-                # leastsq_uncalib, covar = opt.curve_fit(func, UnCalibdata[0], UnCalibdata[1], params_uncalib)
-                # leastsq_calib, covar_cal = opt.curve_fit(func, Calibdata[0], Calibdata[1], params_calib)
+                    # leastsq_uncalib, covar = opt.curve_fit(func, UnCalibdata[0], UnCalibdata[1], params_uncalib)
+                    # leastsq_calib, covar_cal = opt.curve_fit(func, Calibdata[0], Calibdata[1], params_calib)
 
             # print("fit params individual", fit_params_uncalib, fit_params_calib) # , "covar", covar)
             # print("init_params_uncalib", init_params_uncalib)
@@ -276,7 +278,6 @@ if __name__=="__main__":
             # Guess models used for fitting
             Guess_uncalib = func(UnCalibdata[0], *init_params_uncalib)
             Guess_calib = func(Calibdata[0], *init_params_calib)
-
 
             plt.figure()
             plt.subplot(211)
@@ -309,7 +310,7 @@ if __name__=="__main__":
             if Reply == "y":
                 print("Good fit found")
                 break
-            # Goodfit = input(" Is this a good fit")  # python 3
+                # Goodfit = input(" Is this a good fit")  # python 3
         # after good fit
 
         # ### pixel map creation

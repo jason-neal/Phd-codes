@@ -27,13 +27,12 @@ def main(spectrum_1, spectrum_2, synthetic=None):
 
     dspec = DiffSpec(spec1, spec2)
 
+    # Pass to the differential class:
+    #    Calculate RV from date
 
-# Pass to the differential class:
-#    Calculate RV from date
-
-#    Shift spectra to a common reference
-     # dspec.reference_shift()
-#    Wavelength match - Interpolate etc
+    #    Shift spectra to a common reference
+    # dspec.reference_shift()
+    #    Wavelength match - Interpolate etc
     # dspec.wave_match()
     # result = dspec.subtract()
 
@@ -52,6 +51,7 @@ def main(spectrum_1, spectrum_2, synthetic=None):
         synth_diff = DiffSpec(synth1, synth2)
 
         # synth_diff.displayplot()
+
 
 def load_spectrum(name):
     data = fits.getdata(name)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     obs_num = "1"
     ref_num = "3"
     target = "HD30501-" + obs_num
-    ref_target = "HD30501-" + ref_num    # should be different from target
+    ref_target = "HD30501-" + ref_num  # should be different from target
 
     if target == ref_target:
         raise ValueError("Reference target should be different from target")

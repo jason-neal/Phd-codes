@@ -30,7 +30,7 @@ def divide_spectra(spec_a, spec_b):
 
     Divide two spectra
     """
-    assert(len(spec_a) == len(spec_b)), "Not the same length"
+    assert (len(spec_a) == len(spec_b)), "Not the same length"
     divide = spec_a / spec_b
     return divide
 
@@ -88,7 +88,7 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
 
     # new_tell = interped_tell ** B
     new_tell = airmass_scaling(interped_tell, tell_airmass, obs_airmass)
-    corr_spec = divide_spectra(spec_obs, new_tell) # Divide by telluric spectra
+    corr_spec = divide_spectra(spec_obs, new_tell)  # Divide by telluric spectra
 
     Corrections.append(corr_spec)
     Correction_Bs.append(B)
@@ -110,9 +110,10 @@ def export_correction_2fits(filename, wavelength, corrected, original, telluric,
     thdulist = fits.HDUList([prihdu, tbhdu])
     # telluric head to go as a second extension !!!
 
-    #print("Writing to fits file")
-    thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
+    # print("Writing to fits file")
+    thdulist.writeto(filename, output_verify="silentfix")  # Fixing errors to work properly
     return None
+
 
 def new_export_correction_2fits(filename, wavelength, corrected, hdr, hdrkeys, hdrvals, tellhdr):
     """Write Telluric Corrected spectra to a fits table file."""
@@ -128,7 +129,7 @@ def new_export_correction_2fits(filename, wavelength, corrected, hdr, hdrkeys, h
     # telluric head to go as a second extension !!!
 
     # print("Writing to fits file")
-    thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
+    thdulist.writeto(filename, output_verify="silentfix")  # Fixing errors to work properly
     return None
 
 
@@ -218,10 +219,10 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
 
     """
     params = Parameters()
-    params.add('scale_factor', value=1)   # add min and max values ?
+    params.add('scale_factor', value=1)  # add min and max values ?
     params.add('R', value=R, vary=False)
     params.add('fwhm_lim', value=5, vary=False)
-    params.add('fit_lines', value=True, vary=False)   # only fit the peaks of lines < 0.995
+    params.add('fit_lines', value=True, vary=False)  # only fit the peaks of lines < 0.995
     params.add("verbose", value=False, vary=False)
 
     out = minimize(h20_residual, params, args=([obs_wl, obs_I], [h20_wl, h20_I]))
@@ -245,7 +246,7 @@ def h2o_telluric_correction(obs_wl, obs_I, h20_wl, h20_I, R):
 
 def telluric_correction(obs_wl, obs_I, obs_airmass, tell_wl, tell_I, spec_airmass):
     """Set obs_airmas and spec_airmass equal to achieve a scaling factor of 1 = No scaling."""
-    tell_I = tell_I ** (obs_airmass / spec_airmass)   # Airmass scaling
+    tell_I = tell_I ** (obs_airmass / spec_airmass)  # Airmass scaling
     interp_tell_I = wl_interpolation(tell_wl, tell_I, obs_wl)
     corrected_obs = divide_spectra(obs_I, interp_tell_I)
 
@@ -325,18 +326,18 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     # Calculate Resolving Power.
     # Using the rule of thumb equation from the CRIRES manual.
     # Check for adaptive optics use.
-    horder_loop = hdr["HIERARCH ESO AOS RTC LOOP HORDER"]    # High order loop on or off
-    lgs_loop = hdr["HIERARCH ESO AOS RTC LOOP LGS"]          # LGS jitter loop on or off
-    loopstate = hdr["HIERARCH ESO AOS RTC LOOP STATE"]       # Loop state, open or closed
+    horder_loop = hdr["HIERARCH ESO AOS RTC LOOP HORDER"]  # High order loop on or off
+    lgs_loop = hdr["HIERARCH ESO AOS RTC LOOP LGS"]  # LGS jitter loop on or off
+    loopstate = hdr["HIERARCH ESO AOS RTC LOOP STATE"]  # Loop state, open or closed
     tiptilt_loop = hdr["HIERARCH ESO AOS RTC LOOP TIPTILT"]  # Tip Tilt loop on or off
-    slit_width = hdr["HIERARCH ESO INS SLIT1 WID"]           # Slit width
+    slit_width = hdr["HIERARCH ESO INS SLIT1 WID"]  # Slit width
 
     if any([horder_loop, loopstate, tiptilt_loop]) and (loopstate != "OPEN"):
         print("Adaptive optics was used - Rule of thumb for Resolution is not good enough")
     else:
         R = int(100000 * 0.2 / slit_width)
 
- # ################################################  NEW METHOD section ############################
+        # ################################################  NEW METHOD section ############################
     if new_method:
         # Changing for new telluric line location defaults (inside the Combined_nods)
         if h2o_scaling:
@@ -371,7 +372,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
                                                                                       tapas_h20_section[1], R)
 
             I_corr = h20_corrected_obs
-            correction_used = tell_used * h20tell_used   # Combined corrections
+            correction_used = tell_used * h20tell_used  # Combined corrections
 
         else:
             # load combined dataset only
@@ -399,7 +400,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             plt.show()
 
     # ################# REPLACING this / or if still given different location for tapas files#######
-    else:   # old method
+    else:  # old method
 
         obs_datetime = hdr["DATE-OBS"]
         obsdate, obstime = obs_datetime.split("T")
@@ -436,7 +437,9 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         print("Telluric normaliztion value", np.median(I_tell[maxes]))
 
         Corrections, Correction_tells, Correction_Bs, Correction_labels = telluric_correct(wl, I,
-                           tell_data[0], tell_data[1], obs_airmass, tell_airmass, kind=kind, method=method)
+                                                                                           tell_data[0], tell_data[1],
+                                                                                           obs_airmass, tell_airmass,
+                                                                                           kind=kind, method=method)
 
         if show:
             plt.figure()  # Tellurics
@@ -470,11 +473,11 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
 
     # ## SAVING Telluric Corrected Spectra ###
     # PROBABALY NEED TO HARDCODE IN THE HEADER LINES...
-    os.chdir(homedir)   # to make sure saving where running
+    os.chdir(homedir)  # to make sure saving where running
 
     # ## TODO add mutually exclusive flag (with output) to add extra suffixs on end by .tellcorr.
     if output:
-            output_filename = output
+        output_filename = output
     else:
         if h2o_scaling:
             output_filename = fname.replace(".fits", ".h2otellcorr.fits")
@@ -500,8 +503,8 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
                    (h2o_scaling, "Was separate H20 scaling 1 = Yes"),
                    (h2o_scale_val, "H20 scale value used"),
                    (R, "Observation resolution calculated by rule of thumb")]
-        tellhdr = False   # ## need to correctly get this from obtain telluric
-    else:   # Old method
+        tellhdr = False  # ## need to correctly get this from obtain telluric
+    else:  # Old method
         # Keys and values for Fits header file
         hdrkeys = ["Correction", "Tapas Interpolation method",
                    "Interpolation kind", "B PARAM",
@@ -512,7 +515,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
                    (b_used, "Airmass scaling parameter"),
                    (h2o_scaling, "Was separate H20 scaling Done 1 = Yes"),
                    (R, "Observation resolution calculated by rule of thumb")]
-        tellhdr = False   # ## need to correctly get this from obtain telluric
+        tellhdr = False  # ## need to correctly get this from obtain telluric
 
     if export:
         if old:
