@@ -30,6 +30,7 @@ def main(fname, apply_berv=False, export=False, show=False):
 
     # Find telluric file
     telluric_file = glob.glob(path + "/Telluric_files*/*_10_*.ipac")
+    print("Telluric_file", telluric_file, "(should be a single file")
     assert len(telluric_file) == 1
     teluric, tell_header = obt.load_telluric("", telluric_file[0])
     tell_spec = Spectrum(xaxis=teluric[0], flux=teluric[1], header=observation.header)
@@ -68,19 +69,22 @@ def main(fname, apply_berv=False, export=False, show=False):
         plt.show()
 
     if export:
-        obs_name = fname.replace(".fits", "_bervd.fits")
+        obs_name = fname.replace(".fits", "_bervcorr.fits")
         new_export_correction_2fits(obs_name, observation.xaxis, observation.flux, observation.header, ["BervDone"],
                                     [True],tellhdr=tell_spec.header)
 
-        tell_name = "{}-{}_berved_telluric_model_{}.fits".format(star, obsnum, chip)
-        new_export_correction_2fits(tell_name, tell_spec.xaxis, tell_spec.flux, tell_spec.header, ["BervDone"], [True],tellhdr=tell_spec.header)
-
-        obs_mask = fname.replace(".fits", "_bervd_tellmasked.fits")
+        obs_mask = fname.replace(".fits", "_bervcorr_masked.fits")
         new_export_correction_2fits(obs_mask, maskedin_obs.xaxis, maskedin_obs.flux, observation.header,
                                     ["BervDone", "Tellmask", "pix_mask", "ratio_mask"],
                                     [True, (mask_value, "telluric line depth limit"),
                                      (pixels_removed, "Number of pixels masked out"),
                                      (fraction_removed, "Fraction of pixels masked out")],tellhdr=tell_spec.header)
+
+        try:
+            tell_name = "{}-{}_berved_telluric_model_{}.fits".format(star, obsnum, chip)
+            new_export_correction_2fits(tell_name, tell_spec.xaxis, tell_spec.flux, tell_spec.header, ["BervDone"], [True],tellhdr=tell_spec.header)
+        except OSError as e:
+            pass
 
 
 def parse_args(args):

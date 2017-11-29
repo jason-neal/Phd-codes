@@ -31,9 +31,9 @@ config = {
                 "TelluricSpectra/auto_tellcorrect.sh",
                 "handy_spectra.py",
                 "WavelengthCalibration/wl_calibrate.py",
-                "TelluricSpectra/berv_and_mask.py",
-                "TelluricSpectra/auto_berv_and_mask_handy.sh",
-                "TelluricSpectra/auto_berv_and_mask.sh",
+                "berv_and_mask.py",
+                "auto_berv_and_mask_handy.sh",
+                "auto_berv_and_mask.sh",
                 ],
     'name': 'phd-codes',
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
