@@ -1,0 +1,8 @@
+lmfit
+astropy
+scipy
+argparse
+matplotlib
+numpy
+hypothesis
+PyAstronomy
