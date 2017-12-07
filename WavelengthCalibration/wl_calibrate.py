@@ -285,7 +285,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
             print('Warning: Model spectrum not available in wavelength range.')
             model = False
 
-    rough_coord_name = os.path.join(fname.split(".fits")[0], "_rough_cords.pickle")
+    rough_coord_name = "_rough_cords.pickle".format(fname.split(".fits")[0])
     while True:
         try:
             if use_rough:
