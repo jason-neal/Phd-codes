@@ -15,11 +15,11 @@ import os
 import lmfit
 import matplotlib.pyplot as plt
 import numpy as np
-from octotribble.SpectralTools import (instrument_convolution, wav_selector,
-                           wl_interpolation)
 from astropy.io import fits
 from lmfit import Parameters, minimize
 from octotribble.Get_filenames import get_filenames
+from octotribble.SpectralTools import (instrument_convolution, wav_selector,
+                                       wl_interpolation)
 
 import TelluricSpectra.Obtain_Telluric as obt
 from TelluricSpectra.utilities import append_hdr
@@ -99,12 +99,12 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell, obs_airmass, tell_air
 
 def export_correction_2fits(filename, wavelength, corrected, original, telluric, hdr, hdrkeys, hdrvals, tellhdr):
     """Write Telluric Corrected spectra to a fits table file."""
-    col1 = fits.Column(name="Wavelength", format="E", array=wavelength)  # colums of data
+    col1 = fits.Column(name="Wavelength", format="E", array=wavelength)  # columns of data
     col2 = fits.Column(name="Corrected_DRACS", format="E", array=corrected)
     col3 = fits.Column(name="Extracted_DRACS", format="E", array=original)
     col4 = fits.Column(name="Interpolated_Tapas", format="E", array=telluric)
     cols = fits.ColDefs([col1, col2, col3, col4])
-    tbhdu = fits.BinTableHDU.from_columns(cols)  # binary tbale hdu
+    tbhdu = fits.BinTableHDU.from_columns(cols)  # binary table hdu
     prihdr = append_hdr(hdr, hdrkeys, hdrvals)
     prihdu = fits.PrimaryHDU(header=prihdr)
     thdulist = fits.HDUList([prihdu, tbhdu])
@@ -117,7 +117,7 @@ def export_correction_2fits(filename, wavelength, corrected, original, telluric,
 
 def new_export_correction_2fits(filename, wavelength, corrected, hdr, hdrkeys, hdrvals, tellhdr):
     """Write Telluric Corrected spectra to a fits table file."""
-    col1 = fits.Column(name="wavelength", format="E", array=wavelength)  # colums of data
+    col1 = fits.Column(name="wavelength", format="E", array=wavelength)  # columns of data
     col2 = fits.Column(name="flux", format="E", array=corrected)
     # col3 = fits.Column(name="Extracted_DRACS", format="E", array=original)
     # col4 = fits.Column(name="Interpolated_Tapas", format="E", array=telluric)
@@ -145,15 +145,15 @@ def get_observation_averages(homedir):
     Uses the list_spectra.txt that is in this directory to open each file and extract values from the headers.
     *Possibly add extra extensions to the headrer in the future when combining.
     """
-    raw_path = homedir[:-13] + "Raw_files/"
+    raw_path = os.path.join(homedir[:-13], "Raw_files")
     list_name = "list_spectra.txt"
 
     nod_airmass = []
     nod_median_time = []
     with open(list_name, "r") as f:
         for line in f:
-            fname = line[:-1] + ".fits"
-            hdr = fits.getheader(raw_path + fname)
+            fname = "{}.fits".format(line[:-1])
+            hdr = fits.getheader(os.path.join(raw_path, fname))
             datetime = hdr["DATE-OBS"]
             time = datetime[11:19]
             airmass_start = hdr["HIERARCH ESO TEL AIRM START"]
@@ -292,7 +292,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         print("Actual directory currently in is", homedir)
         raise ValueError("Not correct path")
 
-    # Load in Crires Spectra
+    # Load in CRIRES Spectra
     data = fits.getdata(fname)
     hdr = fits.getheader(fname)
 
@@ -341,7 +341,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     if new_method:
         # Changing for new telluric line location defaults (inside the Combined_nods)
         if h2o_scaling:
-            # load separated H20 tapas datasets
+            # load separated H20 tapas data sets
 
             tapas_h20 = get_filenames(tellpath, "tapas_*", "*_ReqId_12_No_Ifunction*")
             if len(tapas_h20) > 1:
@@ -392,7 +392,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         if show:
             plt.figure()  # Corrections
             plt.plot(wl, I, "--", linewidth=2, label="Observed Spectra")
-            plt.plot(wl, I_corr, linewidth=2, label=("Corrected spectra"))
+            plt.plot(wl, I_corr, linewidth=2, label="Corrected spectra")
             plt.hlines(1, wl[0], wl[-1], color="grey", linestyles='dashed')
             plt.legend(loc="best")
             plt.title("Telluric Corrections")
@@ -412,10 +412,10 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
         else:
             tellpath = "/home/jneal/Phd/data/Tapas/"
             tellname = obt.get_telluric_name(tellpath, obsdate, obstime)
-        print("Returned Mathching filenames", tellname)
+        print("Returned Matching filenames", tellname)
 
         print("tellpath after", tellpath)
-        assert len(tellname) < 2, "Multiple tapas filenames match"
+        assert len(tellname) < 2, "Multiple tapas file names match"
 
         tell_data, tell_hdr = obt.load_telluric(tellpath, tellname[0])
         # print("Telluric Header ", tell_hdr)
@@ -472,7 +472,7 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
     # ######################################   Ends  HERE ##########################################
 
     # ## SAVING Telluric Corrected Spectra ###
-    # PROBABALY NEED TO HARDCODE IN THE HEADER LINES...
+    # PROBABLY NEED TO HARD CODE IN THE HEADER LINES...
     os.chdir(homedir)  # to make sure saving where running
 
     # ## TODO add mutually exclusive flag (with output) to add extra suffixs on end by .tellcorr.
@@ -522,9 +522,9 @@ def main(fname, export=False, output=False, tellpath=False, kind="linear", metho
             export_correction_2fits(output_filename, wl, I_corr, I, tell_used, hdr, hdrkeys, hdrvals, tellhdr)
         else:
             new_export_correction_2fits(output_filename, wl, I_corr, hdr, hdrkeys, hdrvals, tellhdr)
-        print("Saved corected telluric spectra to " + str(output_filename))
+        print("Saved corrected telluric spectra to " + str(output_filename))
     else:
-        print("Skipped Saving corected telluric spectra ")
+        print("Skipped Saving corrected telluric spectra ")
 
 
 if __name__ == "__main__":

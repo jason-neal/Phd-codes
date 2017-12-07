@@ -11,25 +11,20 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-from astropy.io import fits
 from PyAstronomy import pyasl
+from astropy.io import fits
+# import XCorrWaveCalScript as XCorrWaveCal
+from octotribble.SpectralTools import wav_selector
 
-import WavelengthCalibration.GaussianFitting as gf
 # from gooey import Gooey, GooeyParser
 # from octotribble import IOmodule
 import TelluricSpectra.Obtain_Telluric as obt
-# import XCorrWaveCalScript as XCorrWaveCal
-from WavelengthCalibration.Gaussian_fit_testing import Get_DRACS
-from octotribble.SpectralTools import wav_selector
+import WavelengthCalibration.GaussianFitting as gf
 from TelluricSpectra.Tapas_Berv_corr import tapas_helcorr
 from TelluricSpectra.TellRemoval import airmass_scaling
 from WavelengthCalibration.utilities import append_hdr
 
 # from plot_fits import get_wavelength
-
-
-
-debug = logging.debug
 
 # Use raw_input if running on python 2.x
 if hasattr(__builtins__, 'raw_input'):
@@ -117,15 +112,15 @@ def export_wavecal_2fits(filename, wavelength, spectrum, pixelpos, hdr, hdrkeys,
     thdulist = fits.HDUList([prihdu, tbhdu])
     # print("Writing to fits file")
     try:
-        thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
+        thdulist.writeto(filename, output_verify="silentfix")  # Fixing errors to work properly
     except IOError:
         print("A calibtration already exists. What do you want to do?")
         ans = input(" o-Overwrite, a-append number")
         if ans.lower() == "o":
-            os.rename(filename, filename + "_old")
+            os.rename(filename, "{}_old".format(filename))
             thdulist.writeto(filename, output_verify="silentfix")
         elif ans.lower() == "a":
-            thdulist.writeto(filename + "_new", output_verify="silentfix")
+            thdulist.writeto("{}_new".format(filename), output_verify="silentfix")
         else:
             print("Did not append to name or overwrite fits file")
     return None
@@ -141,20 +136,18 @@ def new_export_wavecal_2fits(filename, wavelength, spectrum, hdr, hdrkeys=None, 
     prihdu = fits.PrimaryHDU(header=prihdr)
     thdulist = fits.HDUList([prihdu, tbhdu])
     try:
-        thdulist.writeto(filename, output_verify="silentfix")   # Fixing errors to work properly
+        thdulist.writeto(filename, output_verify="silentfix")  # Fixing errors to work properly
     except IOError:
         print("A calibration already exists. What do you want to do?")
         ans = input(" o-Overwrite, a-append number")
         if ans.lower() == "o":
-            os.rename(filename, filename + "_old")
+            os.rename(filename, "{}_old".format(filename))
             thdulist.writeto(filename, output_verify="silentfix")
         elif ans.lower() == "a":
-            thdulist.writeto(filename + "_new", output_verify="silentfix")
+            thdulist.writeto("{}_new".foramt(filename), output_verify="silentfix")
         else:
             print("Did not append to name or overwrite fits file")
     return None
-
-
 
 
 def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
@@ -166,18 +159,17 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
     return None
 
 
-def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, use_rough=True, old=False, debug=False):
+def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, use_rough=True, old=False,
+         debug=False):
     config_debug(debug)
     homedir = os.getcwd()
-    # print("Input name", fname)
-    # print("Output name", output)
 
     data = fits.getdata(fname)
-    if data.shape[0] == 3:   # used extras
-        debug(data.shape)
+    if data.shape[0] == 3:  # used extras
+        logging.debug(data.shape)
         data = data[0][0]
-        debug(data.shape)
-        debug(data)
+        logging.debug(data.shape)
+        logging.debug(data)
 
     test0 = ".ms.norm.comb.fits" in fname  # from python combination
 
@@ -203,7 +195,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         tell_data, tell_header = obt.load_telluric(tellpath, telluric)
     else:
         raise Exception("Please specify the telluric line model to calibrate against.")
-    #    tellpath = "/home/jneal/Phd/data/Tapas/"
+    # tellpath = "/home/jneal/Phd/data/Tapas/"
     #    tellname = obt.get_telluric_name(tellpath, obsdate, obstime) # to within the hour
     #    tell_data, tell_header = obt.load_telluric(tellpath, tellname[0])
 
@@ -249,7 +241,6 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         # print("Vacuum detector limits", [wl_lower_vac, wl_upper_vac])
         # print("New berv shifted detector limits", [wl_lower, wl_upper])
 
-
     # Sliced to wavelength measurement of detector
     # calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
     calib_data = wav_selector(tell_data[0], tell_data[1], wl_lower, wl_upper)
@@ -268,7 +259,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         I_mod = fits.getdata(model)
         hdr = fits.getheader(model)
         if 'WAVE' in hdr.keys():
-            w_mod = fits.getdata(modelpath + modelwave)
+            w_mod = fits.getdata(os.path.join(modelpath, modelwave))
             w_mod = w_mod / 10.
         else:
             w_mod = get_wavelength(hdr)
@@ -294,7 +285,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
             print('Warning: Model spectrum not available in wavelength range.')
             model = False
 
-    rough_coord_name = fname.split(".fits")[0] + "_rough_cords.pickle"
+    rough_coord_name = os.path.join(fname.split(".fits")[0], "_rough_cords.pickle")
     while True:
         try:
             if use_rough:
@@ -392,7 +383,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     # SAVING
     ans = input("Do you want to save the calibration?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
-        os.chdir(homedir)   # to make sure saving where running
+        os.chdir(homedir)  # to make sure saving where running
         if output:
             Output_filename = output
         else:
@@ -414,20 +405,20 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
                    (tell_header["WAVSCALE"], "Either air, vacuum, or wavenumber")]
         # # ADD OTHER parameter need to store above - estimated errors of fitting?
         if old:
-            export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], uncalib_data[0], hdr, hdrkeys, hdrvals)
+            export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], uncalib_data[0], hdr, hdrkeys,
+                                 hdrvals)
         else:
             # New (wavelength, flux) format
             new_export_wavecal_2fits(Output_filename, calibrated_wl, uncalib_data[1], hdr, hdrkeys, hdrvals)
 
         # Save calibration values to a txt file
-        coord_txt_fname = "Coordinates_" + fname[:-5] + ".txt"
+        coord_txt_fname = "Coordinates_{}.txt".format(fname[:-5])
 
         save_calibration_coords(coord_txt_fname, good_a, std_a, peaks_a, good_b, peaks_b, std_a)
         # save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs)
         print("Succesfully saved calibration to file - {}".format(Output_filename))
     else:
         print("Did not save calibration to file.")
-
 
     ans = input("Do you want to observe the line depths?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
@@ -440,11 +431,11 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     linedepthpath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
     ans = input("Do you want to export the line depths to a file?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
-        with open(linedepthpath + "New_Spectral_linedepths.txt", "a") as f:
+        with open(os.path.join(linedepthpath, "New_Spectral_linedepths.txt"), "a") as f:
             for peak in peaks_a:
-            #    print(peak)
+                #    print(peak)
                 f.write(str(peak) + "\n")
-        with open(linedepthpath + "New_Telluric_linedepths.txt", "a") as f:
+        with open(os.path.join(linedepthpath, "New_Telluric_linedepths.txt"), "a") as f:
             for peak in peaks_b:
                 f.write(str(peak) + "\n")
         print("Saved line depths to New_xxxx_linedepths.txt in {0}".format(linedepthpath))
