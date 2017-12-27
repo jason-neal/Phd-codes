@@ -2,7 +2,7 @@
 
 """ Script to run wavelength calibration on input fits file"""
 # from __future__ import division, print_function
-
+import matplotlib.pyplot
 import argparse
 import logging
 import os
