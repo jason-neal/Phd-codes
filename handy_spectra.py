@@ -22,7 +22,7 @@ for f in files:
         comb = ""
 
     if "h2otellcorr" in f:
-        tell = "h20tellcorr"
+        tell = "h2otellcorr"
     else:
         tell = "tellcorr"
 
