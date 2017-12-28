@@ -56,7 +56,6 @@ except NameError:
 #     return
 
 
-
 def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
     """Get rough coordinate values to use advanced fitting on.
 
@@ -218,7 +217,7 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
     return params
 
 
-def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model=False, ref=False):
+def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model=False, ref=False, normalize=True):
     """Returns the parameters of matching peaks for calibration map
 
     """
@@ -243,18 +242,18 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
         wl_a_sec, sect_a = slice_percentage(wl_a, spec_a, AxCoords[i])
         wl_b_sec, sect_b = slice_percentage(wl_b, spec_b, BxCoords[i])
 
-        # renormalize by upperquartile to give beter fit chance
-        # print("upper quatrile A", upper_quartile(sect_a))
-        a_copy = copy.copy(sect_a)
-        b_copy = copy.copy(sect_b)
-        auq = upper_quartile(a_copy)
-        auq = upper_quartile(b_copy)
-        # print ("upper quartile A", auq, type(auq))
-        # print ("upper quartile B", auq, type(auq))
-        sect_a = sect_a / auq
-        sect_b = sect_b / auq
-        # sect_a = sect_a / np.median(sect_a)
-        # sect_b = sect_b / np.median(sect_b)
+        # renormalize by upperquartile to give better fit chance
+        # print("upper quartile A", upper_quartile(sect_a))
+
+        if normalize:
+            a_copy = copy.copy(sect_a)
+            b_copy = copy.copy(sect_b)
+            auq = upper_quartile(a_copy)
+            buq = upper_quartile(b_copy)
+            # print ("upper quartile A", auq, type(auq))
+            # print ("upper quartile B", buq, type(buq))
+            sect_a = sect_a / auq
+            sect_b = sect_b / buq
 
         while True:  # Was this a good fit
             try:  # RuntimeError of fitting
