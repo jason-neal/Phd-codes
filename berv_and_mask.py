@@ -29,7 +29,7 @@ def main(fname, apply_berv=False, export=False, show=False):
     path = os.path.join(base_dir, "{0}-{1}".format(star, obsnum))
 
     # Find telluric file
-    telluric_file = glob.glob(path + "/Telluric_files*/*_10_*.ipac")
+    telluric_file = glob.glob(path + "/Telluric_files/*ReqId_10_*.ipac")
     print("Telluric_file", telluric_file, "(should be a single file")
     assert len(telluric_file) == 1
     teluric, tell_header = obt.load_telluric("", telluric_file[0])
@@ -93,8 +93,8 @@ def parse_args(args):
 
     :returns: the args
     """
-    parser = argparse.ArgumentParser(description='Telluric Removal')
-    parser.add_argument('fname', help='Input fits file')
+    parser = argparse.ArgumentParser(description='berv and mask')
+    parser.add_argument('fname', help='Input fits file', nargs="+")
     parser.add_argument('-b', '--apply_berv', action='store_true',
                         help='Add berv correction to spectra and maskfile.')
     parser.add_argument('-e', '--export', action='store_true',
@@ -108,6 +108,8 @@ def parse_args(args):
 if __name__ == "__main__":
     args = vars(parse_args(sys.argv[1:]))
     fname = args.pop('fname')
+
     opts = {k: args[k] for k in args}
 
-    main(fname, **opts)
+    for name in fname:
+        main(name, **opts)
