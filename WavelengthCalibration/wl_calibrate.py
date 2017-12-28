@@ -61,11 +61,13 @@ def _parser():
     parser.add_argument('-b', '--berv_corr', default=False, action="store_true",
                         help='Apply Berv corr to plot limits if using berv corrected tapas')
     parser.add_argument('-u', '--use_rough', default=True, action="store_false",
-                        help=" Get rough coordinates from stored pickle file, (if present).")
+                        help="Disable Get rough coordinates from stored pickle file, (if present).")
     parser.add_argument('--old', default=False, action="store_true",
                         help="Use the old file format (wave, Extracted Dracs, pixel num).")
     parser.add_argument('--debug', default=False, action="store_true",
                         help="Enable Debuging output.")
+    parser.add_argument('-c', '--continuum_normalize', default=False, action="store_true",
+                        help="Continuum normalize obs with a order-2 polynomial.")
     # parser = GooeyParser(description='Wavelength Calibrate CRIRES Spectra')
     # parser.add_argument('fname',
     #                    action='store',
@@ -160,11 +162,12 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
 
 
 def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=False, use_rough=True, old=False,
-         debug=False):
+         debug=False, continuum_normalize=False):
     config_debug(debug)
     homedir = os.getcwd()
 
     data = fits.getdata(fname)
+    hdr = fits.getheader(fname)
     if data.shape[0] == 3:  # used extras
         logging.debug(data.shape)
         data = data[0][0]
@@ -181,8 +184,18 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     # uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
     uncalib_data = [np.arange(len(uncalib_combined)) + 1, uncalib_combined]
 
+    if continuum_normalize:
+        from spectrum_overload import Spectrum
+        plt.plot(uncalib_data[0], uncalib_data[1], label="orginal")
+        speca = Spectrum(xaxis=uncalib_data[0], flux=uncalib_data[1], header=hdr)
+        spec = speca.normalize("poly", 4, nbins=20, ntop=5)
+        uncalib_data = [spec.xaxis, spec.flux]
+        normalize = False
+        print("Did continuum normalization")
+    else:
+        normalize = True
+
     # Get time from header to then get telluric lines
-    hdr = fits.getheader(fname)
     wl_lower = hdr["HIERARCH ESO INS WLEN STRT"]
     wl_upper = hdr["HIERARCH ESO INS WLEN END"]
     datetime = hdr["DATE-OBS"]
@@ -227,19 +240,12 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     elif berv_corr:
         print("Berv_corr flag given but tapas data was not berv corrected. Not adjusting limits")
 
-    # ## Air wavelengths
-    # Convert limits if using air wavelengths
+    # Convert wavelength limits if using air wavelengths
     if tell_header["WAVSCALE"] == "air":
         logging.warning("Using Air Wavelengths")
-        # vac2air on the crires limits
-        # print("Using AIR wavelength scale so changing wl limits")
-        wl_lower_vac = wl_lower
-        wl_upper_vac = wl_upper
         # The other modes don't work above 1.69 micron
         wl_lower = pyasl.vactoair2(wl_lower, mode="edlen53")
         wl_upper = pyasl.vactoair2(wl_upper, mode="edlen53")
-        # print("Vacuum detector limits", [wl_lower_vac, wl_upper_vac])
-        # print("New berv shifted detector limits", [wl_lower, wl_upper])
 
     # Sliced to wavelength measurement of detector
     # calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
@@ -307,15 +313,15 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     if model:
         fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1],
                                                 rough_x_a, calib_data[0], calib_data[1],
-                                                rough_x_b, model=[w_mod, I_mod])
+                                                rough_x_b, model=[w_mod, I_mod], normalize=normalize)
     elif ref:
         fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1],
                                                 rough_x_a, calib_data[0], calib_data[1],
-                                                rough_x_b, ref=[w_ref, I_ref])
+                                                rough_x_b, ref=[w_ref, I_ref], normalize=normalize)
     else:
         fit_results = gf.adv_wavelength_fitting(uncalib_data[0], uncalib_data[1],
                                                 rough_x_a, calib_data[0], calib_data[1],
-                                                rough_x_b)
+                                                rough_x_b, normalize=normalize)
     good_a, peaks_a, std_a, good_b, peaks_b, std_b = fit_results
 
     lin_map = gf.wavelength_mapping(good_a, good_b, order=1)
@@ -431,6 +437,8 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     linedepthpath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
     ans = input("Do you want to export the line depths to a file?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
+        if not os.path.exists(linedepthpath):
+            linedepthpath = "."
         with open(os.path.join(linedepthpath, "New_Spectral_linedepths.txt"), "a") as f:
             for peak in peaks_a:
                 #    print(peak)

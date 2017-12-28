@@ -193,7 +193,7 @@ FWHM_max = wav_chip[-1]/R
 print("Min FWHM", FWHM_min)
 print("Max FWHM", FWHM_max)
 
-# pyasl needs equidistant wavelenghts
+# pyasl needs equidistant wavelengths
 
 
 from Find_gcdt import gcdt

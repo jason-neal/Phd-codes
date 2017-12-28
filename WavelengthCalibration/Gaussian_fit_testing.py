@@ -363,7 +363,7 @@ if __name__ == "__main__":
         plt.text(400, 0, "Std diff linear fit = " + str(std_diff_lin))
         plt.text(400, -.01, "Std diff quad fit = " + str(std_diff_quad))
         plt.xlabel("Pixel Position")
-        plt.ylabel("Wavelenght Diff (nm)")
+        plt.ylabel("Wavelength Diff (nm)")
         plt.legend(loc="best")
         plt.show()
 

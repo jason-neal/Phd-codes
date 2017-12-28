@@ -26,7 +26,7 @@ from octotribble.debug_utils import pv
 # from octotribble.Get_filenames import get_filenames
 from WavelengthCalibration.Gaussian_fit_testing import Get_DRACS
 
-# Use raw_input compatibility for python 2.x and 3.x (doesn't overwrite seperate input in py2.x)
+# Use raw_input compatibility for python 2.x and 3.x (doesn't overwrite separate input in py2.x)
 try:
     raw_input
 except NameError:
@@ -54,7 +54,6 @@ except NameError:
 #     coords.append((ix, iy))
 # print("Click position", [ix, iy])
 #     return
-
 
 
 def get_rough_peaks(wl_a, spec_a, wl_b, spec_b):
@@ -218,7 +217,7 @@ def do_fit(wl, spec, init_params, stel=None, tell=None):
     return params
 
 
-def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model=False, ref=False):
+def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model=False, ref=False, normalize=True):
     """Returns the parameters of matching peaks for calibration map
 
     """
@@ -233,28 +232,28 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
     spec_a = np.array(spec_a)  # make sure all are numpy arrays
     wl_b = np.array(wl_b)  # make sure all are numpy arrays
     spec_b = np.array(spec_b)  # make sure all are numpy arrays
-    delta_a = np.abs(np.mean(wl_a[1:] - wl_a[:-1]))  # average wl step
-    delta_b = np.abs(np.mean(wl_b[1:] - wl_b[:-1]))
+    delta_a = np.abs(np.mean(np.diff(wl_a)))  # average wl step
+    delta_b = np.abs(np.mean(np.diff(wl_b)))
 
-    assert len(AxCoords) is len(BxCoords), "Lenght of Coords do not match {}, {}".format(len(AxCoords), len(BxCoords))
+    assert len(AxCoords) is len(BxCoords), "Length of Coords do not match {}, {}".format(len(AxCoords), len(BxCoords))
     for i in range(len(AxCoords)):
         # print("A coords Axcoords", AxCoords)
         # print(i, " ith value in Axcoords", AxCoords[i])
         wl_a_sec, sect_a = slice_percentage(wl_a, spec_a, AxCoords[i])
         wl_b_sec, sect_b = slice_percentage(wl_b, spec_b, BxCoords[i])
 
-        # renormalize by upperquartile to give beter fit chance
-        # print("upper quatrile A", upper_quartile(sect_a))
-        a_copy = copy.copy(sect_a)
-        b_copy = copy.copy(sect_b)
-        auq = upper_quartile(a_copy)
-        auq = upper_quartile(b_copy)
-        # print ("upper quartile A", auq, type(auq))
-        # print ("upper quartile B", auq, type(auq))
-        sect_a = sect_a / auq
-        sect_b = sect_b / auq
-        # sect_a = sect_a / np.median(sect_a)
-        # sect_b = sect_b / np.median(sect_b)
+        # renormalize by upperquartile to give better fit chance
+        # print("upper quartile A", upper_quartile(sect_a))
+
+        if normalize:
+            a_copy = copy.copy(sect_a)
+            b_copy = copy.copy(sect_b)
+            auq = upper_quartile(a_copy)
+            buq = upper_quartile(b_copy)
+            # print ("upper quartile A", auq, type(auq))
+            # print ("upper quartile B", buq, type(buq))
+            sect_a = sect_a / auq
+            sect_b = sect_b / buq
 
         while True:  # Was this a good fit
             try:  # RuntimeError of fitting
@@ -368,7 +367,7 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
                 continue
 
         if fit_worked:
-            # Seperate back out the stellar/telluric lines
+            # Separate back out the stellar/telluric lines
             fit_line_params_a, fit_stell_params, fit_extra_params = split_telluric_stellar_telluric(fit_params_a,
                                                                                                     num_stellar,
                                                                                                     num_extra)
@@ -438,15 +437,15 @@ def func(x, *params):
 
 
 def func_with_stellar(x, num_stell: int, *params):
-    """Function to generate the multiple gaussian profiles with stellar gausian.
+    """Function to generate the multiple gaussian profiles with stellar gaussian.
 
     Adapted from
     http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python
-    For the stellar line case the frist param contains then number of
+    For the stellar line case the first param contains then number of
     stellar lines are present. The stellar lines are at the end of the
-    List of parameters so need to seperate them out.
+    List of parameters so need to separate them out.
     [number of stellar lines, telluric lines, stellar lines]
-    # not any more use lambda fucntion as a fixed parameter
+    # not any more use lambda function as a fixed parameter
 
     """
     y_line = np.ones_like(x)
@@ -473,13 +472,13 @@ def func_with_stellar(x, num_stell: int, *params):
 
 
 def func_with_stellar_and_tell(x, num_stell: int, num_tell: int, *params):
-    """Function to generate the multiple gaussian profiles with stellar gausian.
+    """Function to generate the multiple gaussian profiles with stellar Gaussian.
 
     Adapted from
     http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python
     For the stellar line case the frist param contains then number of
     stellar lines are present. The stellar lines are at the end of the
-     list of parameters so need to seperate them out.
+     list of parameters so need to separate them out.
     [[number of telluric lines], telluric lines, stellar lines]
     # not any more use lambda fucntion as a fixed parameter
 
@@ -586,7 +585,7 @@ List[float], List[float], List[float]):
     assert isinstance(num_telluric, int), "num_telluric must be an integer."
     assert num_stellar >= 0, "Number of stellar lines must be positive"
     assert num_telluric >= 0, "Number of telluric lines must be positive"
-    assert 3 * (num_stellar + num_telluric) <= par_len, "Number of stellar and telluric lines > lenght of parameters."
+    assert 3 * (num_stellar + num_telluric) <= par_len, "Number of stellar and telluric lines > length of parameters."
 
     first_tell = int(-3 * num_telluric) if num_telluric != 0 else par_len  # index of first telluric line
 
@@ -658,7 +657,7 @@ def upper_quartile(nums):
 
 def slice_percentage(wl, spectrum, pos, percent=0.20):
     """Extract a section of a spectrum around a given wavelength position.
-        percnt is the percentage lenght of the spectra to use.
+        percnt is the percentage length of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
         """
     span = np.abs(wl[-1] - wl[0])
@@ -674,7 +673,7 @@ def slice_percentage(wl, spectrum, pos, percent=0.20):
 
 def slice_spectra(wl, spectrum, low, high):
     """Extract a section of a spectrum between wavelength bounds.
-        percnt is the percentage lenght of the spectra to use.
+        percnt is the percentage length of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
         """
     # print("lower bound", low)
