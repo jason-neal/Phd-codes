@@ -1,4 +1,7 @@
 # Ignore python generate .pyc files
 .sync/*
 *.pyc
-.ipynb_checkpoints
+.ipynb_checkpoints/
+.idea/
+.eggs/
+*.egg-info
