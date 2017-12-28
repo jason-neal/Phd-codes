@@ -172,7 +172,7 @@ def h20_residual(params, obs_data, telluric_data):
     scale_factor = params["scale_factor"].value
     R = params["R"].value
     fwhm_lim = params["fwhm_lim"].value
-    # n_jobs = params["n_jobs"].value  # parallel implementaiton
+    # n_jobs = params["n_jobs"].value  # parallel implementation
     # chip_select = params["chip_select"].value
     verbose = params["verbose"].value
     fit_lines = params["fit_lines"].value  # if true only fit areas deeper than 0.995

@@ -11841,7 +11841,7 @@ div#notebook {
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Define Faster functions to try</span>
 <span class="k">def</span> <span class="nf">fast_wav_selector</span><span class="p">(</span><span class="n">wav</span><span class="p">,</span> <span class="n">flux</span><span class="p">,</span> <span class="n">wav_min</span><span class="p">,</span> <span class="n">wav_max</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Faster Wavelenght selector</span>
+    <span class="sd">&quot;&quot;&quot; Faster Wavelength selector</span>
 <span class="sd">    </span>
 <span class="sd">    If passed lists it will return lists.</span>
 <span class="sd">    If passed np arrays it will return arrays</span>
@@ -12177,7 +12177,7 @@ wvl : array
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Min FWHM&quot;</span><span class="p">,</span> <span class="n">FWHM_min</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Max FWHM&quot;</span><span class="p">,</span> <span class="n">FWHM_max</span><span class="p">)</span>
 
-<span class="c1"># pyasl needs equidistant wavelenghts </span>
+<span class="c1"># pyasl needs equidistant wavelengths </span>
 
 <span class="kn">from</span> <span class="nn">Find_gcdt</span> <span class="k">import</span> <span class="n">gcdt</span>
 <span class="n">greatest_common_divisor</span> <span class="o">=</span> <span class="n">gcdt</span><span class="p">(</span><span class="n">wav_chip</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
@@ -12912,7 +12912,7 @@ wvl : array
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Remarks-from-1June2016-">Remarks from 1June2016-<a class="anchor-link" href="#Remarks-from-1June2016-">&#182;</a></h4><p>The scaling and convolving code does work now. Detector 2 looks okish but the others do not. I now need to fix up the wavelenght scaling to get the proper calibrated wavelenghts in here.
+<h4 id="Remarks-from-1June2016-">Remarks from 1June2016-<a class="anchor-link" href="#Remarks-from-1June2016-">&#182;</a></h4><p>The scaling and convolving code does work now. Detector 2 looks okish but the others do not. I now need to fix up the wavelength scaling to get the proper calibrated wavelengths in here.
 All the scaling values are all over the place. Something like 0.5, 0.9, 0.8, 0.25 in the first try on each detector.</p>
 <p>20/6/2016</p>
 <p>The fits look better now with properly calibrated data. Unfortunately it appears that if there is a large height difference in lines the larger lines poorly affect the smaller lines.</p>

@@ -428,7 +428,7 @@ p.renderers.extend(Boxes)
 #plt.vlines(linepos, 2110, 2170)
 #plt.ylim([2100,2170])
 
-p.title = "Wavelenght Mapping"
+p.title = "Wavelength Mapping"
 p.title_text_font_size = "14pt"
 p.yaxis.axis_label = 'Wavelength (nm)'
 p.yaxis.axis_label_text_font_size = "12pt"

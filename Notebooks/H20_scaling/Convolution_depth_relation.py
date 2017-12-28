@@ -106,7 +106,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 
 # In[ ]:
 
-#Wavelenght density
+#Wavelength density
 plt.plot(tapas_h20_data[0][1:],tapas_h20_data[0][1:]-tapas_h20_data[0][:-1])
 plt.ylabel("Delta Wavelength")
 plt.xlabel("Wavelength (nm)")
@@ -141,7 +141,7 @@ bokeh.plotting.show(bokeh.mpl.to_bokeh())
 plt.plot(tapas_h20_data[0],tapas_h20_data[1])
 plt.plot(conv_wav_divide, conv_flux_divide)
 plt.plot(conv_wav, conv_flux)
-plt.xlabel("Wavelenght")
+plt.xlabel("Wavelength")
 plt.ylabel("Flux with division")
 
 bokeh.plotting.show(bokeh.mpl.to_bokeh())
