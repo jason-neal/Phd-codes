@@ -233,8 +233,8 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
     spec_a = np.array(spec_a)  # make sure all are numpy arrays
     wl_b = np.array(wl_b)  # make sure all are numpy arrays
     spec_b = np.array(spec_b)  # make sure all are numpy arrays
-    delta_a = np.abs(np.mean(wl_a[1:] - wl_a[:-1]))  # average wl step
-    delta_b = np.abs(np.mean(wl_b[1:] - wl_b[:-1]))
+    delta_a = np.abs(np.mean(np.diff(wl_a)))  # average wl step
+    delta_b = np.abs(np.mean(np.diff(wl_b)))
 
     assert len(AxCoords) is len(BxCoords), "Length of Coords do not match {}, {}".format(len(AxCoords), len(BxCoords))
     for i in range(len(AxCoords)):
