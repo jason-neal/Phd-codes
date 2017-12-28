@@ -240,19 +240,12 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     elif berv_corr:
         print("Berv_corr flag given but tapas data was not berv corrected. Not adjusting limits")
 
-    # ## Air wavelengths
-    # Convert limits if using air wavelengths
+    # Convert wavelength limits if using air wavelengths
     if tell_header["WAVSCALE"] == "air":
         logging.warning("Using Air Wavelengths")
-        # vac2air on the crires limits
-        # print("Using AIR wavelength scale so changing wl limits")
-        wl_lower_vac = wl_lower
-        wl_upper_vac = wl_upper
         # The other modes don't work above 1.69 micron
         wl_lower = pyasl.vactoair2(wl_lower, mode="edlen53")
         wl_upper = pyasl.vactoair2(wl_upper, mode="edlen53")
-        # print("Vacuum detector limits", [wl_lower_vac, wl_upper_vac])
-        # print("New berv shifted detector limits", [wl_lower, wl_upper])
 
     # Sliced to wavelength measurement of detector
     # calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
