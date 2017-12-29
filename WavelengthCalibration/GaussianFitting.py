@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 """CRIRES Wavelength Calibration.
-Fitting the Centroid positions of telluric lines with gausians
+Fitting the Centroid positions of telluric lines with gaussians
 to obtain a wavelength calibration from pixel to wavelength.
 
 """
@@ -35,7 +35,7 @@ except NameError:
 
 # Gaussian Fitting Module
 # Develop the advanced fitting routine that fits slices of spectra
-# with potentailly multiple gausians.
+# with potentially multiple Gaussians.
 
 #######################################################################
 #                                                                     #
@@ -422,7 +422,7 @@ def func(x, *params):
     Adapted from
     http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python.
     Params are now list (or numpy array) of values in order of xpos,
-    ypos, sigma of each gausian peak
+    ypos, sigma of each gaussian peak
 
     """
     y = np.ones_like(x)
@@ -458,7 +458,7 @@ def func_with_stellar(x, num_stell: int, *params):
         ctr = line_params[i]
         amp = abs(line_params[i + 1])  # always positive so peaks are downward
         wid = line_params[i + 2]
-        y_line = y_line - amp * np.exp(-0.5 * ((x - ctr) / wid) ** 2)  # Add teluric lines
+        y_line = y_line - amp * np.exp(-0.5 * ((x - ctr) / wid) ** 2)  # Add telluric lines
     for i in range(0, len(stellar_params), 3):
         stel_ctr = stellar_params[i]
         stel_amp = abs(stellar_params[i + 1])  # always positive so peaks are down
@@ -476,11 +476,11 @@ def func_with_stellar_and_tell(x, num_stell: int, num_tell: int, *params):
 
     Adapted from
     http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python
-    For the stellar line case the frist param contains then number of
+    For the stellar line case the first param contains then number of
     stellar lines are present. The stellar lines are at the end of the
      list of parameters so need to separate them out.
     [[number of telluric lines], telluric lines, stellar lines]
-    # not any more use lambda fucntion as a fixed parameter
+    # not any more use lambda function as a fixed parameter
 
     """
     y_line = np.ones_like(x)
@@ -492,19 +492,19 @@ def func_with_stellar_and_tell(x, num_stell: int, num_tell: int, *params):
     par = params[0]
     line_params, stellar_params, telluric_params = split_telluric_stellar_telluric(par, num_stell, num_tell)
 
-    # Main Telluric lines to calibtate with
+    # Main Telluric lines to calibrate with
     for i in range(0, len(line_params), 3):
         ctr = line_params[i]
         amp = abs(line_params[i + 1])  # always positive so peaks are downward
         wid = line_params[i + 2]
-        y_line = y_line - amp * np.exp(-0.5 * ((x - ctr) / wid) ** 2)  # Add teluric lines
+        y_line = y_line - amp * np.exp(-0.5 * ((x - ctr) / wid) ** 2)  # Add telluric lines
 
     # Smaller Telluric lines not used for calibration.
     for i in range(0, len(telluric_params), 3):
         ctr = telluric_params[i]
         amp = abs(telluric_params[i + 1])  # always positive so peaks are downward
         wid = telluric_params[i + 2]
-        y_tell = y_tell - amp * np.exp(-0.5 * ((x - ctr) / wid) ** 2)  # Add teluric lines
+        y_tell = y_tell - amp * np.exp(-0.5 * ((x - ctr) / wid) ** 2)  # Add telluric lines
 
     # Stellar lines to multiply by
     for i in range(0, len(stellar_params), 3):
@@ -526,7 +526,7 @@ def func_for_plotting(x, params):
     Adapted from
     http://stackoverflow.com/questions/26902283/fit-multiple-gaussians-to-the-data-in-python.
     Params are now a numpy array of values in order of xpos, ypos,
-    sigma of each gausian peak
+    sigma of each gaussian peak
     """
     y = np.ones_like(x)
     # print("*params inside plotting func function", type(params),
@@ -542,14 +542,14 @@ def func_for_plotting(x, params):
 
 #######################################################################
 #                                                                     #
-#                        # Data manipulationions                      #
+#                        # Data manipulations                      #
 #                        # i.e. type conversions, slicing             #
 #                                                                     #
 #######################################################################
 def split_telluric_stellar(params: List[float], num_stellar: int) -> (List[float], List[float]):
     """Split up the array of lines into the telluric and stellar parts.
 
-    input np.array(teluric lines, stellar lines)
+    input np.array(telluric lines, stellar lines)
     num_stellar is the number of stellar lines at the end
     output telluric lines, stellar lines
     """
@@ -573,7 +573,7 @@ def split_telluric_stellar_telluric(params: List[float], num_stellar: int, num_t
 List[float], List[float], List[float]):
     """Split up the array of lines into the telluric and stellar parts.
 
-    input np.array(teluric lines, stellar lines)
+    input np.array(telluric lines, stellar lines)
     num_stellar is the number of stellar lines at the end
     output telluric lines, stellar lines
 
@@ -624,7 +624,7 @@ def coords2gaussian_params(coords, delta):
 
 
 def params2coords(params):
-    """Turn numpy array of gausian fit parameters into
+    """Turn numpy array of gaussian fit parameters into
     (x, y) tuples of peak coordinates
 
     """
@@ -657,7 +657,7 @@ def upper_quartile(nums):
 
 def slice_percentage(wl, spectrum, pos, percent=0.20):
     """Extract a section of a spectrum around a given wavelength position.
-        percnt is the percentage length of the spectra to use.
+        percent is the percentage length of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
         """
     span = np.abs(wl[-1] - wl[0])
@@ -673,7 +673,7 @@ def slice_percentage(wl, spectrum, pos, percent=0.20):
 
 def slice_spectra(wl, spectrum, low, high):
     """Extract a section of a spectrum between wavelength bounds.
-        percnt is the percentage length of the spectra to use.
+        percent is the percentage length of the spectra to use.
         Returns both the sections of wavelength and spectra extracted.
         """
     # print("lower bound", low)
@@ -750,7 +750,7 @@ def plot_both_fits(wl_a, spec_a, wl_b, spec_b, show_plot=False, paramsA=None,
     bb2 = best_b is not []
     if bb1 and bb2:
         """Mark peaks that have already been added to cood fitted peaks
-        list to prevent doubleing up """
+        list to prevent doubling up """
         for xpos in best_b:
             # print("Xpos", xpos)
             ax1.plot(xpos, 1, "kx", ms=20, label="already picked", lw=4)
@@ -857,15 +857,15 @@ def print_fit_instructions():
 
     instructions = """\nYou will be shown an overlay of the observed specrtra and
         a model of atmospheric transmission from tapas. A selection
-        of the tapas model has been taken accoriding to the start and
+        of the tapas model has been taken according to the start and
         end wavelength given in the header of the observed spectrum. \n
-        The goal of this is to select absorbtion lines that are common
+        The goal of this is to select aabsorptionlines that are common
         to both spectra to create a mapping from pixels to wavelength. \n
         First select the peaks of the main telluric lines (left click) in the observed
         spectra (shown in blue) that correspond to telluric lines. This first selection is to define areas
         to zoom into to create a finer peak selection.
         When you have selected all the areas then right click to save these an move onto the tapas spectra.
-        Now select (left click) the peaks of the telluric lines in the model (now blue) that match the choosen
+        Now select (left click) the peaks of the telluric lines in the model (now blue) that match the chosen  
         observed lines (indicated with a pink diamonds), Right click to close
         The order of clicking does not mater as the coordinates of the peaks are sorted into ascending order.
         \nYou will be now shown a snapshot zoomed in view around the first main peak you selected.
