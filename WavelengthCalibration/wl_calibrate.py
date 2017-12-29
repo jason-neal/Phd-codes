@@ -2,7 +2,7 @@
 
 """ Script to run wavelength calibration on input fits file"""
 # from __future__ import division, print_function
-import matplotlib.pyplot
+
 import argparse
 import logging
 import os
@@ -16,8 +16,6 @@ from astropy.io import fits
 # import XCorrWaveCalScript as XCorrWaveCal
 from octotribble.SpectralTools import wav_selector
 
-# from gooey import Gooey, GooeyParser
-# from octotribble import IOmodule
 import TelluricSpectra.Obtain_Telluric as obt
 import WavelengthCalibration.GaussianFitting as gf
 from TelluricSpectra.Tapas_Berv_corr import tapas_helcorr
