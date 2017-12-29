@@ -26,9 +26,11 @@ from WavelengthCalibration.utilities import append_hdr
 
 # from plot_fits import get_wavelength
 
-# Use raw_input if running on python 2.x
-if hasattr(__builtins__, 'raw_input'):
-    input = raw_input
+# Use raw_input for compatibility for python 2.x and 3.x (doesn't overwrite separate input in py2.x)
+try:
+    raw_input
+except NameError:
+    raw_input = input
 
 
 def config_debug(enable):
@@ -117,7 +119,7 @@ def export_wavecal_2fits(filename, wavelength, spectrum, pixelpos, hdr, hdrkeys,
         thdulist.writeto(filename, output_verify="silentfix")  # Fixing errors to work properly
     except IOError:
         print("A calibtration already exists. What do you want to do?")
-        ans = input(" o-Overwrite, a-append number")
+        ans = raw_input(" o-Overwrite, a-append number")
         if ans.lower() == "o":
             os.rename(filename, "{}_old".format(filename))
             thdulist.writeto(filename, output_verify="silentfix")
@@ -141,7 +143,7 @@ def new_export_wavecal_2fits(filename, wavelength, spectrum, hdr, hdrkeys=None, 
         thdulist.writeto(filename, output_verify="silentfix")  # Fixing errors to work properly
     except IOError:
         print("A calibration already exists. What do you want to do?")
-        ans = input(" o-Overwrite, a-append number")
+        ans = raw_input(" o-Overwrite, a-append number")
         if ans.lower() == "o":
             os.rename(filename, "{}_old".format(filename))
             thdulist.writeto(filename, output_verify="silentfix")
@@ -192,8 +194,9 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     obsdate, obstime = datetime.split("T")
     obstime, __ = obstime.split(".")
 
-    if telluric:  # manually spcified telluric line
+    if telluric:  # manually specified telluric line
         tellpath = os.getcwd() + "/"
+        print("vals", tellpath, telluric)
         tell_data, tell_header = obt.load_telluric(tellpath, telluric)
     else:
         raise Exception("Please specify the telluric line model to calibrate against.")
@@ -255,7 +258,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         print("Did continuum normalization")
     else:
         normalize = True
-    
+
     gf.print_fit_instructions()  # Instructions on how to calibrate
     if ref:  # Reference object spectra to possibly identify shifted/blended lines
         I_ref = fits.getdata(ref)
@@ -368,7 +371,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     # FINE TUNING
 
     # Do you want to fine turn this calibration?
-    # ans = input("Do you want to finetune the calibtration?\n")
+    # ans = raw_input("Do you want to finetune the calibtration?\n")
     # if ans in ['yes', 'y', 'Yes', 'YES']:
     #     print("\n\nFinetune with XCORR WAVECAL using this result as the guess wavelength\n")
     #     Finetuned_wl, finetuned_params = XCorrWaveCal.wl_xcorr((calibrated_wl, uncalib_data[1]),
@@ -392,7 +395,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     #     print("Did not fine tune calibration with Xcorr")
 
     # SAVING
-    ans = input("Do you want to save the calibration?\n")
+    ans = raw_input("Do you want to save the calibration?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         os.chdir(homedir)  # to make sure saving where running
         if output:
@@ -431,7 +434,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     else:
         print("Did not save calibration to file.")
 
-    ans = input("Do you want to observe the line depths?\n")
+    ans = raw_input("Do you want to observe the line depths?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         # Observe heights of fitted peaks
         plt.figure
@@ -440,7 +443,7 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         plt.show(block=True)
 
     linedepthpath = "/home/jneal/Phd/data/Crires/BDs-DRACS/"
-    ans = input("Do you want to export the line depths to a file?\n")
+    ans = raw_input("Do you want to export the line depths to a file?\n")
     if ans in ['yes', 'y', 'Yes', 'YES']:
         if not os.path.exists(linedepthpath):
             linedepthpath = "."
