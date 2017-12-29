@@ -16,6 +16,8 @@ base_dir = os.path.join("/", "home", "jneal", "Phd", "data", "Crires", "BDs-DRAC
 
 
 def decompose_parameters(fname):
+    # This assumes that the handy_spectra.py has been run.
+    # So the file is named like {star}-{obsnum}.mixavg.(h2o)tellcorr_{chip}.fits
     path, name = os.path.split(fname)
     star = name.split("-")[0]
     obsnum = name.split("-")[1]
@@ -30,10 +32,10 @@ def main(fname, apply_berv=False, export=False, show=False):
 
     # Find telluric file
     telluric_file = glob.glob(path + "/Telluric_files/*ReqId_10_*.ipac")
-    print("Telluric_file", telluric_file, "(should be a single file")
+    print("Telluric_file ", telluric_file, " (should be a single file")
     assert len(telluric_file) == 1
-    teluric, tell_header = obt.load_telluric("", telluric_file[0])
-    tell_spec = Spectrum(xaxis=teluric[0], flux=teluric[1], header=observation.header)
+    telluric, tell_header = obt.load_telluric("", telluric_file[0])
+    tell_spec = Spectrum(xaxis=telluric[0], flux=telluric[1], header=observation.header)
 
     if apply_berv:
         wlprime_obs, __ = barycorr_crires(observation.xaxis, observation.flux, observation.header)
@@ -64,7 +66,7 @@ def main(fname, apply_berv=False, export=False, show=False):
         observation.plot(label="obs")
         tell_spec.plot(label="telluric")
         maskedin_obs.plot(label="masked obs >5", color="r", linestyle="", marker=".")
-        plt.hlines(1-mask_value, tell_spec.xaxis[0], tell_spec.xaxis[-1], linestyles="--")
+        plt.hlines(1 - mask_value, tell_spec.xaxis[0], tell_spec.xaxis[-1], linestyles="--")
         plt.legend()
         plt.title("Masking Telluric lines deeper than {}".format(mask_value))
         plt.show()
@@ -72,19 +74,20 @@ def main(fname, apply_berv=False, export=False, show=False):
     if export:
         obs_name = fname.replace(".fits", "_bervcorr.fits")
         new_export_correction_2fits(obs_name, observation.xaxis, observation.flux, observation.header, ["BervDone"],
-                                    [True],tellhdr=tell_spec.header)
+                                    [True], tellhdr=tell_spec.header)
 
         obs_mask = fname.replace(".fits", "_bervcorr_masked.fits")
         new_export_correction_2fits(obs_mask, maskedin_obs.xaxis, maskedin_obs.flux, observation.header,
                                     ["BervDone", "Tellmask", "pix_mask", "ratio_mask"],
                                     [True, (mask_value, "telluric line depth limit"),
                                      (pixels_removed, "Number of pixels masked out"),
-                                     (fraction_removed, "Fraction of pixels masked out")],tellhdr=tell_spec.header)
+                                     (fraction_removed, "Fraction of pixels masked out")], tellhdr=tell_spec.header)
 
         try:
             tell_name = "{}-{}_berved_telluric_model_{}.fits".format(star, obsnum, chip)
-            new_export_correction_2fits(tell_name, tell_spec.xaxis, tell_spec.flux, tell_spec.header, ["BervDone"], [True],tellhdr=tell_spec.header)
-        except OSError as e:
+            new_export_correction_2fits(tell_name, tell_spec.xaxis, tell_spec.flux, tell_spec.header, ["BervDone"],
+                                        [True], tellhdr=tell_spec.header)
+        except OSError:
             pass
 
 
@@ -96,7 +99,7 @@ def parse_args(args):
     parser = argparse.ArgumentParser(description='berv and mask')
     parser.add_argument('fname', help='Input fits file', nargs="+")
     parser.add_argument('-b', '--apply_berv', action='store_true',
-                        help='Add berv correction to spectra and maskfile.')
+                        help='Add berv correction to spectra and mask file.')
     parser.add_argument('-e', '--export', action='store_true',
                         help='Export/save results to fits file')
     parser.add_argument("-s", "--show", action='store_true',
