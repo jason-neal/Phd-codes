@@ -184,17 +184,6 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     # uncalib_data = [range(1, len(uncalib_combined) + 1), uncalib_combined]
     uncalib_data = [np.arange(len(uncalib_combined)) + 1, uncalib_combined]
 
-    if continuum_normalize:
-        from spectrum_overload import Spectrum
-        plt.plot(uncalib_data[0], uncalib_data[1], label="orginal")
-        speca = Spectrum(xaxis=uncalib_data[0], flux=uncalib_data[1], header=hdr)
-        spec = speca.normalize("poly", 4, nbins=20, ntop=5)
-        uncalib_data = [spec.xaxis, spec.flux]
-        normalize = False
-        print("Did continuum normalization")
-    else:
-        normalize = True
-
     # Get time from header to then get telluric lines
     wl_lower = hdr["HIERARCH ESO INS WLEN STRT"]
     wl_upper = hdr["HIERARCH ESO INS WLEN END"]
@@ -251,6 +240,22 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
     # calib_data = gf.slice_spectra(tell_data[0], tell_data[1], wl_lower, wl_upper)
     calib_data = wav_selector(tell_data[0], tell_data[1], wl_lower, wl_upper)
 
+    # Normalize to adjust the continuums
+    if continuum_normalize:
+        from spectrum_overload import Spectrum
+        speca = Spectrum(xaxis=uncalib_data[0], flux=uncalib_data[1], header=hdr)
+        spec = speca.normalize("poly", 4, nbins=20, ntop=5)
+        uncalib_data = [spec.xaxis, spec.flux]
+
+        specb = Spectrum(xaxis=calib_data[0], flux=calib_data[1], header=tell_header)
+        specb = specb.normalize("poly", 4, nbins=20, ntop=5)
+        calib_data = [specb.xaxis, specb.flux]
+
+        normalize = False
+        print("Did continuum normalization")
+    else:
+        normalize = True
+    
     gf.print_fit_instructions()  # Instructions on how to calibrate
     if ref:  # Reference object spectra to possibly identify shifted/blended lines
         I_ref = fits.getdata(ref)
