@@ -386,17 +386,21 @@ def adv_wavelength_fitting(wl_a, spec_a, AxCoords, wl_b, spec_b, BxCoords, model
             for i in range(0, len(fitted_coords_a)):
                 coord_a = fitted_coords_a[i]
                 coord_b = fitted_coords_b[i]
-                include = raw_input("Use Peak # {} ".format(i + 1) + "corresponding to" +
-                                    " [a-({0:.2f}, {1:.2f}), b-({2:.2f}, {3:.2f})]? y/N?".format(coord_a[0], coord_a[1],
+                while True:
+                    include = raw_input("Use Peak # {} ".format(i + 1) + "corresponding to" +
+                                        " [a-({0:.2f}, {1:.2f}), b-({2:.2f}, {3:.2f})]? y/N?".format(coord_a[0], coord_a[1],
                                                                                                  coord_b[0],
                                                                                                  coord_b[1]))
-                if include.lower() == "y" or include.lower() == "yes":
-                    best_a_coords.append(coord_a[0])
-                    best_b_coords.append(coord_b[0])
-                    best_a_peaks.append(coord_a[1])
-                    best_b_peaks.append(coord_b[1])
-                    best_a_std.append(coord_a[2])
-                    best_b_std.append(coord_b[2])
+                    if include.lower() == "y" or include.lower() == "yes":
+                        best_a_coords.append(coord_a[0])
+                        best_b_coords.append(coord_b[0])
+                        best_a_peaks.append(coord_a[1])
+                        best_b_peaks.append(coord_b[1])
+                        best_a_std.append(coord_a[2])
+                        best_b_std.append(coord_b[2])
+                        break
+                    elif include.lower() == "n" or include.lower() == "no":
+                        break
 
             # ask do you want to include all lines? if yes BestCoordsA.append(), BestCoordsB.append()
             # no - individually ask if want want each line included and append if yes
