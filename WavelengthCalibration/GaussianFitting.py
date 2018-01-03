@@ -35,7 +35,7 @@ except NameError:
 
 # Gaussian Fitting Module
 # Develop the advanced fitting routine that fits slices of spectra
-# with potentially multiple Gaussians.
+# with potentially multiple Gaussian functions.
 
 #######################################################################
 #                                                                     #
@@ -43,7 +43,7 @@ except NameError:
 #                                                                     #
 #                                                                     #
 #######################################################################
-# def onclick(event):    # dont need know as can use fig.ginput()
+# def onclick(event): # don't need know as can use fig.ginput()
 #     global ix, iy, coords, fig, cid
 #     # Disconnect after right click
 #     if event.button == 3:   # Right mouse click
@@ -79,7 +79,7 @@ def get_coords(wl_a, spec_a, wl_b, spec_b, title="Mark Lines on Spectra",
     """Obtains Coordinates of clicked points on the plot of spectra.
     The blue plot is the plot to click on to get peak coordinates
     the black plot is the other spectra to compare against.
-    points show the peaks that were choosen to fit.
+    points show the peaks that were chosen to fit.
 
     """
     while True:
@@ -574,7 +574,7 @@ def split_telluric_stellar(params: List[float], num_stellar: int) -> (List[float
 
 
 def split_telluric_stellar_telluric(params: List[float], num_stellar: int, num_telluric: int) -> (
-List[float], List[float], List[float]):
+        List[float], List[float], List[float]):
     """Split up the array of lines into the telluric and stellar parts.
 
     input np.array(telluric lines, stellar lines)
@@ -661,13 +661,11 @@ def upper_quartile(nums):
 
 def slice_percentage(wl, spectrum, pos, percent=0.20):
     """Extract a section of a spectrum around a given wavelength position.
-        percent is the percentage length of the spectra to use.
-        Returns both the sections of wavelength and spectra extracted.
-        """
+
+    percent is the percentage length of the spectra to use.
+    Returns both the sections of wavelength and spectra extracted.
+    """
     span = np.abs(wl[-1] - wl[0])
-    # print("Span Size", span)
-    # print("pos", pos, type(pos))
-    # print("percent", percent, type(percent))
     map1 = wl > (pos - (percent / 2) * span)
     map2 = wl < (pos + (percent / 2) * span)
     wl_sec = wl[map1 * map2]
@@ -677,11 +675,9 @@ def slice_percentage(wl, spectrum, pos, percent=0.20):
 
 def slice_spectra(wl, spectrum, low, high):
     """Extract a section of a spectrum between wavelength bounds.
-        percent is the percentage length of the spectra to use.
-        Returns both the sections of wavelength and spectra extracted.
-        """
-    # print("lower bound", low)
-    # print("upper bound", high)
+
+    Returns both the sections of wavelength and spectra extracted.
+    """
     map1 = wl > low
     map2 = wl < high
     wl_sec = wl[map1 * map2]
