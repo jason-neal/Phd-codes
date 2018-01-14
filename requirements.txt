@@ -1,0 +1,10 @@
+argparse
+astroplan
+astropy
+bokeh
+ephem
+numpy
+matplotlib
+scipy
+spectrum-overload
+Pyastronomy
