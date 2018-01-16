@@ -5,4 +5,4 @@ argparse==1.4.0
 matplotlib==2.1.1
 numpy==1.14.0
 hypothesis==3.44.16
-PyAstronomy
+PyAstronomy==0.12.0
