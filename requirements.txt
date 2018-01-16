@@ -1,4 +1,4 @@
-lmfit
+lmfit==0.9.7
 astropy
 scipy
 argparse
