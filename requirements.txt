@@ -1,6 +1,6 @@
 lmfit==0.9.7
 astropy==2.0.3
-scipy
+scipy==1.0.0
 argparse
 matplotlib
 numpy
