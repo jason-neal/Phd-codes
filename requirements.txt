@@ -1,5 +1,5 @@
 lmfit==0.9.7
-astropy
+astropy==2.0.3
 scipy
 argparse
 matplotlib
