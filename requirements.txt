@@ -4,5 +4,5 @@ scipy==1.0.0
 argparse==1.4.0
 matplotlib==2.1.2
 numpy==1.14.0
-hypothesis==3.44.16
+hypothesis==3.44.26
 PyAstronomy==0.12.0
