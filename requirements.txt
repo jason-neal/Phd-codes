@@ -1,8 +1,8 @@
-lmfit==0.9.7
-astropy==2.0.3
+lmfit==0.9.8
+astropy==3.0
 scipy==1.0.0
 argparse==1.4.0
-matplotlib==2.1.1
+matplotlib==2.1.2
 numpy==1.14.0
-hypothesis==3.44.16
+hypothesis==3.45.2
 PyAstronomy==0.12.0
