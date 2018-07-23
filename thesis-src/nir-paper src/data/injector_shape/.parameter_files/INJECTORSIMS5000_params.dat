@@ -1,0 +1,10 @@
+star 	= INJECTORSIMS5000
+temp 	= 5200
+logg 	= 4.5
+fe_h 	= 0.0
+comp_temp 	= 5000
+comp_logg 	= 5.0
+comp_fe_h 	= 0.0
+gamma 	= 0.0
+rv 	= 100.0
+name 	= INJECTORSIMS5000

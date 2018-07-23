@@ -1,0 +1,306 @@
+Script started on Thu 26 Apr 2018 02:00:16 PM WEST
+/home/jneal/anaconda3/envs/sims/lib/python3.6/site-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+Saved fits to .spectra/INJECTORSIMS5000-1-mixavg-tellcorr_1_bervcorr_masked.fits
+Saved fits to .spectra/INJECTORSIMS5000-1-mixavg-tellcorr_2_bervcorr_masked.fits
+Saved fits to .spectra/INJECTORSIMS5000-1-mixavg-tellcorr_3_bervcorr_masked.fits
+Saved fits to .spectra/INJECTORSIMS5000-1-mixavg-tellcorr_4_bervcorr_masked.fits
+The observation used is  .spectra/INJECTORSIMS5000-1-mixavg-tellcorr_3_bervcorr_masked.fits 
+The observation used is  .spectra/INJECTORSIMS5000-1-mixavg-tellcorr_1_bervcorr_masked.fits 
+The observation used is  .spectra/INJECTORSIMS5000-1-mixavg-tellcorr_4_bervcorr_masked.fits 
+
+
+
+mode in target params iam
+mode in target params iam
+mode in target params iam
+The observation used is  .spectra/INJECTORSIMS5000-1-mixavg-tellcorr_2_bervcorr_masked.fits 
+
+mode in target params iam
+[Errno 2] No such file or directory: '.spectra/detector_masks.json'
+No Masking file/data present for INJECTORSIMS5000-1_2
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+DOING BETASIGMA ERRORS
+[Errno 2] No such file or directory: '.spectra/detector_masks.json'
+No Masking file/data present for INJECTORSIMS5000-1_4
+[Errno 2] No such file or directory: '.spectra/detector_masks.json'
+No Masking file/data present for INJECTORSIMS5000-1_3
+WARNING Not a valid header so can't do automatic correction.
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+WARNING Helcorr value was zero
+DOING BETASIGMA ERRORS
+DOING BETASIGMA ERRORS
+[Errno 2] No such file or directory: '.spectra/detector_masks.json'
+No Masking file/data present for INJECTORSIMS5000-1_1
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+DOING BETASIGMA ERRORS
+Beta-Sigma error value = 0.00280+/-0.00019
+
+STARTING iam_analysis
+3360 parameter iterations
+160 rv iterations
+21 model iterations
+
+Beta-Sigma error value = 0.00325+/-0.00021
+
+
+STARTING iam_analysis
+3360 parameter iterations
+160 rv iterations
+21 model iterations
+
+Beta-Sigma error value = 0.00265+/-0.00017
+
+Beta-Sigma error value = 0.00310+/-0.00020
+
+STARTING iam_analysis
+3360 parameter iterations
+160 rv iterations
+21 model iterations
+
+
+
+STARTING iam_analysis
+3360 parameter iterations
+160 rv iterations
+21 model iterations
+
+
+  0%|                                                     | 0/1 [00:00<?, ?it/s]  0%|                                                     | 0/1 [00:00<?, ?it/s]  0%|                                                     | 0/1 [00:00<?, ?it/s]  0%|                                                     | 0/1 [00:00<?, ?it/s]/home/jneal/Phd/Codes/companion_simulations/simulators/iam_module.py:346: UserWarning: Not Scalar Re-normalizing to observations!
+  warnings.warn("Not Scalar Re-normalizing to observations!")
+/home/jneal/Phd/Codes/companion_simulations/simulators/iam_module.py:346: UserWarning: Not Scalar Re-normalizing to observations!
+  warnings.warn("Not Scalar Re-normalizing to observations!")
+/home/jneal/Phd/Codes/companion_simulations/simulators/iam_module.py:346: UserWarning: Not Scalar Re-normalizing to observations!
+  warnings.warn("Not Scalar Re-normalizing to observations!")
+/home/jneal/Phd/Codes/companion_simulations/simulators/iam_module.py:346: UserWarning: Not Scalar Re-normalizing to observations!
+  warnings.warn("Not Scalar Re-normalizing to observations!")
+100%|█████████████████████████████████████████████| 1/1 [00:10<00:00, 10.50s/it]
+
+Now use bin/coadd_chi2_db.py
+100%|█████████████████████████████████████████████| 1/1 [00:10<00:00, 10.50s/it]
+
+Now use bin/coadd_chi2_db.py
+100%|█████████████████████████████████████████████| 1/1 [00:10<00:00, 10.50s/it]
+
+Now use bin/coadd_chi2_db.py
+100%|█████████████████████████████████████████████| 1/1 [00:11<00:00, 11.12s/it]
+
+Now use bin/coadd_chi2_db.py
+Fixed host analysis with reduced gamma.
+Database Column Value Ranges
+index     		  1.0 - 3.36e+03
+teff_2    		4e+03 - 6e+03
+logg_2    		  5.0 -   5.0
+feh_2     		  0.0 -   0.0
+alpha_1   		0.118 - 0.496
+npix_1    		1.02e+03 - 1.02e+03
+rv        		 95.0 - 1.04e+02
+gamma     		 -1.0 -  0.75
+chi2_1    		2.6e+03 - 1.1e+04
+arbnorm_1 		  1.0 -   1.0
+alpha_2   		0.119 - 0.496
+npix_2    		1.02e+03 - 1.02e+03
+chi2_2    		1.27e+03 - 1.12e+04
+arbnorm_2 		  1.0 -   1.0
+alpha_3   		0.119 - 0.496
+npix_3    		1.02e+03 - 1.02e+03
+chi2_3    		7.9e+02 - 2.77e+03
+arbnorm_3 		  1.0 -   1.0
+alpha_4   		0.122 - 0.488
+npix_4    		9.72e+02 - 9.72e+02
+chi2_4    		1.25e+04 - 1.44e+04
+arbnorm_4 		  1.0 -   1.0
+coadd_chi2		1.73e+04 - 3.93e+04
+coadd_npix		4.04e+03 - 4.04e+03
+teff_1    		5.2e+03 - 5.2e+03
+logg_1    		  4.5 -   4.5
+feh_1     		  0.0 -   0.0
+Smallest Co-add reduced Chi2 values in the database.
+   index  teff_2  logg_2  feh_2  alpha_1  npix_1     rv  gamma     chi2_1  \
+0   1525    4900     5.0    0.0   0.2612    1024  100.0    0.0  2597.4151   
+1   1517    4900     5.0    0.0   0.2612    1024   99.5    0.0  2625.6244   
+2   1533    4900     5.0    0.0   0.2612    1024  100.5    0.0  2609.0021   
+3   1509    4900     5.0    0.0   0.2612    1024   99.0    0.0  2658.5626   
+4   1357    4800     5.0    0.0   0.2446    1024   99.5    0.0  2627.1838   
+5   1365    4800     5.0    0.0   0.2446    1024  100.0    0.0  2607.9699   
+6   1373    4800     5.0    0.0   0.2446    1024  100.5    0.0  2597.3195   
+7   1349    4800     5.0    0.0   0.2446    1024   99.0    0.0  2648.8402   
+8   1685    5000     5.0    0.0   0.2784    1024  100.0    0.0  2648.7525   
+9   1541    4900     5.0    0.0   0.2612    1024  101.0    0.0  2665.2473   
+
+   arbnorm_1  ...    arbnorm_3  alpha_4  npix_4      chi2_4  arbnorm_4  \
+0        1.0  ...          1.0   0.2656     972  12578.3162        1.0   
+1        1.0  ...          1.0   0.2656     972  12566.2184        1.0   
+2        1.0  ...          1.0   0.2656     972  12593.2873        1.0   
+3        1.0  ...          1.0   0.2656     972  12546.6322        1.0   
+4        1.0  ...          1.0   0.2489     972  12493.0243        1.0   
+5        1.0  ...          1.0   0.2489     972  12530.9439        1.0   
+6        1.0  ...          1.0   0.2489     972  12557.8302        1.0   
+7        1.0  ...          1.0   0.2489     972  12500.3408        1.0   
+8        1.0  ...          1.0   0.2828     972  12827.4035        1.0   
+9        1.0  ...          1.0   0.2656     972  12640.3684        1.0   
+
+   coadd_chi2  coadd_npix  teff_1  logg_1  feh_1  
+0    4.284604        4044  5200.0     4.5    0.0  
+1    4.291717        4044  5200.0     4.5    0.0  
+2    4.299355        4044  5200.0     4.5    0.0  
+3    4.308352        4044  5200.0     4.5    0.0  
+4    4.319899        4044  5200.0     4.5    0.0  
+5    4.321483        4044  5200.0     4.5    0.0  
+6    4.334874        4044  5200.0     4.5    0.0  
+7    4.338546        4044  5200.0     4.5    0.0  
+8    4.339631        4044  5200.0     4.5    0.0  
+9    4.346927        4044  5200.0     4.5    0.0  
+
+[10 rows x 27 columns]
+[Errno 2] No such file or directory: '.spectra/detector_masks.json'
+No Masking file/data present for INJECTORSIMS5000-1_1
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+[Errno 2] No such file or directory: '.spectra/detector_masks.json'
+No Masking file/data present for INJECTORSIMS5000-1_2
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+[Errno 2] No such file or directory: '.spectra/detector_masks.json'
+No Masking file/data present for INJECTORSIMS5000-1_3
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+[Errno 2] No such file or directory: '.spectra/detector_masks.json'
+No Masking file/data present for INJECTORSIMS5000-1_4
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+Unique  teff_2  values = [4000, 4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000, 5100, 5200, 5300, 5400, 5500, 5600, 5700, 5800, 5900, 6000]
+saved parabolas for  teff_2
+Unique  gamma  values = [-1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75]
+saved parabolas for  gamma
+Unique  rv  values = [95.0, 95.5, 96.0, 96.5, 97.0, 97.5, 98.0, 98.5, 99.0, 99.5, 100.0, 100.5, 101.0, 101.5, 102.0, 102.5, 103.0, 103.5, 104.0, 104.5]
+saved parabolas for  rv
+coadd_chi2 solution  4900.000  +nan  +nan
+Saved chi2 parabolas for  teff_2
+coadd_chi2 solution  0.000  +nan  +nan
+Saved chi2 parabolas for  gamma
+coadd_chi2 solution  100.000 -0.435 +0.040
+Saved chi2 parabolas for  rv
+chi2_1 solution  4800.000 -8.707 +93.704
+Saved individual chi2 parabolas for  teff_2
+chi2_2 solution  5000.000  +nan  +nan
+Saved individual chi2 parabolas for  teff_2
+chi2_3 solution  5000.000  +nan  +nan
+Saved individual chi2 parabolas for  teff_2
+chi2_4 solution  4600.000  +nan  +nan
+Saved individual chi2 parabolas for  teff_2
+coadd_chi2 solution  4900.000  +nan  +nan
+Saved individual chi2 parabolas for  teff_2
+chi2_1 solution  0.000 -0.030 +0.025
+Saved individual chi2 parabolas for  gamma
+chi2_2 solution  0.000 +0.017 +0.112
+Saved individual chi2 parabolas for  gamma
+chi2_3 solution  0.000 -0.061 +0.066
+Saved individual chi2 parabolas for  gamma
+chi2_4 solution  0.000  +nan  +nan
+Saved individual chi2 parabolas for  gamma
+coadd_chi2 solution  0.000  +nan  +nan
+Saved individual chi2 parabolas for  gamma
+chi2_1 solution  100.500 -0.664 +0.038
+Saved individual chi2 parabolas for  rv
+chi2_2 solution  100.000 -0.376 +0.034
+Saved individual chi2 parabolas for  rv
+chi2_3 solution  100.000 -0.343 +0.464
+Saved individual chi2 parabolas for  rv
+chi2_4 solution  99.000  +nan  +nan
+Saved individual chi2 parabolas for  rv
+coadd_chi2 solution  100.000 -0.435 +0.040
+Saved individual chi2 parabolas for  rv
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+WARNING Not a valid header so can't do automatic correction.
+WARNING Helcorr value was zero
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+/home/jneal/anaconda3/envs/sims/lib/python3.6/site-packages/matplotlib/pyplot.py:528: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`).
+  max_open_warning, RuntimeWarning)
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+WARNING database_contour did not plot due to 
+Input z must be at least a 2x2 array.
+Observation INJECTORSIMS5000 - 1
+Expected Parameters
+---------------------
+teff= 5200  logg=4.50  feh= 0.0 	companion_temp= 5000 
+IAM SOLUTIONS
+---------------------
+chi2_1     solution:
+Companion: teff_2= 4800  logg2=5.00  feh2= 0.0  gamma= 0.0  rv=100.5  Host: teff= 5200  logg=4.50  feh= 0.0  chi2= 2597.32 median alpha=0.246
+chi2_2     solution:
+Companion: teff_2= 5000  logg2=5.00  feh2= 0.0  gamma= 0.0  rv=100.0  Host: teff= 5200  logg=4.50  feh= 0.0  chi2= 1269.80 median alpha=0.279
+chi2_3     solution:
+Companion: teff_2= 5000  logg2=5.00  feh2= 0.0  gamma= 0.0  rv=100.0  Host: teff= 5200  logg=4.50  feh= 0.0  chi2=  790.49 median alpha=0.279
+chi2_4     solution:
+Companion: teff_2= 4600  logg2=5.00  feh2= 0.0  gamma= 0.0  rv=99.0  Host: teff= 5200  logg=4.50  feh= 0.0  chi2=12467.23 median alpha=0.214
+coadd_chi2 solution:
+Companion: teff_2= 4900  logg2=5.00  feh2= 0.0  gamma= 0.0  rv=100.0  Host: teff= 5200  logg=4.50  feh= 0.0  chi2=17314.09 median alpha=0.262
+Done
+Noise level = 300
+iam fake analysis
+Original opts {'star': 'INJECTORSIMS5000', 'obsnum': 1, 'teff': 5200, 'logg': 4.5, 'feh': 0.0, 'teff2': 5000, 'logg2': 5.0, 'feh2': 0.0, 'gamma': 0.0, 'rv': 100.0, 'suffix': '_comp_5000', 'noise': 300, 'replace': False, 'area_scale': True, 'n_jobs': 4, 'fudge': None, 'renormalize': False, 'norm_method': 'scalar', 'no_plots': False, 'only_plots': False}
+
+Script done on Thu 26 Apr 2018 02:00:47 PM WEST

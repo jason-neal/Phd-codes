@@ -1,0 +1,55 @@
+# YAML configuration script
+
+name: separate_companion_simulations
+
+data:
+  grid_name: "PHOENIX"
+  files: [""]
+  instruments : ["CRIRES_50k"]
+  orders: [1]
+
+outdir : output/
+
+plotdir : plots/
+
+# The parameters defining your raw spectral library live here.
+grid:
+  raw_path: "/home/jneal/Phd/data/PHOENIX-ALL/PHOENIX/"
+  hdf5_path: "/home/jneal/Phd/Analysis/injection/libraries/PHOENIX_CRIRES_50k.hdf5"
+  parname: ["temp", "logg", "Z"]
+  key_name: "t{0:.0f}g{1:.1f}z{2:.1f}" # Specifies how the params are stored
+  # in the HDF5 file
+  parrange: [[2200, 9000], [1.0, 6.0], [-3., 1.0]]
+  wl_range: [20000, 22000]
+  buffer: 50. # AA
+
+
+chunk_ID: 0
+spectrum_ID: 0
+instrument_ID: 0
+
+
+sim_grid:
+    gammas: [-1, 1, 0.25]
+    rvs: [95, 105, 0.5]
+    teff_1: [0, 1, 100]
+    teff_2: [-1000, 1001, 100]
+    feh_1: [0, 1, 1.5]
+    feh_2: [0, 1, 1.5]
+    logg_1: [0, 1.51, 2.5]
+    logg_2: [0, 1.1, 2.5]
+    arb_norm: [1, 1.01, 10.01]  # Arbitrary normalization inside chisquare
+
+paths:
+    parameters: ".parameter_files/"
+    spectra: ".spectra/"
+    output_dir: "analysis/"
+
+
+# Valid values [tell_corr, h2o_tell_corr, berv_mask, berv_corr, h2o_berv_corr, h2o_berv_mask]
+spec_version: berv_mask 
+
+betasigma: 
+  N: 5
+  j: 2
+
