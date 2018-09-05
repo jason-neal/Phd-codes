@@ -10,15 +10,19 @@ from TelluricSpectra.TellRemoval import airmass_scaling
 ESO_path = "/home/jneal/Phd/data/ESO-Skydata/"
 tapas_path = "/home/jneal/Phd/data/tapas-testing/"
 
-filenames = ["HD30501-1-R50000-gaussianconvolution-2FWHM.dat", \
-            "HD30501-1-R50000-gaussianconvolution-5FWHM.dat", \
-            "HD30501-1-R50000-gaussianconvolution-8FWHM.dat", \
-            "HD30501-1-R50000-noconvolution-.dat", \
-            "HD30501-1-R100000-gaussianconvolution-5FWHM.dat", \
-            "HD30501-1-R100000-noconvolution-.dat"]
+filenames = [
+    "HD30501-1-R50000-gaussianconvolution-2FWHM.dat",
+    "HD30501-1-R50000-gaussianconvolution-5FWHM.dat",
+    "HD30501-1-R50000-gaussianconvolution-8FWHM.dat",
+    "HD30501-1-R50000-noconvolution-.dat",
+    "HD30501-1-R100000-gaussianconvolution-5FWHM.dat",
+    "HD30501-1-R100000-noconvolution-.dat",
+]
 
-Fits_skytables = ["HD30501-1-100000-no-convolution.fits", \
-                    "HD30501-1-50000-no-convolution.fits"]
+Fits_skytables = [
+    "HD30501-1-100000-no-convolution.fits",
+    "HD30501-1-50000-no-convolution.fits",
+]
 
 
 # See what is in the Skytables
@@ -36,8 +40,10 @@ plt.xlim([2117, 2121])
 # plt.show()
 
 
-no_conv_filenames = ["HD30501-1-R50000-noconvolution-.dat", \
-                    "HD30501-1-R100000-noconvolution-.dat"]
+no_conv_filenames = [
+    "HD30501-1-R50000-noconvolution-.dat",
+    "HD30501-1-R100000-noconvolution-.dat",
+]
 plt.figure()
 for name in no_conv_filenames:
     wl, Tr = np.loadtxt(ESO_path + name, unpack=True)
@@ -48,10 +54,12 @@ plt.legend()
 plt.title("Resolution Change Effect with No Convolution")
 # plt.show()
 
-R5_filenames = ["HD30501-1-R50000-noconvolution-.dat", \
-            "HD30501-1-R50000-gaussianconvolution-2FWHM.dat", \
-            "HD30501-1-R50000-gaussianconvolution-5FWHM.dat", \
-            "HD30501-1-R50000-gaussianconvolution-8FWHM.dat"]
+R5_filenames = [
+    "HD30501-1-R50000-noconvolution-.dat",
+    "HD30501-1-R50000-gaussianconvolution-2FWHM.dat",
+    "HD30501-1-R50000-gaussianconvolution-5FWHM.dat",
+    "HD30501-1-R50000-gaussianconvolution-8FWHM.dat",
+]
 plt.figure()
 for name in R5_filenames:
     wl, Tr = np.loadtxt(ESO_path + name, unpack=True)
@@ -72,8 +80,10 @@ plt.title("50000 Resolution Effect of Line Profile")
 # plt.show()
 
 
-R10_filenames = ["HD30501-1-R100000-gaussianconvolution-5FWHM.dat", \
-            "HD30501-1-R100000-noconvolution-.dat"]
+R10_filenames = [
+    "HD30501-1-R100000-gaussianconvolution-5FWHM.dat",
+    "HD30501-1-R100000-noconvolution-.dat",
+]
 plt.figure()
 for name in R10_filenames:
     wl, Tr = np.loadtxt(ESO_path + name, unpack=True)
@@ -97,9 +107,11 @@ plt.title("R=100000 Convolution Effect")
 #####  Tapas at R 50000
 # path = "/home/jneal/Phd/data/tapas-testing/"
 
-tapas1_filenames = ["tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-10.ipac", \
-            "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-5.ipac", \
-            "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-15.ipac"]
+tapas1_filenames = [
+    "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-10.ipac",
+    "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-5.ipac",
+    "tapas_2012-04-07T01:20:20-HD30501-1-R50000-sample-15.ipac",
+]
 plt.figure()
 for name in tapas1_filenames:
     data, hdr = obt.load_telluric(tapas_path, name)
@@ -107,7 +119,16 @@ for name in tapas1_filenames:
     res = float(hdr["resPower"])
     sampRati = hdr["sampRati"]
     airmass = hdr["airmass"]
-    plt.plot(data[0], data[1], label="R =" + str(int(res)) + ", sampling =" + sampRati + " airmass=" + str(airmass))
+    plt.plot(
+        data[0],
+        data[1],
+        label="R ="
+        + str(int(res))
+        + ", sampling ="
+        + sampRati
+        + " airmass="
+        + str(airmass),
+    )
 
     # plt.plot(wl, Tr, label=res + " " + conv + " " + fwhm)
 plt.legend()
@@ -116,10 +137,12 @@ plt.title("Tapas R=50000 sampling Effect")
 # plt.show()
 
 
-tapas2_filenames = ["tapas_test2_1.ipac", \
-            "tapas_test2_2.ipac", \
-            "tapas_test2_3.ipac", \
-            "tapas_test2_4.ipac"]
+tapas2_filenames = [
+    "tapas_test2_1.ipac",
+    "tapas_test2_2.ipac",
+    "tapas_test2_3.ipac",
+    "tapas_test2_4.ipac",
+]
 plt.figure()
 for name in tapas2_filenames:
     data, hdr2 = obt.load_telluric(tapas_path, name)
@@ -137,7 +160,16 @@ for name in tapas2_filenames:
         sampRati = 0
         airmass = hdr2["airmass"]
 
-    plt.plot(data[0], data[1], label="R =" + str(int(res)) + ", sampling =" + str(sampRati) + " airmass=" + str(airmass))
+    plt.plot(
+        data[0],
+        data[1],
+        label="R ="
+        + str(int(res))
+        + ", sampling ="
+        + str(sampRati)
+        + " airmass="
+        + str(airmass),
+    )
     # plt.plot(wl, Tr, label=res + " " + conv + " " + fwhm)
 plt.legend(loc="best")
 plt.xlim([2117, 2121])
@@ -148,14 +180,16 @@ plt.title("Tapas Instrument Effect")
 # Effect of 1 hour time increments on tapas spectra
 # (to see the effect of the 1hr timing difference given by tapas)
 plt.figure()
-tapas3_filenames = ["tapas_test3_timing_-3.ipac", \
-            "tapas_-2timing.ipac", \
-            "tapas_test3_timing_-2.ipac", \
-            "tapas_test3_timing_-1.ipac", \
-            "tapas_test3_timing_0.ipac", \
-            "tapas_test3_timing_+1.ipac", \
-            "tapas_test3_timing_+2.ipac"]
-            # "tapas_test3_timing_+3.ipac"
+tapas3_filenames = [
+    "tapas_test3_timing_-3.ipac",
+    "tapas_-2timing.ipac",
+    "tapas_test3_timing_-2.ipac",
+    "tapas_test3_timing_-1.ipac",
+    "tapas_test3_timing_0.ipac",
+    "tapas_test3_timing_+1.ipac",
+    "tapas_test3_timing_+2.ipac",
+]
+# "tapas_test3_timing_+3.ipac"
 
 for name in tapas3_filenames:
     data, hdr = obt.load_telluric(tapas_path, name)
@@ -166,7 +200,7 @@ for name in tapas3_filenames:
     sampRati = hdr["sampRati"]
     airmass = hdr["airmass"]
 
-    plt.plot(data[0], data[1], label= time + " airmass=" + str(airmass))
+    plt.plot(data[0], data[1], label=time + " airmass=" + str(airmass))
     # plt.plot(wl, Tr, label=res + " " + conv + " " + fwhm)
 plt.legend(loc="best")
 plt.title("Tapas Timing Effects \n R=50000, Sample Ratio=10\nObs Time=00:20:20")
@@ -178,14 +212,16 @@ plt.xlim([2117, 2121])
 # Effect of 1 hour time increments on tapas spectra
 # (to see the effect of the 1hr timing difference given by tapas)
 plt.figure()
-tapas3_filenames = ["tapas_test3_timing_-3.ipac", \
-            "tapas_-2timing.ipac", \
-            "tapas_test3_timing_-2.ipac", \
-            "tapas_test3_timing_-1.ipac", \
-            "tapas_test3_timing_0.ipac", \
-            "tapas_test3_timing_+1.ipac", \
-            "tapas_test3_timing_+2.ipac"]
-            # "tapas_test3_timing_+3.ipac"
+tapas3_filenames = [
+    "tapas_test3_timing_-3.ipac",
+    "tapas_-2timing.ipac",
+    "tapas_test3_timing_-2.ipac",
+    "tapas_test3_timing_-1.ipac",
+    "tapas_test3_timing_0.ipac",
+    "tapas_test3_timing_+1.ipac",
+    "tapas_test3_timing_+2.ipac",
+]
+# "tapas_test3_timing_+3.ipac"
 
 for name in tapas3_filenames:
     data, hdr = obt.load_telluric(tapas_path, name)
@@ -199,11 +235,17 @@ for name in tapas3_filenames:
     # Airmass Scaling
     scaled_data = airmass_scaling(data[1], float(airmass), 1.6)
     # plt.plot(data[0], data[1], label= time + " airmass=" + str(airmass))
-    plt.plot(data[0], scaled_data, label= time + " airmass=" + str(airmass) + " scalled=" + str(1.6))
+    plt.plot(
+        data[0],
+        scaled_data,
+        label=time + " airmass=" + str(airmass) + " scalled=" + str(1.6),
+    )
 
     # plt.plot(wl, Tr, label=res + " " + conv + " " + fwhm)
 plt.legend(loc="best")
-plt.title("Tapas Timing Effects\nScalled to Airmass 1.6\nR=50000, Sample Ratio = 10\nObs Time=00:20:20")
+plt.title(
+    "Tapas Timing Effects\nScalled to Airmass 1.6\nR=50000, Sample Ratio = 10\nObs Time=00:20:20"
+)
 plt.xlim([2117, 2121])
 # plt.show()
 
@@ -222,8 +264,10 @@ plt.xlim([2117, 2121])
 # wavelength calibration of the observed spectrum, since it is
 # taken simultaneously with the target spectrum.
 
-tapas4_filenames = ["tapas_test3_timing_0_no_berv_corr.ipac", \
-            "tapas_test3_timing_0.ipac"]
+tapas4_filenames = [
+    "tapas_test3_timing_0_no_berv_corr.ipac",
+    "tapas_test3_timing_0.ipac",
+]
 plt.figure()
 for name in tapas4_filenames:
     data, hdr = obt.load_telluric(tapas_path, name)
@@ -233,22 +277,26 @@ for name in tapas4_filenames:
     airmass = hdr["airmass"]
     barydone = hdr["barydone"]
 
-    plt.plot(data[0], data[1], label= "barydone " + barydone + " airmass=" + str(airmass))
+    plt.plot(
+        data[0], data[1], label="barydone " + barydone + " airmass=" + str(airmass)
+    )
 plt.legend(loc="best")
-plt.title("Tapas Effect of Barycentric Correction (Normally on)\nR=50000, Sample Ratio = 10" )
+plt.title(
+    "Tapas Effect of Barycentric Correction (Normally on)\nR=50000, Sample Ratio = 10"
+)
 plt.xlim([2117, 2121])
 # plt.show()
-
-
 
 
 ##################################################################### 3
 
 ## Compare ESO Sky Calc and TAPAS
-comp_filenames = ["tapas_test3_timing_-1.ipac", \
-        "HD30501-1-R50000-gaussianconvolution-2FWHM.dat", \
-        "HD30501-1-R50000-gaussianconvolution-5FWHM.dat", \
-        "HD30501-1-R50000-gaussianconvolution-8FWHM.dat"]
+comp_filenames = [
+    "tapas_test3_timing_-1.ipac",
+    "HD30501-1-R50000-gaussianconvolution-2FWHM.dat",
+    "HD30501-1-R50000-gaussianconvolution-5FWHM.dat",
+    "HD30501-1-R50000-gaussianconvolution-8FWHM.dat",
+]
 plt.figure()
 for name in comp_filenames:
     if name.split("_")[0] == "tapas":
@@ -258,7 +306,16 @@ for name in comp_filenames:
         sampRati = hdr["sampRati"]
         airmass = hdr["airmass"]
 
-        plt.plot(data[0], data[1], label= "Tapas R=" + str(res) + ", Sampling=" + sampRati + " airmass=" + str(airmass))
+        plt.plot(
+            data[0],
+            data[1],
+            label="Tapas R="
+            + str(res)
+            + ", Sampling="
+            + sampRati
+            + " airmass="
+            + str(airmass),
+        )
 
     elif name.split("-")[0] == "HD30501":
         wl, Tr = np.loadtxt(ESO_path + name, unpack=True)
@@ -269,8 +326,8 @@ for name in comp_filenames:
             fwhm = split[-1].split(".")[0]
         else:
             fwhm = ""
-        plt.plot(wl, Tr, label="ESO SkyCalc, R=" + res +", fwhm=" + fwhm)
+        plt.plot(wl, Tr, label="ESO SkyCalc, R=" + res + ", fwhm=" + fwhm)
 plt.legend(loc="best")
-plt.title("Tapas/ ESO SkyCal Comparison\nR=50000" )
+plt.title("Tapas/ ESO SkyCal Comparison\nR=50000")
 plt.xlim([2117, 2121])
 plt.show()

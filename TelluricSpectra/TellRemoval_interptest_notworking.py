@@ -22,7 +22,7 @@ import TelluricSpectra.Obtain_Telluric as obt
 def divide_spectra(spec_a, spec_b):
     """ Assumes that the spectra have been interpolated to same wavelength step"""
     """ Divide two spectra"""
-    assert(len(spec_a) == len(spec_b)), "Not the same length"
+    assert len(spec_a) == len(spec_b), "Not the same length"
     divide = spec_a / spec_b
     return divide
 
@@ -35,7 +35,7 @@ def match_wl(wl, spec, ref_wl):
 
     print("newspec1")
     # cubic spline with scipy
-    newspec2 = interpolate.interp1d(wl, spec, kind='cubic')(ref_wl)
+    newspec2 = interpolate.interp1d(wl, spec, kind="cubic")(ref_wl)
     print("newspec2")
     # ewspec2 = sp.interpolate.interp1d(wl, spec, kind='cubic')(ref_wl)
     return newspec1, newspec2  # test inperpolations
@@ -76,10 +76,10 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell):
     print("After match_wl")
     # could just do interp here without  match_wl function
     # test outputs
-    #print("test1")
+    # print("test1")
     # test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp1)
-    #print("test2")
-   # test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp2)
+    # print("test2")
+    # test_plot_interpolation(wl_tell, spec_tell, wl_obs, interp2)
 
     # division
     print("Before divide_spectra")
@@ -87,7 +87,6 @@ def telluric_correct(wl_obs, spec_obs, wl_tell, spec_tell):
     print("After divide_spectra")
     #
     # other corrections?
-
 
     return corrected_spec
 
@@ -97,10 +96,9 @@ def _parser():
 
     :returns: the args
     """
-    parser = argparse.ArgumentParser(description='Telluric Removal')
-    parser.add_argument('fname', help='Input fits file')
-    parser.add_argument('-o', '--output', default=False,
-                        help='Ouput Filename', )
+    parser = argparse.ArgumentParser(description="Telluric Removal")
+    parser.add_argument("fname", help="Input fits file")
+    parser.add_argument("-o", "--output", default=False, help="Ouput Filename")
     args = parser.parse_args()
     return args
 
@@ -143,12 +141,10 @@ def main(fname, output=False):
 
 if __name__ == "__main__":
     args = vars(_parser())
-    fname = args.pop('fname')
+    fname = args.pop("fname")
     opts = {k: args[k] for k in args}
 
     main(fname, **opts)
-
-
 
     """ Some test code for testing functions """
     sze = 20
@@ -160,8 +156,8 @@ if __name__ == "__main__":
     y1 = np.ones_like(x1)
     print(x1)
     print(x2)
-    #print(y1)
-    #print(y2)
+    # print(y1)
+    # print(y2)
     y1_cor = telluric_correct(x1, y1, x2, y2)
     print(x1)
     print(y1)

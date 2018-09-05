@@ -48,7 +48,7 @@ def get_telluric_name(path, date, time, ext="*"):
 
 def list_telluric(path):
     match = get_filenames(path, "tapas_*")
-    print("List all ""tapas_*"" files in directory")
+    print("List all " "tapas_*" " files in directory")
     return match
 
 
@@ -98,7 +98,11 @@ def load_telluric(path, filename):
         col2 = i_tell["transmittance"]
 
     else:
-        raise ValueError("Tapas file '{0}' Does not have an extension of '.ipac' or '.fits'".format(filename))
+        raise ValueError(
+            "Tapas file '{0}' Does not have an extension of '.ipac' or '.fits'".format(
+                filename
+            )
+        )
 
     # Sort in ascending wavelength
     if col1[-1] - col1[0] < 0:  # wl is backwards
