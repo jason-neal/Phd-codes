@@ -156,7 +156,7 @@ def save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals,
     with open(filename, "w") as f:
         f.write("# Pixels  \t Obs Depths \t Obs STD \t Wavelengths \t Tell depths \t Tell STD\n")
         for pixel, obs_d, obs_s, wl, wl_d, wl_s in zip(obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs):
-            f.write(("{:5.40f}\t{:01.40f}\t{:02.40f}\t{:5.40f}\t{:01.40f}\t{:02.40f}\n"
+            f.write(("{:5.05f}\t{:01.05f}\t{:02.05f}\t{:5.05f}\t{:01.05f}\t{:02.05f}\n"
                      "").format(pixel, 1 - obs_d, obs_s, wl, 1 - wl_d, wl_s))
     return None
 
@@ -426,7 +426,8 @@ def main(fname, output=None, telluric=None, model=None, ref=None, berv_corr=Fals
         # Save calibration values to a txt file
         coord_txt_fname = "Coordinates_{}.txt".format(fname[:-5])
 
-        save_calibration_coords(coord_txt_fname, good_a, std_a, peaks_a, good_b, peaks_b, std_a)
+        save_calibration_coords(coord_txt_fname, good_a, peaks_a, std_a, good_b, peaks_b, std_a)
+        #save_calibration_coords(coord_txt_fname, good_a, std_a, peaks_a, good_b, peaks_b, std_a) # bad version
         # save_calibration_coords(filename, obs_pixels, obs_depths, obs_STDs, wl_vals, wl_depths, wl_STDs)
         print("Succesfully saved calibration to file - {}".format(Output_filename))
     else:
