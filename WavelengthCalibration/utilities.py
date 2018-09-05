@@ -11,10 +11,10 @@ def append_hdr(hdr, keys=None, values=None, item=0):
     If a key is not found it adds it to the header.
     """
     if keys is not None and values is not None:
-        if isinstance(keys, str):           # To handle single value
+        if isinstance(keys, str):  # To handle single value
             hdr[keys] = values
         else:
-            assert len(keys) == len(values), 'Not the same number of keys as values'
+            assert len(keys) == len(values), "Not the same number of keys as values"
             for i, key in enumerate(keys):
                 hdr[key] = values[i]
                 # print(repr(hdr[-2:10]))

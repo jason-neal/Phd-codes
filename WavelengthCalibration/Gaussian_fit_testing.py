@@ -11,7 +11,7 @@ from octotribble import IOmodule
 from octotribble.Get_filenames import get_filenames
 
 # Use raw_input if running on python 2.x
-if hasattr(__builtins__, 'raw_input'):
+if hasattr(__builtins__, "raw_input"):
     input = raw_input
 
 
@@ -61,7 +61,9 @@ def func4(x, *params):
 
 def Get_DRACS(filepath, chip):
     """Filepath needs to point object"""
-    filename = get_filenames(filepath, "CRIRE*.norm.comb.fits", "*_" + str(chip + 1) + ".*")
+    filename = get_filenames(
+        filepath, "CRIRE*.norm.comb.fits", "*_" + str(chip + 1) + ".*"
+    )
     # print("Filename =", filepath + filename[0])
     # print("length filename", len(filename))
     assert len(filename) is 1  # Check only one filename found
@@ -120,7 +122,9 @@ def RV_Calc(Lambda, deltalambda):
 if __name__ == "__main__":
 
     # path = "/home/jneal/Documents/Programming/UsableScripts/WavelengthCalibration/testfiles/"
-    path = "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
+    path = (
+        "/home/jneal/Phd/Codes/Phd-codes/WavelengthCalibration/testfiles/"
+    )  # Updated for git repo
     # path = "C:/Users/Jason/Documents/Phd/Phd-codes/WavelengthCalibration/testfiles/"  # Updated for git repo
     global param_nums
     param_nums = 3  # 4 does not work as well
@@ -144,7 +148,9 @@ if __name__ == "__main__":
 
         # Orignal way I tested this
         # UnCalibdata = IOmodule.read_2col(path + "HD30501-1_DRACS_Blaze_Corrected_spectra_chip-" + str(chip + 1) + ".txt")
-        Calibdata = IOmodule.read_2col(path + "Telluric_spectra_CRIRES_Chip-" + str(chip + 1) + ".txt")
+        Calibdata = IOmodule.read_2col(
+            path + "Telluric_spectra_CRIRES_Chip-" + str(chip + 1) + ".txt"
+        )
 
         # plt.plot(UnCalibdata)
         # plt.plot(Calibdata[1], "g")
@@ -159,17 +165,20 @@ if __name__ == "__main__":
             ax2 = ax1.twiny()
             ax1.plot(Calibdata[0], Calibdata[1], label="Calib")
             ax1.plot(Calibdata[0], np.ones_like(Calibdata[1]))  # horizontal line
-            ax1.set_ylabel('Transmittance')
-            ax1.set_xlabel('Wavelength (nm)')
+            ax1.set_ylabel("Transmittance")
+            ax1.set_xlabel("Wavelength (nm)")
             ax1.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
 
-            ax2.plot(UnCalibdata[0], UnCalibdata[1], 'r', label="UnCalib")  # -0.03 * np.ones_like(UnCalibdata[1])
-            ax2.set_xlabel('Pixel vals')
-            ax2.set_ylabel('Normalized ADU')
+            ax2.plot(
+                UnCalibdata[0], UnCalibdata[1], "r", label="UnCalib"
+            )  # -0.03 * np.ones_like(UnCalibdata[1])
+            ax2.set_xlabel("Pixel vals")
+            ax2.set_ylabel("Normalized ADU")
             ax2.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
-            cid = fig.canvas.mpl_connect('button_press_event', onclick)
+            cid = fig.canvas.mpl_connect("button_press_event", onclick)
             print(
-                "Left click on the maximum of each Spectra line peak (Red) that you want to fit from left to right. \nThen right click to close and perform fit")
+                "Left click on the maximum of each Spectra line peak (Red) that you want to fit from left to right. \nThen right click to close and perform fit"
+            )
             plt.show()
             # print("coords found for first plot", coords)
             coords_pxl = coords
@@ -185,17 +194,20 @@ if __name__ == "__main__":
                 ax1 = fig.add_subplot(111)
                 ax2 = ax1.twiny()
                 ax2.plot(Calibdata[0], Calibdata[1])
-                ax2.set_ylabel('Transmittance')
-                ax2.set_xlabel('Wavelength (nm)')
+                ax2.set_ylabel("Transmittance")
+                ax2.set_xlabel("Wavelength (nm)")
                 ax2.set_xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
-                ax1.plot(UnCalibdata[0], UnCalibdata[1], 'r')
-                ax1.plot(xpos, np.ones_like(ypos) - ypos, "*k", linewidth=5, markersize=10)
-                ax1.set_xlabel('Pixel vals')
-                ax1.set_ylabel('Normalized ADU')
+                ax1.plot(UnCalibdata[0], UnCalibdata[1], "r")
+                ax1.plot(
+                    xpos, np.ones_like(ypos) - ypos, "*k", linewidth=5, markersize=10
+                )
+                ax1.set_xlabel("Pixel vals")
+                ax1.set_ylabel("Normalized ADU")
                 ax1.set_xlim(np.min(UnCalibdata[0]), np.max(UnCalibdata[0]))
-                cid = fig.canvas.mpl_connect('button_press_event', onclick)
+                cid = fig.canvas.mpl_connect("button_press_event", onclick)
                 print(
-                    "Left click on the maximum of each Telluric line peak (Blue) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit")
+                    "Left click on the maximum of each Telluric line peak (Blue) that you want to select that match the already sellected lines in order from left to right. \nThen right click to close and perform fit"
+                )
                 plt.show()
                 # print("coords found for second plot", coords)
                 coords_wl = coords
@@ -233,14 +245,32 @@ if __name__ == "__main__":
             init_params_calib = []
             for i in range(len(ypos)):
                 if param_nums == 3:
-                    init_params_uncalib += [xpos[i], ypos[i], 1.2]  # center , amplitude, std
+                    init_params_uncalib += [
+                        xpos[i],
+                        ypos[i],
+                        1.2,
+                    ]  # center , amplitude, std
                 elif param_nums == 4:
-                    init_params_uncalib += [xpos[i], ypos[i], 1.2, 0.01]  # center , amplitude, std (vertshift)
+                    init_params_uncalib += [
+                        xpos[i],
+                        ypos[i],
+                        1.2,
+                        0.01,
+                    ]  # center , amplitude, std (vertshift)
             for i in range(len(cal_ypos)):
                 if param_nums == 3:
-                    init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04]  # center , amplitude, std
+                    init_params_calib += [
+                        cal_xpos[i],
+                        cal_ypos[i],
+                        0.04,
+                    ]  # center , amplitude, std
                 elif param_nums == 4:
-                    init_params_calib += [cal_xpos[i], cal_ypos[i], 0.04, 0.004]  # center , amplitude, std (vertshift)
+                    init_params_calib += [
+                        cal_xpos[i],
+                        cal_ypos[i],
+                        0.04,
+                        0.004,
+                    ]  # center , amplitude, std (vertshift)
 
             print("init_params_calib", init_params_calib)
             print("init_params_uncalib", init_params_uncalib)
@@ -257,12 +287,16 @@ if __name__ == "__main__":
 
                 # print(type([jj, jj + 1, jj + 2]))
                 # print("[jj, jj + 1, jj + 2]", [jj, jj + param_nums])
-                this_params_uncalib = init_params_uncalib[jj:jj + param_nums]
+                this_params_uncalib = init_params_uncalib[jj : jj + param_nums]
                 # print("this_params_uncalib", this_params_uncalib)
-                this_params_calib = init_params_calib[jj:jj + param_nums]
+                this_params_calib = init_params_calib[jj : jj + param_nums]
                 # print("this_params_calib", this_params_calib)
-                this_fit_uncalib, covar = opt.curve_fit(func, UnCalibdata[0], UnCalibdata[1], this_params_uncalib)
-                this_fit_calib, covar_cal = opt.curve_fit(func, Calibdata[0], Calibdata[1], this_params_calib)
+                this_fit_uncalib, covar = opt.curve_fit(
+                    func, UnCalibdata[0], UnCalibdata[1], this_params_uncalib
+                )
+                this_fit_calib, covar_cal = opt.curve_fit(
+                    func, Calibdata[0], Calibdata[1], this_params_calib
+                )
                 # save parameters
                 for par in range(param_nums):
                     fit_params_uncalib.append(this_fit_uncalib[par])
@@ -281,16 +315,16 @@ if __name__ == "__main__":
 
             plt.figure()
             plt.subplot(211)
-            plt.plot(UnCalibdata[0], UnCalibdata[1], 'r', label="uncalib")
-            plt.plot(UnCalibdata[0], Guess_uncalib, 'go-', label="guess uncalib")
-            plt.plot(UnCalibdata[0], Fitted_uncalib, 'k.-', label="fitted uncalib")
+            plt.plot(UnCalibdata[0], UnCalibdata[1], "r", label="uncalib")
+            plt.plot(UnCalibdata[0], Guess_uncalib, "go-", label="guess uncalib")
+            plt.plot(UnCalibdata[0], Fitted_uncalib, "k.-", label="fitted uncalib")
             plt.title("Spectral line fits")
             plt.legend()
 
             plt.subplot(212)
-            plt.plot(Calibdata[0], Calibdata[1], 'b', label="Calib")
-            plt.plot(Calibdata[0], Guess_calib, 'go-', label="guess calib")
-            plt.plot(Calibdata[0], Fitted_calib, 'k.-', label="fitted calib")
+            plt.plot(Calibdata[0], Calibdata[1], "b", label="Calib")
+            plt.plot(Calibdata[0], Guess_calib, "go-", label="guess calib")
+            plt.plot(Calibdata[0], Fitted_calib, "k.-", label="fitted calib")
             plt.title("Telluric line fits")
             plt.legend(loc="best")
             print("init params_uncalib", init_params_uncalib)
@@ -357,7 +391,7 @@ if __name__ == "__main__":
 
         plt.plot(pixel_pos, diff_lin, "or", label="linfit")
         plt.plot(pixel_pos, diff_quad, "sk", label="quad fit")
-        plt.plot([pixel_pos[0], 1024], [0, 0], 'b--')
+        plt.plot([pixel_pos[0], 1024], [0, 0], "b--")
         plt.plot([1, 1024], fit_diffs[[0, -1]], "*g", label="End Fitting Values")
         plt.title("Differences between points and the fits")
         plt.text(400, 0, "Std diff linear fit = " + str(std_diff_lin))
@@ -390,11 +424,11 @@ if __name__ == "__main__":
         # ax2 = ax1.twiny()
         plt.plot(Calibdata[0], Calibdata[1], label="Telluric")
         # plt.set_ylabel('Transmittance')
-        plt.xlabel('Wavelength (nm)')
+        plt.xlabel("Wavelength (nm)")
         plt.xlim(np.min(Calibdata[0]), np.max(Calibdata[0]))
-        plt.plot(Calibrated_lin, UnCalibdata[1], 'r', label="Lin Caibrated Spectrum")
-        plt.plot(Calibrated_quad, UnCalibdata[1], 'g', label="Quad Caibrated Spectrum")
-        plt.ylabel('Normalized ADU')
+        plt.plot(Calibrated_lin, UnCalibdata[1], "r", label="Lin Caibrated Spectrum")
+        plt.plot(Calibrated_quad, UnCalibdata[1], "g", label="Quad Caibrated Spectrum")
+        plt.ylabel("Normalized ADU")
         plt.title("Testing Calibrated spectrum")
         plt.legend(loc="best")
         plt.show()

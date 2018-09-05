@@ -1,13 +1,16 @@
 #!/usr/lib/python3
 
 import matplotlib.pyplot as plt
+
 # Testing the affectof using all 3 cips with the known offset between them to wave length calibrate the spectra
 import numpy as np
 
 
 def gen_map(x, a, b, c, noise):
-    #noise_vals = noise * np.random.randn(len(x))
-    ans =  [a * xpos**2 + b * xpos + c + float(noise * np.random.randn(1)) for xpos in x]
+    # noise_vals = noise * np.random.randn(len(x))
+    ans = [
+        a * xpos ** 2 + b * xpos + c + float(noise * np.random.randn(1)) for xpos in x
+    ]
     return ans
 
 
@@ -25,10 +28,10 @@ Test_pxl2 = [pxl + 1 * 1024 + Gap1 for pxl in Test_pxl2]
 Test_pxl3 = [pxl + 2 * 1024 + Gap1 + Gap2 for pxl in Test_pxl3]
 Test_pxl4 = [pxl + 3 * 1024 + Gap_sum for pxl in Test_pxl4]
 
-aa = 5 / 5000000.0    # smaller value
-bb = 80 / 5000.0   # 80 nm over 4 * 1024 detectors plus gaps
-cc = 2110.0      # nm
-noise = 0.05   # nm
+aa = 5 / 5000000.0  # smaller value
+bb = 80 / 5000.0  # 80 nm over 4 * 1024 detectors plus gaps
+cc = 2110.0  # nm
+noise = 0.05  # nm
 
 Test_wl1 = gen_map(Test_pxl1, aa, bb, cc, noise)
 Test_wl2 = gen_map(Test_pxl2, aa, bb, cc, noise)
@@ -78,20 +81,20 @@ print("\nwl_map params 4\t", Combined_map)
 Combined_vals = np.polyval(Combined_map, pixel_span)
 
 
-plt.plot(pixel_span, wlvals1, 'b', label="Chip1")
-plt.plot(pixel_span, wlvals2, 'r', label="Chip2")
-plt.plot(pixel_span, wlvals3, 'g', label="Chip3")
-plt.plot(pixel_span, wlvals4, 'm', label="Chip4")
-plt.plot(pixel_span, Combined_vals, 'k', label="Combined")
+plt.plot(pixel_span, wlvals1, "b", label="Chip1")
+plt.plot(pixel_span, wlvals2, "r", label="Chip2")
+plt.plot(pixel_span, wlvals3, "g", label="Chip3")
+plt.plot(pixel_span, wlvals4, "m", label="Chip4")
+plt.plot(pixel_span, Combined_vals, "k", label="Combined")
 
 plt.legend(loc=0)
 
 plt.subplot(212)
-plt.plot(pixel_span, np.zeros_like(pixel_span), "k--", label = "")
-plt.plot(pixel_span, Combined_vals - wlvals1, 'b', label = "Combined-Chip1")
-plt.plot(pixel_span, Combined_vals - wlvals2, 'r', label = "Combined-Chip2")
-plt.plot(pixel_span, Combined_vals - wlvals3, 'g', label = "Combined-Chip3")
-plt.plot(pixel_span, Combined_vals - wlvals4, 'm', label = "Combined-Chip4")
+plt.plot(pixel_span, np.zeros_like(pixel_span), "k--", label="")
+plt.plot(pixel_span, Combined_vals - wlvals1, "b", label="Combined-Chip1")
+plt.plot(pixel_span, Combined_vals - wlvals2, "r", label="Combined-Chip2")
+plt.plot(pixel_span, Combined_vals - wlvals3, "g", label="Combined-Chip3")
+plt.plot(pixel_span, Combined_vals - wlvals4, "m", label="Combined-Chip4")
 plt.xlabel("Pixel Position")
 plt.ylabel("Wavelength Difference\nbetween Models (nm)")
 plt.legend(loc=0)
@@ -100,7 +103,16 @@ ax1.get_yaxis().get_major_formatter().set_useOffset(False)
 plt.ylim([-0.3, 0.3])
 
 # Mark Chip positions
-linepos = [0, 1024, 1024 + Gap1, 2 * 1024 + Gap1, 2 * 1024 + Gap1 + Gap2, 3 * 1024 + Gap1 + Gap2, 3 * 1024 + Gap1 + Gap2 + Gap3, 4 * 1024 + Gap1 + Gap2 + Gap3]
+linepos = [
+    0,
+    1024,
+    1024 + Gap1,
+    2 * 1024 + Gap1,
+    2 * 1024 + Gap1 + Gap2,
+    3 * 1024 + Gap1 + Gap2,
+    3 * 1024 + Gap1 + Gap2 + Gap3,
+    4 * 1024 + Gap1 + Gap2 + Gap3,
+]
 plt.vlines(linepos, -1, 1)
 
 plt.show()
@@ -115,10 +127,10 @@ yerr = np.array(noise * np.ones_like(x))
 
 ## least-squares solution
 # build the matrix A (you can use the np.vstack function)
-A = np.vstack((np.ones_like(x), x, x**2)).T
+A = np.vstack((np.ones_like(x), x, x ** 2)).T
 
 # build the matrix C
-C = np.diag(yerr**2)
+C = np.diag(yerr ** 2)
 
 # calculate the covariance matrix [A^T C^-1 A]^-1
 # (use the linear algebra functions in np.linalg)
@@ -131,18 +143,18 @@ X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 # extract from X the parameters m and b
 b, m, q = X
 
-print('b= {} +- {}'.format(b, np.sqrt(cov2[0, 0])))
-print('m= {} +- {}'.format(m, np.sqrt(cov2[1, 1])))
-print('q= {} +- {}'.format(q, np.sqrt(cov2[2, 2])))
+print("b= {} +- {}".format(b, np.sqrt(cov2[0, 0])))
+print("m= {} +- {}".format(m, np.sqrt(cov2[1, 1])))
+print("q= {} +- {}".format(q, np.sqrt(cov2[2, 2])))
 
 # plot the data (with errorbars) and the best-fit line
 plt.figure()
-plt.errorbar(x, y, yerr=noise, fmt='o')
+plt.errorbar(x, y, yerr=noise, fmt="o")
 
 xx = np.linspace(min(x), max(x))
-plt.plot(xx, q * xx**2 + m * xx + b, '-', label="Matrix LR")
+plt.plot(xx, q * xx ** 2 + m * xx + b, "-", label="Matrix LR")
 plt.title("Matrix multiplication")
-plt.plot(pixel_span, Combined_vals, 'k', label="PolyVal Combined")
+plt.plot(pixel_span, Combined_vals, "k", label="PolyVal Combined")
 plt.legend()
 plt.show()
 
@@ -150,12 +162,12 @@ plt.show()
 print("They return the equivalent results")
 
 
- # Third order regression
+# Third order regression
 print("adding x**3 term ")
-A = np.vstack((np.ones_like(x), x, x**2, x**3)).T
+A = np.vstack((np.ones_like(x), x, x ** 2, x ** 3)).T
 
 # build the matrix C
-C = np.diag(yerr**2)
+C = np.diag(yerr ** 2)
 
 # calculate the covariance matrix [A^T C^-1 A]^-1
 # (use the linear algebra functions in np.linalg)
@@ -168,22 +180,22 @@ X = np.dot(cov2, np.dot(A.T, np.linalg.solve(C, y)))
 # extract from X the parameters m and b
 b3, m3, q3, r3 = X
 
-print('b= {} +- {}'.format(b3, np.sqrt(cov2[0, 0])))
-print('m= {} +- {}'.format(m3, np.sqrt(cov2[1, 1])))
-print('q= {} +- {}'.format(q3, np.sqrt(cov2[2, 2])))
-print('r= {} +- {}'.format(r3, np.sqrt(cov2[3, 3])))
+print("b= {} +- {}".format(b3, np.sqrt(cov2[0, 0])))
+print("m= {} +- {}".format(m3, np.sqrt(cov2[1, 1])))
+print("q= {} +- {}".format(q3, np.sqrt(cov2[2, 2])))
+print("r= {} +- {}".format(r3, np.sqrt(cov2[3, 3])))
 
 # plot the data (with errorbars) and the best-fit line
 plt.figure()
 plt.subplot(211)
-plt.errorbar(x, y, yerr=noise, fmt='o')
+plt.errorbar(x, y, yerr=noise, fmt="o")
 
 # xx = np.linspace(min(x), max(x))
 xx = np.array(pixel_span)
-yy = r3 * xx**3 + q3 * xx**2 + m3 * xx + b3
-plt.plot(xx, yy, '-', label="Matrix LR")
+yy = r3 * xx ** 3 + q3 * xx ** 2 + m3 * xx + b3
+plt.plot(xx, yy, "-", label="Matrix LR")
 plt.title("Matrix multiplication 3rd order ")
-plt.plot(pixel_span, Combined_vals, 'k', label="PolyVal Combined")
+plt.plot(pixel_span, Combined_vals, "k", label="PolyVal Combined")
 plt.legend()
 
 plt.subplot(212)
@@ -193,8 +205,16 @@ plt.show()
 
 print("Orginal Equation = {0}*x**2 + {1}*x + {2}".format(aa, bb, cc))
 
-print("Polyval Equation = {0}*x**2 + {1}*x + {2}".format(Combined_map[0], Combined_map[1], Combined_map[2]))
+print(
+    "Polyval Equation = {0}*x**2 + {1}*x + {2}".format(
+        Combined_map[0], Combined_map[1], Combined_map[2]
+    )
+)
 
 print("Regression Equation = {0}*x**2 + {1}*x + {2}".format(q, m, b))
 
-print("x**3 Regression Equation = {0}*x**3 + {1}*x**2 + {2}*x + {3}".format(r3, q3, m3, b3))
+print(
+    "x**3 Regression Equation = {0}*x**3 + {1}*x**2 + {2}*x + {3}".format(
+        r3, q3, m3, b3
+    )
+)

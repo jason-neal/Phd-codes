@@ -9,8 +9,7 @@ The script will quickly find the files automatically and plot them together.
 TODO - Add a argparse flag/fname to save the plot?
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
 
