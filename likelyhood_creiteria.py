@@ -21,15 +21,20 @@ def BIC_fixed_snr_chi2old(chi_square, n_data, n_params, sigma_fixed):
     # c = np.exp(-chi_square / 2)
     # likelyhood = a * b * c
 
-    log_likelyhood = n_data * (np.log(1 / np.sqrt(2 * np.pi)) + 1 / sigma_fixed) - chi_square / 2
+    log_likelyhood = (
+        n_data * (np.log(1 / np.sqrt(2 * np.pi)) + 1 / sigma_fixed) - chi_square / 2
+    )
 
     bic = n_params * np.log(n_data) - 2 * log_likelyhood
     return bic
 
 
 def BIC_obs_snr_chi2(chi_square, n_data, n_params, sigma_vect):
-    log_likelyhood = n_data * (np.log(1 / np.sqrt(2 * np.pi))) + np.log(
-        np.prod(sigma_vect)) - chi_square / 2
+    log_likelyhood = (
+        n_data * (np.log(1 / np.sqrt(2 * np.pi)))
+        + np.log(np.prod(sigma_vect))
+        - chi_square / 2
+    )
 
     bic = n_params * np.log(n_data) - 2 * log_likelyhood
     return bic
@@ -76,14 +81,26 @@ if __name__ == "__main__":
 
     print("est BIC6 3000 150 ", BIC_fixed_snr_chi2(chi6, 3072, 4, 1 / 150))
 
-    print("delta BIC5 2000 150 ",
-          BIC_fixed_snr_chi2(chi5, 2072, 2, 1 / 150) - BIC_fixed_snr_chi2(chi6, 2072, 4, 1 / 150))
+    print(
+        "delta BIC5 2000 150 ",
+        BIC_fixed_snr_chi2(chi5, 2072, 2, 1 / 150)
+        - BIC_fixed_snr_chi2(chi6, 2072, 4, 1 / 150),
+    )
 
-    print("delta 2000 300",
-          BIC_fixed_snr_chi2(chi5, 2072, 2, 1 / 300) - BIC_fixed_snr_chi2(chi6, 2072, 4, 1 / 300))
+    print(
+        "delta 2000 300",
+        BIC_fixed_snr_chi2(chi5, 2072, 2, 1 / 300)
+        - BIC_fixed_snr_chi2(chi6, 2072, 4, 1 / 300),
+    )
 
-    print("delta 1000 150 ",
-          BIC_fixed_snr_chi2(chi5, 1072, 2, 1 / 150) - BIC_fixed_snr_chi2(chi6, 1072, 4, 1 / 150))
+    print(
+        "delta 1000 150 ",
+        BIC_fixed_snr_chi2(chi5, 1072, 2, 1 / 150)
+        - BIC_fixed_snr_chi2(chi6, 1072, 4, 1 / 150),
+    )
 
-    print("delta 3000 150 ",
-          BIC_fixed_snr_chi2(chi5, 3072, 2, 1 / 150) - BIC_fixed_snr_chi2(chi6, 3072, 4, 1 / 150))
+    print(
+        "delta 3000 150 ",
+        BIC_fixed_snr_chi2(chi5, 3072, 2, 1 / 150)
+        - BIC_fixed_snr_chi2(chi6, 3072, 4, 1 / 150),
+    )

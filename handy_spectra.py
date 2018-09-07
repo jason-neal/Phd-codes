@@ -5,7 +5,7 @@ import sys
 
 handy_location = "/home/jneal/.handy_spectra/"
 
-files = [f for f in os.listdir('.') if os.path.isfile(f)]
+files = [f for f in os.listdir(".") if os.path.isfile(f)]
 files = [f for f in files if "wavecal." in f]
 files = [f for f in files if "tellcorr.fits" in f]
 
@@ -30,4 +30,3 @@ for f in files:
     # copy then move
     subprocess.call("cp {0} {0}_cp".format(f), shell=True)
     subprocess.call("mv {0}_cp {1}{2}".format(f, handy_location, new_name), shell=True)
-

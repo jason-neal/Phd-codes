@@ -12,12 +12,16 @@ debug = logging.debug
 
 
 def _parser():
-    parser = argparse.ArgumentParser(description='Differential analysis.')
-    parser.add_argument('spectrum_1', help='spectrum filename', type=str)
-    parser.add_argument('spectrum_2', help='spectrum filename', type=str)
-    parser.add_argument("synthetic", help="Synthetic spectrum of expected companion. (Phoenix-ACES)")
+    parser = argparse.ArgumentParser(description="Differential analysis.")
+    parser.add_argument("spectrum_1", help="spectrum filename", type=str)
+    parser.add_argument("spectrum_2", help="spectrum filename", type=str)
+    parser.add_argument(
+        "synthetic", help="Synthetic spectrum of expected companion. (Phoenix-ACES)"
+    )
 
-    parser.add_argument("--debug", help="Turning on debug output", action='store_true', default=False)
+    parser.add_argument(
+        "--debug", help="Turning on debug output", action="store_true", default=False
+    )
     return parser.parse_args()
 
 
@@ -71,11 +75,13 @@ if __name__ == "__main__":
     debug_on = True
     # opts = {k: args[k] for k in args}
     if debug_on:
-        logging.basicConfig(level=logging.DEBUG,
-                            format='%(asctime)s %(levelname)s %(message)s')
+        logging.basicConfig(
+            level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s"
+        )
     else:
-        logging.basicConfig(level=logging.WARNING,
-                            format='%(asctime)s %(levelname)s %(message)s')
+        logging.basicConfig(
+            level=logging.WARNING, format="%(asctime)s %(levelname)s %(message)s"
+        )
 
     # This stuff will be replace by the parser. included here to test things while creating
     chip_num = 1
@@ -87,12 +93,24 @@ if __name__ == "__main__":
     if target == ref_target:
         raise ValueError("Reference target should be different from target")
 
-    dracs_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/".format(target)
-    tellcorr_name = get_filenames(dracs_path, "CRIRE.*", "*{}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
+    dracs_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/".format(
+        target
+    )
+    tellcorr_name = get_filenames(
+        dracs_path,
+        "CRIRE.*",
+        "*{}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num),
+    )
     tellcorr_name = dracs_path + tellcorr_name[0]
 
-    ref_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/".format(ref_target)
-    reftellcorr_name = get_filenames(ref_path, "CRIRE.*", "*{}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num))
+    ref_path = "/home/jneal/Phd/data/Crires/BDs-DRACS/{0}/Combined_Nods/".format(
+        ref_target
+    )
+    reftellcorr_name = get_filenames(
+        ref_path,
+        "CRIRE.*",
+        "*{}.nod.ms.norm.sum.wavecal.tellcorr.fits".format(chip_num),
+    )
     reftellcorr_name = ref_path + reftellcorr_name[0]
 
     main(tellcorr_name, reftellcorr_name)

@@ -26,11 +26,15 @@ def gaussian(wav, x0, fwhm):
 
 
 def sprof_gaussian(wav, k, x, fwhm):
-    return (1.0 - gaussian(wav, x + k / 2, fwhm)) - (1.0 - gaussian(wav, x - k / 2, fwhm))
+    return (1.0 - gaussian(wav, x + k / 2, fwhm)) - (
+        1.0 - gaussian(wav, x - k / 2, fwhm)
+    )
 
 
 def sprof_lorentz(wav, k, x, fwhm):
-    return (1.0 - lorentzian(wav, x + k / 2, fwhm)) - (1.0 - lorentzian(wav, x - k / 2, fwhm))
+    return (1.0 - lorentzian(wav, x + k / 2, fwhm)) - (
+        1.0 - lorentzian(wav, x - k / 2, fwhm)
+    )
 
 
 R = 50000
@@ -40,7 +44,9 @@ rv_fwhm = c / R
 # Load the model spectrum
 pathwave = "/home/jneal/Phd/data/phoenixmodels/WAVE_PHOENIX-ACES-AGSS-COND-2011.fits"
 # Z-0.0/lte02500-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits
-specpath = "/home/jneal/Phd/data/phoenixmodels/HD30501b-lte02500-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits"
+specpath = (
+    "/home/jneal/Phd/data/phoenixmodels/HD30501b-lte02500-5.00-0.0.PHOENIX-ACES-AGSS-COND-2011-HiRes.fits"
+)
 w_mod = fits.getdata(pathwave)
 w_mod /= 10  # to nm
 
@@ -65,7 +71,9 @@ flux[flux < 0] = 0
 # Convolve to R=50000 PyAstronomy (my convolution code also works)
 flux = pyasl.instrBroadGaussFast(w_mod, flux, R)
 
-mask2 = (w_mod <= inner_limits[1]) & (w_mod >= inner_limits[0])  # Mask only CRIRES region
+mask2 = (w_mod <= inner_limits[1]) & (
+    w_mod >= inner_limits[0]
+)  # Mask only CRIRES region
 w_mod2 = w_mod[mask2]
 flux2 = flux[mask2]
 
@@ -79,17 +87,29 @@ model_rv_amp4 = np.zeros_like(rvs)
 
 for i, rv in enumerate(rvs):
     # Doppler shift model and calculate the maximum line amplitude.
-    nflux_rv, __ = pyasl.dopplerShift(w_mod, flux, rv, edgeHandling=None, fillValue=None)
+    nflux_rv, __ = pyasl.dopplerShift(
+        w_mod, flux, rv, edgeHandling=None, fillValue=None
+    )
     diff = flux - nflux_rv
     wav_nan = w_mod[~np.isnan(diff)]
     diff = diff[~np.isnan(diff)]
 
-    model_rv_amp[i] = np.max(np.abs(diff[(wav_nan <= inner_limits[1]) & (wav_nan >= inner_limits[0])]))
+    model_rv_amp[i] = np.max(
+        np.abs(diff[(wav_nan <= inner_limits[1]) & (wav_nan >= inner_limits[0])])
+    )
     # Limit for each chip
-    model_rv_amp1[i] = np.max(np.abs(diff[(wav_nan <= chip_limits[0][1]) & (wav_nan >= chip_limits[0][0])]))
-    model_rv_amp2[i] = np.max(np.abs(diff[(wav_nan <= chip_limits[1][1]) & (wav_nan >= chip_limits[1][0])]))
-    model_rv_amp3[i] = np.max(np.abs(diff[(wav_nan <= chip_limits[2][1]) & (wav_nan >= chip_limits[2][0])]))
-    model_rv_amp4[i] = np.max(np.abs(diff[(wav_nan <= chip_limits[3][1]) & (wav_nan >= chip_limits[3][0])]))
+    model_rv_amp1[i] = np.max(
+        np.abs(diff[(wav_nan <= chip_limits[0][1]) & (wav_nan >= chip_limits[0][0])])
+    )
+    model_rv_amp2[i] = np.max(
+        np.abs(diff[(wav_nan <= chip_limits[1][1]) & (wav_nan >= chip_limits[1][0])])
+    )
+    model_rv_amp3[i] = np.max(
+        np.abs(diff[(wav_nan <= chip_limits[2][1]) & (wav_nan >= chip_limits[2][0])])
+    )
+    model_rv_amp4[i] = np.max(
+        np.abs(diff[(wav_nan <= chip_limits[3][1]) & (wav_nan >= chip_limits[3][0])])
+    )
 
 theoretical_gauss_list = []
 theoretical_lorentz_list = []
@@ -97,7 +117,9 @@ for chip in range(1, 6):
     theory_gaussian = np.zeros_like(rvs)
     theory_lorentz = np.zeros_like(rvs)
 
-    mask = (w_mod <= chip_limits[chip - 1][1]) & (w_mod >= chip_limits[chip - 1][0])  # mask chip
+    mask = (w_mod <= chip_limits[chip - 1][1]) & (
+        w_mod >= chip_limits[chip - 1][0]
+    )  # mask chip
     w_chip = w_mod[mask]
     wav0 = np.median(w_chip)
     fwhm0 = wav0 / R
@@ -123,15 +145,22 @@ def g(fig, *args, **kwargs):
     plt.plot(rvs, theoretical_lorentz_list[2], "-.", label="Lorentzian 3")
     plt.plot(rvs, theoretical_lorentz_list[3], "-", label="Lorentzian 4")
     plt.vlines(x=[-1.2, 1.2], ymin=-0.1, ymax=1.1, label="Max RV", alpha=0.5)
-    plt.vlines(x=[-rv_fwhm, rv_fwhm], ymin=-0.1, ymax=1.1, linestyle="--", label=r"$\rm RV_{FWHM}$", alpha=0.5)
-    ax.set_xlabel('Radial Velocity (km/s)')
-    ax.set_ylabel('Relative Amplitude')
+    plt.vlines(
+        x=[-rv_fwhm, rv_fwhm],
+        ymin=-0.1,
+        ymax=1.1,
+        linestyle="--",
+        label=r"$\rm RV_{FWHM}$",
+        alpha=0.5,
+    )
+    ax.set_xlabel("Radial Velocity (km/s)")
+    ax.set_ylabel("Relative Amplitude")
     plt.ylim([-0.05, 1.1])
     plt.legend()
-    #plt.show()
+    # plt.show()
 
 
-g(type='A&A', save='../rv_diff_amplitude_chip_test.pdf', tight=True)
+g(type="A&A", save="../rv_diff_amplitude_chip_test.pdf", tight=True)
 
 
 @styler
@@ -151,15 +180,22 @@ def h(fig, *args, **kwargs):
     plt.plot(rvs, theoretical_lorentz_list[2], "-.", label="Lorentzian 3")
     plt.plot(rvs, theoretical_lorentz_list[3], "-", label="Lorentzian 4")
     plt.vlines(x=[-1.2, 1.2], ymin=-0.1, ymax=1.1, label="Max RV", alpha=0.5)
-    plt.vlines(x=[-rv_fwhm, rv_fwhm], ymin=-0.1, ymax=1.1, linestyle="--", label=r"$\rm RV_{FWHM}$", alpha=0.5)
-    ax.set_xlabel('Radial Velocity (km/s)')
-    ax.set_ylabel('Relative Amplitude')
+    plt.vlines(
+        x=[-rv_fwhm, rv_fwhm],
+        ymin=-0.1,
+        ymax=1.1,
+        linestyle="--",
+        label=r"$\rm RV_{FWHM}$",
+        alpha=0.5,
+    )
+    ax.set_xlabel("Radial Velocity (km/s)")
+    ax.set_ylabel("Relative Amplitude")
     plt.ylim([-0.05, 1.1])
     plt.legend()
-    #plt.show()
+    # plt.show()
 
 
-h(type='A&A', save='../rv_diff_amplitude_chip_test2.pdf', tight=True)
+h(type="A&A", save="../rv_diff_amplitude_chip_test2.pdf", tight=True)
 
 #########################################
 
@@ -186,13 +222,20 @@ def f(fig, *args, **kwargs):
     plt.plot(rvs, theory_gaussian_amp / theory_gaussian_scale, "--", label="Gaussian")
     plt.plot(rvs, theory_lorentz_amp / theory_lorentz_scale, "-.", label="Lorentzian")
     plt.vlines(x=[-1.2, 1.2], ymin=-0.1, ymax=1.1, label="Max RV", alpha=0.5)
-    plt.vlines(x=[-rv_fwhm, rv_fwhm], ymin=-0.1, ymax=1.1, linestyle="--", label=r"$\rm RV_{FWHM}$", alpha=0.5)
-    ax.set_xlabel('Radial Velocity (km/s)')
-    ax.set_ylabel('Relative Amplitude')
+    plt.vlines(
+        x=[-rv_fwhm, rv_fwhm],
+        ymin=-0.1,
+        ymax=1.1,
+        linestyle="--",
+        label=r"$\rm RV_{FWHM}$",
+        alpha=0.5,
+    )
+    ax.set_xlabel("Radial Velocity (km/s)")
+    ax.set_ylabel("Relative Amplitude")
     plt.ylim([-0.05, 1.1])
     plt.legend()
     # plt.show()
 
 
-f(type='A&A', save='../rv_diff_amplitude_figure_final.pdf', tight=True)
+f(type="A&A", save="../rv_diff_amplitude_figure_final.pdf", tight=True)
 print("Done")
